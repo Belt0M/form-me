@@ -1,5 +1,5 @@
 import React from 'react'
-import {Link} from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import Logo from '../assets/img/logo.png'
 
 interface Props {
@@ -8,8 +8,8 @@ interface Props {
 
 const Header: React.FC<Props> = ({actions}) => {
 	return (
-		<header className='p-2 flex justify-between items-center border-b border-b-purple-800 font-bold'>
-			<Link to='/' className='text-white text-lg flex items-center'>
+		<header className='flex items-center justify-between px-5 py-2 font-bold border-b border-b-purple-800 bg-stone-900'>
+			<Link to='/' className='flex items-center text-lg text-white'>
 				<img src={Logo} alt='Logo' className='h-16' />
 				Form...me
 			</Link>

@@ -32,9 +32,15 @@ label {
 	user-select: none;
 }
 
+.canvas-grid {
+	background-size: 50px 50px;
+	background-image: linear-gradient(to right, #4b067a 1px, transparent 1px),
+		linear-gradient(to bottom, #4b067a 1px, transparent 1px);
+}
+
 @media (prefers-color-scheme: light) {
 	:root {
-		color: #213547;
+		color: #1d1d1d;
 		background-color: #ffffff;
 	}
 	a:hover {
