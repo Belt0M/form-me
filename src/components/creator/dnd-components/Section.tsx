@@ -1,22 +1,30 @@
-// src/components/creator/Section.tsx
-import React, {FC, ReactElement} from 'react'
+import React, {CSSProperties, FC, ReactElement} from 'react'
 
 interface Props {
-	style?: React.CSSProperties | null
-	children?: ReactElement
+	style?: CSSProperties
+	children?: ReactElement | ReactElement[]
 	onDragEnter?: (event: React.DragEvent<HTMLDivElement>) => void
 	onDragLeave?: (event: React.DragEvent<HTMLDivElement>) => void
+	onMouseEnter?: () => void
+	onMouseLeave?: () => void
 }
 
-const Section: FC<Props> = ({style, children, onDragEnter, onDragLeave}) => {
+const Section: FC<Props> = ({
+	style,
+	children,
+	onDragEnter,
+	onDragLeave,
+	onMouseEnter,
+	onMouseLeave,
+}) => {
 	return (
 		<section
-			className='relative w-full h-full p-4 bg-dark'
-			style={{
-				...style,
-			}}
+			className='h-full min-h-[200px] bg-gray-500'
+			style={style}
 			onDragEnter={onDragEnter}
 			onDragLeave={onDragLeave}
+			onMouseEnter={onMouseEnter}
+			onMouseLeave={onMouseLeave}
 		>
 			{children}
 		</section>

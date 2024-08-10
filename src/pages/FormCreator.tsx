@@ -70,7 +70,6 @@ const FormCreator: React.FC = () => {
 			children: [],
 		}
 
-		// Якщо positionMode не абсолютний, не встановлюємо x і y
 		if (positionMode === EPosition.ABSOLUTE) {
 			newComponent.x = x
 			newComponent.y = y
@@ -112,7 +111,10 @@ const FormCreator: React.FC = () => {
 						/>
 					))}
 				</Canvas>
-				<Sidebar onDragStart={handleDragStart} />
+				<Sidebar
+					onDragStart={handleDragStart}
+					isCanvasEmpty={canvasComponents.length === 0}
+				/>
 			</main>
 		</>
 	)

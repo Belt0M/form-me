@@ -5,15 +5,26 @@ interface Props {
 	children?: ReactElement | ReactElement[]
 	onDragEnter?: (event: React.DragEvent<HTMLDivElement>) => void
 	onDragLeave?: (event: React.DragEvent<HTMLDivElement>) => void
+	onMouseEnter?: () => void
+	onMouseLeave?: () => void
 }
 
-const Div: FC<Props> = ({style, children, onDragEnter, onDragLeave}) => {
+const Div: FC<Props> = ({
+	style,
+	children,
+	onDragEnter,
+	onDragLeave,
+	onMouseEnter,
+	onMouseLeave,
+}) => {
 	return (
 		<div
-			className='p-4 bg-secondary'
+			className='h-24 bg-gray-300'
 			style={style}
 			onDragEnter={onDragEnter}
 			onDragLeave={onDragLeave}
+			onMouseEnter={onMouseEnter}
+			onMouseLeave={onMouseLeave}
 		>
 			{children}
 		</div>

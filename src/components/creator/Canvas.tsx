@@ -41,6 +41,7 @@ const Canvas: React.FC<CanvasProps> = ({onDrop, onDragOver, children}) => {
 					style={{
 						left: highlightPosition.x,
 						top: highlightPosition.y,
+						border: '2px dashed #4A4A4A', // Highlighted border
 					}}
 				/>
 			)}

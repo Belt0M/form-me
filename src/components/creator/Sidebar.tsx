@@ -9,9 +9,10 @@ interface SidebarProps {
 		position: EPosition,
 		event: React.DragEvent<HTMLDivElement>
 	) => void
+	isCanvasEmpty: boolean
 }
 
-const Sidebar: React.FC<SidebarProps> = ({onDragStart}) => {
+const Sidebar: React.FC<SidebarProps> = ({onDragStart, isCanvasEmpty}) => {
 	const [position, setPosition] = useState<EPosition>(EPosition.RELATIVE)
 
 	return (
@@ -29,17 +30,25 @@ const Sidebar: React.FC<SidebarProps> = ({onDragStart}) => {
 				</select>
 			</div>
 			<div className='grid grid-cols-2 gap-4'>
-				{sidebarComponents.map(({icon: IconComponent, type}) => (
-					<div
-						key={type}
-						draggable
-						onDragStart={event => onDragStart(type, position, event)}
-						className='flex flex-col items-center justify-center gap-2 p-2 mb-2 text-white bg-white border-2 border-purple-800 cursor-pointer aspect-square rounded-xl bg-opacity-10'
-					>
-						<IconComponent size={24} weight='bold' />
-						<span className='font-bold'>{`</${type}>`}</span>
-					</div>
-				))}
+				{sidebarComponents.map(({icon: IconComponent, type}) => {
+					const isSection = type === EHTMLTag.SECTION
+					const isDisabled = isCanvasEmpty ? !isSection : false
+					return (
+						<div
+							key={type}
+							draggable={!isDisabled}
+							onDragStart={event =>
+								!isDisabled && onDragStart(type, position, event)
+							}
+							className={`flex flex-col items-center justify-center gap-2 p-2 mb-2 text-white bg-white border-2 border-purple-800 cursor-pointer aspect-square rounded-xl bg-opacity-10 ${
+								isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+							}`}
+						>
+							<IconComponent size={24} weight='bold' />
+							<span className='font-bold'>{`</${type}>`}</span>
+						</div>
+					)
+				})}
 			</div>
 		</aside>
 	)
