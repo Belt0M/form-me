@@ -1,70 +1,80 @@
-import { useDroppable } from '@dnd-kit/core'
-import React from 'react'
-import { IComponent } from '../../types/IComponent'
-import ComponentContext from './ComponentContext'
+// src/components/Canvas.tsx
+import React, {useState} from 'react'
+import {IComponent} from '../../types/IComponent'
 
-const Canvas: React.FC<{
-	components: IComponent[]
-	hoveredPosition: {x: number; y: number} | null
-	setComponents: React.Dispatch<React.SetStateAction<IComponent[]>>
-}> = ({components, hoveredPosition, setComponents}) => {
-	const {setNodeRef} = useDroppable({id: 'canvas'})
-	const [selectedComponent, setSelectedComponent] =
-		React.useState<IComponent | null>(null)
+interface CanvasProps {
+	onDrop: (component: IComponent, x: number, y: number) => void
+	onDragOver: (event: React.DragEvent<HTMLDivElement>) => void
+	children?: React.ReactNode
+	selectedComponent: IComponent | null
+}
 
-	const handleComponentClick = (component: IComponent) => {
-		setSelectedComponent(component)
+const Canvas: React.FC<CanvasProps> = ({
+	onDrop,
+	onDragOver,
+	children,
+	selectedComponent,
+}) => {
+	const [highlightPosition, setHighlightPosition] = useState<{
+		x: number
+		y: number
+	} | null>(null)
+	const [hoveredComponent, setHoveredComponent] = useState<{
+		component: string
+		position: string
+	} | null>(null)
+
+	const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
+		event.preventDefault()
+		// Set hovered component based on drag data
+		const component = event.dataTransfer.getData('component')
+		const position = event.dataTransfer.getData('position')
+		setHoveredComponent({component, position})
 	}
 
-	const handleComponentContextClose = () => {
-		setSelectedComponent(null)
+	const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+		event.preventDefault()
+		const rect = event.currentTarget.getBoundingClientRect()
+		const x = Math.floor((event.clientX - rect.left) / 50) * 50
+		const y = Math.floor((event.clientY - rect.top) / 50) * 50
+		setHighlightPosition({x, y})
+		onDragOver(event)
 	}
 
-	const updateComponent = (updatedComponent: IComponent) => {
-		setComponents(
-			components.map(comp =>
-				comp.id === updatedComponent.id ? updatedComponent : comp
-			)
-		)
+	const handleDragLeave = () => {
+		setHighlightPosition(null)
+		setHoveredComponent(null)
+	}
+
+	const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+		event.preventDefault()
+		if (highlightPosition && selectedComponent) {
+			onDrop(selectedComponent, highlightPosition.x, highlightPosition.y)
+			setHighlightPosition(null)
+			setHoveredComponent(null)
+		}
 	}
 
 	return (
 		<div
-			ref={setNodeRef}
-			className='relative grid flex-grow p-4 bg-stone-800 canvas-grid'
-			style={{
-				gridTemplateColumns: `repeat(auto-fill, 50px)`,
-				gridTemplateRows: `repeat(auto-fill, 50px)`,
-			}}
+			className='relative flex-grow p-4 bg-stone-800 canvas-grid'
+			onDragEnter={handleDragEnter}
+			onDragOver={handleDragOver}
+			onDragLeave={handleDragLeave}
+			onDrop={handleDrop}
 		>
-			{components.map((component, index) => (
+			{/* Highlight Box */}
+			{highlightPosition && (
 				<div
-					key={index}
-					className='absolute p-2 mb-2 text-white bg-gray-700 rounded cursor-pointer'
-					onClick={() => handleComponentClick(component)}
-					style={{top: component.position.y, left: component.position.x}}
-				>
-					{component.id}
-				</div>
-			))}
-			{hoveredPosition && (
-				<div
-					className='absolute border-2 border-blue-500 border-dashed'
+					className='absolute w-[50px] h-[50px] bg-purple-600 opacity-50 pointer-events-none'
 					style={{
-						top: hoveredPosition.y,
-						left: hoveredPosition.x,
-						width: '50px',
-						height: '50px',
+						left: highlightPosition.x,
+						top: highlightPosition.y,
 					}}
 				/>
 			)}
-			{selectedComponent && (
-				<ComponentContext
-					component={selectedComponent}
-					onClose={handleComponentContextClose}
-					onUpdate={updateComponent}
-				/>
-			)}
+			{/* Render Canvas Components */}
+			{children}
 		</div>
 	)
 }

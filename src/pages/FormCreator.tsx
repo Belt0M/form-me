@@ -1,60 +1,58 @@
-import
-	{
-		DndContext,
-		DragEndEvent,
-		DragMoveEvent,
-		DragOverlay,
-		DragStartEvent,
-		UniqueIdentifier,
-	} from '@dnd-kit/core'
-import React, { useCallback, useState } from 'react'
+// src/pages/FormCreator.tsx
+import React, {useState} from 'react'
 import Canvas from '../components/creator/Canvas'
 import Sidebar from '../components/creator/Sidebar'
 import Header from '../components/Header'
-import { IComponent } from '../types/IComponent'
+import {IComponent} from '../types/IComponent'
+
+interface CanvasComponent {
+	component: IComponent
+	x: number
+	y: number
+}
 
 const FormCreator: React.FC = () => {
-	const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
-	const [components, setComponents] = useState<IComponent[]>([])
-	const [hoveredPosition, setHoveredPosition] = useState<{
-		x: number
-		y: number
-	} | null>(null)
+	const [canvasComponents, setCanvasComponents] = useState<CanvasComponent[]>(
+		[]
+	)
+	const [selectedComponent, setSelectedComponent] = useState<IComponent | null>(
+		null
+	)
+	const [currentPosition, setCurrentPosition] = useState<string>('relative')
 
-	const handleDragStart = (event: DragStartEvent) => {
-		setActiveId(event.active.id)
+	const handleDragStart = (
+		component: IComponent,
+		position: string,
+		event: React.DragEvent<HTMLDivElement>
+	) => {
+		setSelectedComponent(component)
+		setCurrentPosition(position)
+
+		const dragGhost = document.createElement('div')
+
+		dragGhost.className =
+			'p-2 mb-2 text-white border bg-stone-500 border-stone-700'
+		dragGhost.textContent = component.id as string
+		document.body.appendChild(dragGhost)
+		dragGhost.style.position = 'absolute'
+		dragGhost.style.top = '-9999px'
+
+		const {width, height} = dragGhost.getBoundingClientRect()
+		event.dataTransfer.setDragImage(dragGhost, width / 2, height / 2)
+
+		setTimeout(() => {
+			document.body.removeChild(dragGhost)
+		}, 0)
 	}
 
-	const handleDragEnd = (event: DragEndEvent) => {
-		const {active, over} = event
-		setActiveId(null)
-
-		if (over && over.id === 'canvas') {
-			const rect = over.rect
-			const position = {
-				x: Math.floor((rect.left + rect.width / 2) / 50) * 50,
-				y: Math.floor((rect.top + rect.height / 2) / 50) * 50,
-			}
-			setComponents(components => [
-				...components,
-				{id: active.id, position, styles: null},
-			])
-			setHoveredPosition(null)
-		}
+	const handleDrop = (component: IComponent, x: number, y: number) => {
+		setCanvasComponents([...canvasComponents, {component, x, y}])
+		setSelectedComponent(null)
 	}
 
-	const handleDragMove = useCallback((event: DragMoveEvent) => {
-		const {over} = event
-		if (over && over.id === 'canvas') {
-			const rect = over.rect
-			const position = {
-				x: Math.floor((event.delta.x + rect.width) / 50) * 50,
-				y: Math.floor((event.delta.y + rect.height / 2) / 50) * 50,
-			}
-			console.log(event.delta, rect, position)
-			setHoveredPosition(position)
-		}
-	}, [])
+	const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+		event.preventDefault()
+	}
 
 	return (
 		<>
@@ -68,26 +66,26 @@ const FormCreator: React.FC = () => {
 					</button>
 				}
 			/>
-			<main className='flex max-h-[calc(100vh-80.8px)] overflow-hidden'>
-				<DndContext
-					onDragStart={handleDragStart}
-					onDragEnd={handleDragEnd}
-					onDragMove={handleDragMove}
+			<main className='flex h-[calc(100vh-80.8px)] overflow-hidden'>
+				<Canvas
+					onDrop={handleDrop}
+					onDragOver={handleDragOver}
+					selectedComponent={selectedComponent}
 				>
-					<Canvas
-						components={components}
-						hoveredPosition={hoveredPosition}
-						setComponents={setComponents}
-					/>
-					<Sidebar />
-					<DragOverlay>
-						{activeId ? (
-							<div className='p-2 mb-2 text-white rounded cursor-pointer bg-stone-700'>
-								{activeId}
-							</div>
-						) : null}
-					</DragOverlay>
-				</DndContext>
+					{canvasComponents.map((component, index) => (
+						<div
+							key={index}
+							className={`absolute`}
+							style={{
+								left: component.x,
+								top: component.y,
+							}}
+						>
+							{component.component.id}
+						</div>
+					))}
+				</Canvas>
+				<Sidebar onDragStart={handleDragStart} />
 			</main>
 		</>
 	)
