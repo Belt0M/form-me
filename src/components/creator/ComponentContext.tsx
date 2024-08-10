@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import {IComponent} from '../../types/IComponent'
+import {IComponent} from '../../types/EHTMLTag'
 import {IStyles} from '../../types/IStyles'
 
 const ComponentContext: React.FC<{

@@ -1,53 +1,89 @@
-// src/pages/FormCreator.tsx
 import React, {useState} from 'react'
 import Canvas from '../components/creator/Canvas'
+import RenderCanvasComponent from '../components/creator/CanvasRenderer'
 import Sidebar from '../components/creator/Sidebar'
 import Header from '../components/Header'
-import {IComponent} from '../types/IComponent'
-
-interface CanvasComponent {
-	component: IComponent
-	x: number
-	y: number
-}
+import {EHTMLTag} from '../types/EHTMLTag'
+import {EPosition} from '../types/EPosition'
+import {ICanvasComponent} from '../types/ICanvasComponent'
 
 const FormCreator: React.FC = () => {
-	const [canvasComponents, setCanvasComponents] = useState<CanvasComponent[]>(
+	const [canvasComponents, setCanvasComponents] = useState<ICanvasComponent[]>(
 		[]
 	)
-	const [selectedComponent, setSelectedComponent] = useState<IComponent | null>(
+	const [selectedComponent, setSelectedComponent] = useState<EHTMLTag | null>(
 		null
 	)
-	const [currentPosition, setCurrentPosition] = useState<string>('relative')
+	const [positionMode, setPositionMode] = useState<EPosition>(
+		EPosition.RELATIVE
+	)
+	const [hoveredComponentId, setHoveredComponentId] = useState<string | null>(
+		null
+	)
 
-	const handleDragStart = (
-		component: IComponent,
-		position: string,
-		event: React.DragEvent<HTMLDivElement>
-	) => {
-		setSelectedComponent(component)
-		setCurrentPosition(position)
-
-		const dragGhost = document.createElement('div')
-
-		dragGhost.className =
-			'p-2 mb-2 text-white border bg-stone-500 border-stone-700'
-		dragGhost.textContent = component.id as string
-		document.body.appendChild(dragGhost)
-		dragGhost.style.position = 'absolute'
-		dragGhost.style.top = '-9999px'
-
-		const {width, height} = dragGhost.getBoundingClientRect()
-		event.dataTransfer.setDragImage(dragGhost, width / 2, height / 2)
-
-		setTimeout(() => {
-			document.body.removeChild(dragGhost)
-		}, 0)
+	const handleDragStart = (type: EHTMLTag, position: EPosition) => {
+		setSelectedComponent(type)
+		setPositionMode(position)
 	}
 
-	const handleDrop = (component: IComponent, x: number, y: number) => {
-		setCanvasComponents([...canvasComponents, {component, x, y}])
+	const addComponent = (
+		parentId: string | null,
+		newComponent: ICanvasComponent
+	) => {
+		setCanvasComponents(prevComponents => {
+			if (!parentId) {
+				return [...prevComponents, newComponent]
+			}
+
+			const addChild = (components: ICanvasComponent[]): ICanvasComponent[] => {
+				return components.map(component => {
+					if (component.id === parentId) {
+						return {
+							...component,
+							children: component.children
+								? [...component.children, newComponent]
+								: [newComponent],
+						}
+					}
+					if (component.children) {
+						return {
+							...component,
+							children: addChild(component.children),
+						}
+					}
+					return component
+				})
+			}
+
+			return addChild(prevComponents)
+		})
+	}
+
+	const handleDrop = (x: number, y: number) => {
+		if (selectedComponent === null) return
+
+		const id = crypto.randomUUID()
+		const newComponent: ICanvasComponent = {
+			id,
+			type: selectedComponent,
+			style: {position: positionMode},
+			children: [],
+		}
+
+		// Якщо positionMode не абсолютний, не встановлюємо x і y
+		if (positionMode === EPosition.ABSOLUTE) {
+			newComponent.x = x
+			newComponent.y = y
+		}
+
+		if (hoveredComponentId) {
+			addComponent(hoveredComponentId, newComponent)
+		} else {
+			addComponent(null, newComponent)
+		}
+
 		setSelectedComponent(null)
+		setHoveredComponentId(null)
 	}
 
 	const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
@@ -67,22 +103,13 @@ const FormCreator: React.FC = () => {
 				}
 			/>
 			<main className='flex h-[calc(100vh-80.8px)] overflow-hidden'>
-				<Canvas
-					onDrop={handleDrop}
-					onDragOver={handleDragOver}
-					selectedComponent={selectedComponent}
-				>
-					{canvasComponents.map((component, index) => (
-						<div
-							key={index}
-							className={`absolute`}
-							style={{
-								left: component.x,
-								top: component.y,
-							}}
-						>
-							{component.component.id}
-						</div>
+				<Canvas onDrop={handleDrop} onDragOver={handleDragOver}>
+					{canvasComponents.map(component => (
+						<RenderCanvasComponent
+							key={component.id}
+							component={component}
+							setHoveredComponentId={setHoveredComponentId}
+						/>
 					))}
 				</Canvas>
 				<Sidebar onDragStart={handleDragStart} />

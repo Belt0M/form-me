@@ -1,34 +1,18 @@
-// src/components/Sidebar.tsx
 import React, {useState} from 'react'
-import {IComponent} from '../../types/IComponent'
+import {sidebarComponents} from '../../data/sidebar-components'
+import {EHTMLTag} from '../../types/EHTMLTag'
+import {EPosition} from '../../types/EPosition'
 
 interface SidebarProps {
 	onDragStart: (
-		component: IComponent,
-		position: string,
+		type: EHTMLTag,
+		position: EPosition,
 		event: React.DragEvent<HTMLDivElement>
 	) => void
 }
 
-const components: IComponent[] = [
-	{id: 'section'},
-	{id: 'div'},
-	{id: 'input: text'},
-	{id: 'input: email'},
-	{id: 'input: password'},
-	{id: 'input: select'},
-	{id: 'input: checkbox'},
-	{id: 'input: file'},
-	{id: 'button'},
-	{id: 'h1-h6'},
-	{id: 'span'},
-	{id: 'a'},
-	{id: 'img'},
-	{id: 'label'},
-]
-
 const Sidebar: React.FC<SidebarProps> = ({onDragStart}) => {
-	const [position, setPosition] = useState<string>('relative')
+	const [position, setPosition] = useState<EPosition>(EPosition.RELATIVE)
 
 	return (
 		<aside className='w-1/4 max-h-full px-5 overflow-y-auto py-7 bg-stone-900'>
@@ -37,23 +21,26 @@ const Sidebar: React.FC<SidebarProps> = ({onDragStart}) => {
 				<label className='block mb-2 text-white'>Position</label>
 				<select
 					value={position}
-					onChange={e => setPosition(e.target.value)}
+					onChange={e => setPosition(e.target.value as EPosition)}
 					className='p-2 text-white rounded bg-stone-700'
 				>
-					<option value='relative'>Relative</option>
-					<option value='absolute'>Absolute</option>
+					<option value={EPosition.RELATIVE}>Relative</option>
+					<option value={EPosition.ABSOLUTE}>Absolute</option>
 				</select>
 			</div>
-			{components.map(component => (
-				<div
-					key={component.id}
-					draggable
-					onDragStart={event => onDragStart(component, position, event)}
-					className='p-2 mb-2 text-white cursor-pointer bg-stone-500'
-				>
-					{component.id}
-				</div>
-			))}
+			<div className='grid grid-cols-2 gap-4'>
+				{sidebarComponents.map(({icon: IconComponent, type}) => (
+					<div
+						key={type}
+						draggable
+						onDragStart={event => onDragStart(type, position, event)}
+						className='flex flex-col items-center justify-center gap-2 p-2 mb-2 text-white bg-white border-2 border-purple-800 cursor-pointer aspect-square rounded-xl bg-opacity-10'
+					>
+						<IconComponent size={24} weight='bold' />
+						<span className='font-bold'>{`</${type}>`}</span>
+					</div>
+				))}
+			</div>
 		</aside>
 	)
 }

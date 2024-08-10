@@ -1,36 +1,16 @@
-// src/components/Canvas.tsx
 import React, {useState} from 'react'
-import {IComponent} from '../../types/IComponent'
 
 interface CanvasProps {
-	onDrop: (component: IComponent, x: number, y: number) => void
+	onDrop: (x: number, y: number) => void
 	onDragOver: (event: React.DragEvent<HTMLDivElement>) => void
 	children?: React.ReactNode
-	selectedComponent: IComponent | null
 }
 
-const Canvas: React.FC<CanvasProps> = ({
-	onDrop,
-	onDragOver,
-	children,
-	selectedComponent,
-}) => {
+const Canvas: React.FC<CanvasProps> = ({onDrop, onDragOver, children}) => {
 	const [highlightPosition, setHighlightPosition] = useState<{
 		x: number
 		y: number
 	} | null>(null)
-	const [hoveredComponent, setHoveredComponent] = useState<{
-		component: string
-		position: string
-	} | null>(null)
-
-	const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
-		event.preventDefault()
-		// Set hovered component based on drag data
-		const component = event.dataTransfer.getData('component')
-		const position = event.dataTransfer.getData('position')
-		setHoveredComponent({component, position})
-	}
 
 	const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
 		event.preventDefault()
@@ -41,29 +21,20 @@ const Canvas: React.FC<CanvasProps> = ({
 		onDragOver(event)
 	}
 
-	const handleDragLeave = () => {
-		setHighlightPosition(null)
-		setHoveredComponent(null)
-	}
-
 	const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
 		event.preventDefault()
-		if (highlightPosition && selectedComponent) {
-			onDrop(selectedComponent, highlightPosition.x, highlightPosition.y)
+		if (highlightPosition) {
+			onDrop(highlightPosition.x, highlightPosition.y)
 			setHighlightPosition(null)
-			setHoveredComponent(null)
 		}
 	}
 
 	return (
-		<div
-			className='relative flex-grow p-4 bg-stone-800 canvas-grid'
-			onDragEnter={handleDragEnter}
+		<section
+			className='relative flex-grow px-20 py-12 bg-stone-800 canvas-grid'
 			onDragOver={handleDragOver}
-			onDragLeave={handleDragLeave}
 			onDrop={handleDrop}
 		>
-			{/* Highlight Box */}
 			{highlightPosition && (
 				<div
 					className='absolute w-[50px] h-[50px] bg-purple-600 opacity-50 pointer-events-none'
@@ -73,9 +44,8 @@ const Canvas: React.FC<CanvasProps> = ({
 					}}
 				/>
 			)}
-			{/* Render Canvas Components */}
 			{children}
-		</div>
+		</section>
 	)
 }
 
