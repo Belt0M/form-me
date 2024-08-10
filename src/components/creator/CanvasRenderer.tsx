@@ -17,12 +17,20 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 
 	const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
 		event.preventDefault()
+		event.stopPropagation()
+
+		console.log(id)
+
 		setHoveredComponentId(id)
 		setIsHovered(true)
 	}
 
 	const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
 		event.preventDefault()
+		event.stopPropagation()
+
+		console.log(null)
+
 		setHoveredComponentId(null)
 		setIsHovered(false)
 	}
@@ -48,8 +56,8 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 		computedStyle.width = '100%'
 	}
 
-	const renderChildren = () =>
-		children ? (
+	const renderChildren = () => {
+		return children ? (
 			<React.Fragment>
 				{children.map(child => (
 					<RenderCanvasComponent
@@ -60,6 +68,7 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 				))}
 			</React.Fragment>
 		) : null
+	}
 
 	switch (type) {
 		case 'section':
@@ -72,7 +81,7 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 					onMouseLeave={handleMouseLeave}
 				>
 					<>
-						{renderChildren()}
+						{children?.length ? renderChildren() : null}
 						{isHovered && (
 							<div className='absolute px-2 py-1 text-xs font-bold bg-white rounded bottom-1 right-1 text-primary'>
 								{type}
@@ -92,7 +101,7 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 					onMouseLeave={handleMouseLeave}
 				>
 					<>
-						{renderChildren()}
+						{children?.length ? renderChildren() : null}
 						{isHovered && (
 							<div className='absolute px-2 py-1 text-xs font-bold bg-white rounded bottom-1 right-1 text-primary'>
 								{type}
@@ -101,51 +110,6 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 					</>
 				</Div>
 			)
-			break
-		case 'h1':
-			renderedComponent = (
-				<h1
-					style={computedStyle}
-					onDragEnter={handleDragEnter}
-					onDragLeave={handleDragLeave}
-					onMouseEnter={handleMouseEnter}
-					onMouseLeave={handleMouseLeave}
-				>
-					{'H1 Component'}
-					{isHovered && (
-						<div className='absolute px-2 py-1 text-xs font-bold bg-white rounded bottom-1 right-1 text-primary'>
-							{type}
-						</div>
-					)}
-				</h1>
-			)
-			break
-		case 'input':
-			renderedComponent = (
-				<input
-					style={computedStyle}
-					onDragEnter={handleDragEnter}
-					onDragLeave={handleDragLeave}
-					onMouseEnter={handleMouseEnter}
-					onMouseLeave={handleMouseLeave}
-				/>
-			)
-			break
-		case 'button':
-			// renderedComponent = (
-			//   <button
-			//     style={computedStyle}
-			//     onDragEnter={handleDragEnter}
-			//     onDragLeave={handleDragLeave}
-			//     onMouseEnter={handleMouseEnter}
-			//     onMouseLeave={handleMouseLeave}
-			//   >
-			//     {'Button'}
-			//     {isHovered && (
-			//       <div className="absolute text-xs bottom-1 right-1 text-primary">{type}</div>
-			//     )}
-			//   </button>
-			// );
 			break
 		default:
 			renderedComponent = null
