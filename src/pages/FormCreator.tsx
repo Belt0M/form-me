@@ -25,10 +25,17 @@ const FormCreator: React.FC = () => {
 		null
 	)
 	const [activeTab, setActiveTab] = useState<ETabs>(ETabs.COMPONENTS)
+	const [isDragging, setIsDragging] = useState<boolean>(false)
 
 	const handleDragStart = (type: EHTMLTag, position: EPosition) => {
+		setIsDragging(true)
+
 		setSelectedComponent(type)
 		setPositionMode(position)
+	}
+
+	const handleDragEnd = () => {
+		setIsDragging(false)
 	}
 
 	const addComponent = (
@@ -151,7 +158,12 @@ const FormCreator: React.FC = () => {
 				}
 			/>
 			<main className='flex h-[calc(100vh-80.8px)] overflow-hidden'>
-				<Canvas onDrop={handleDrop} onDragOver={handleDragOver}>
+				<Canvas
+					onDrop={handleDrop}
+					onDragOver={handleDragOver}
+					isEmptyCanvas={!canvasComponents.length}
+					isDragging={isDragging}
+				>
 					{canvasComponents.map(component => (
 						<RenderCanvasComponent
 							key={component.id}
@@ -166,6 +178,7 @@ const FormCreator: React.FC = () => {
 				</Canvas>
 				<Sidebar
 					onDragStart={handleDragStart}
+					onDragEnd={handleDragEnd}
 					isCanvasEmpty={canvasComponents.length === 0}
 					editingComponentId={editingComponentId}
 					componentStyle={

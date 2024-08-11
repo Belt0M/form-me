@@ -32,6 +32,8 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 		event.preventDefault()
 		event.stopPropagation()
 
+		console.log('Enter', event)
+
 		if (event.currentTarget.contains(event.relatedTarget as Node)) {
 			return
 		}

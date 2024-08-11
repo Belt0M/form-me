@@ -11,6 +11,7 @@ interface SidebarProps {
 		position: EPosition,
 		event: React.DragEvent<HTMLDivElement>
 	) => void
+	onDragEnd: () => void
 	isCanvasEmpty: boolean
 	editingComponentId: string | null
 	componentStyle: React.CSSProperties
@@ -21,6 +22,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({
 	onDragStart,
+	onDragEnd,
 	isCanvasEmpty,
 	editingComponentId,
 	componentStyle,
@@ -83,6 +85,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 									onDragStart={event =>
 										!isDisabled && onDragStart(type, position, event)
 									}
+									onDragEnd={onDragEnd}
 									className={`flex flex-col items-center justify-center gap-2 p-2 mb-2 text-white bg-white border-2 border-purple-800 cursor-pointer aspect-square rounded-xl bg-opacity-10 ${
 										isDisabled ? 'opacity-50 cursor-not-allowed' : ''
 									}`}
