@@ -20,6 +20,12 @@ const FormCreator: React.FC = () => {
 	const [hoveredComponentId, setHoveredComponentId] = useState<string | null>(
 		null
 	)
+	const [editingComponentId, setEditingComponentId] = useState<string | null>(
+		null
+	)
+	const [activeTab, setActiveTab] = useState<'components' | 'parameters'>(
+		'components'
+	)
 
 	const handleDragStart = (type: EHTMLTag, position: EPosition) => {
 		setSelectedComponent(type)
@@ -89,6 +95,27 @@ const FormCreator: React.FC = () => {
 		event.preventDefault()
 	}
 
+	const handleDeleteComponent = (id: string) => {
+		setCanvasComponents(prevComponents =>
+			prevComponents.filter(component => component.id !== id)
+		)
+	}
+
+	const handleEditComponent = (id: string) => {
+		setEditingComponentId(id)
+		setActiveTab('parameters')
+	}
+
+	const handleUpdateStyle = (id: string, updatedStyle: React.CSSProperties) => {
+		setCanvasComponents(prevComponents =>
+			prevComponents.map(component =>
+				component.id === id
+					? {...component, style: {...component.style, ...updatedStyle}}
+					: component
+			)
+		)
+	}
+
 	return (
 		<>
 			<Header
@@ -108,12 +135,22 @@ const FormCreator: React.FC = () => {
 							key={component.id}
 							component={component}
 							setHoveredComponentId={setHoveredComponentId}
+							onDeleteComponent={handleDeleteComponent}
+							onEditComponent={handleEditComponent}
+							activeTab={activeTab}
 						/>
 					))}
 				</Canvas>
 				<Sidebar
 					onDragStart={handleDragStart}
 					isCanvasEmpty={canvasComponents.length === 0}
+					editingComponentId={editingComponentId}
+					componentStyle={
+						canvasComponents.find(c => c.id === editingComponentId)?.style || {}
+					}
+					onUpdateStyle={handleUpdateStyle}
+					activeTab={activeTab}
+					setActiveTab={setActiveTab}
 				/>
 			</main>
 		</>
