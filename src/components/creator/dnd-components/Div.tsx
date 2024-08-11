@@ -1,6 +1,7 @@
 import React, {CSSProperties, FC, ReactElement} from 'react'
 
 interface Props {
+	id: string
 	style?: CSSProperties
 	children?: ReactElement | ReactElement[]
 	onDragEnter?: (event: React.DragEvent<HTMLDivElement>) => void
@@ -10,6 +11,7 @@ interface Props {
 }
 
 const Div: FC<Props> = ({
+	id,
 	style,
 	children,
 	onDragEnter,
@@ -19,12 +21,14 @@ const Div: FC<Props> = ({
 }) => {
 	return (
 		<div
-			className='h-24 bg-gray-300'
+			className='h-24 bg-gray-300 min-h-24'
+			id={id}
 			style={style}
 			onDragEnter={onDragEnter}
 			onDragLeave={onDragLeave}
 			onMouseEnter={onMouseEnter}
 			onMouseLeave={onMouseLeave}
+			aria-atomic={true}
 		>
 			{children}
 		</div>

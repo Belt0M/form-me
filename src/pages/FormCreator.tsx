@@ -68,11 +68,13 @@ const FormCreator: React.FC = () => {
 	const handleDrop = (x: number, y: number) => {
 		if (selectedComponent === null) return
 
+		const height = canvasComponents.length === 0 ? '100%' : 'auto'
+
 		const id = crypto.randomUUID()
 		const newComponent: ICanvasComponent = {
 			id,
 			type: selectedComponent,
-			style: {position: positionMode},
+			style: {position: positionMode, height},
 			children: [],
 		}
 
@@ -96,8 +98,34 @@ const FormCreator: React.FC = () => {
 	}
 
 	const handleDeleteComponent = (id: string) => {
+		if (id === hoveredComponentId) {
+			setHoveredComponentId(null)
+		}
+
+		const removeComponentById = (
+			components: ICanvasComponent[],
+			idToRemove: string
+		): ICanvasComponent[] => {
+			return components
+				.map(component => {
+					if (component.id === idToRemove) {
+						return null
+					}
+
+					if (component.children && component.children.length > 0) {
+						component.children = removeComponentById(
+							component.children,
+							idToRemove
+						)
+					}
+
+					return component
+				})
+				.filter(Boolean) as ICanvasComponent[]
+		}
+
 		setCanvasComponents(prevComponents =>
-			prevComponents.filter(component => component.id !== id)
+			removeComponentById(prevComponents, id)
 		)
 	}
 
@@ -135,6 +163,7 @@ const FormCreator: React.FC = () => {
 							key={component.id}
 							component={component}
 							setHoveredComponentId={setHoveredComponentId}
+							hoveredComponentId={hoveredComponentId}
 							onDeleteComponent={handleDeleteComponent}
 							onEditComponent={handleEditComponent}
 							activeTab={activeTab}

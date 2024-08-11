@@ -1,4 +1,5 @@
 import {Gear, Trash} from '@phosphor-icons/react'
+import clsx from 'clsx'
 import React, {useEffect, useRef, useState} from 'react'
 import {ICanvasComponent} from '../../types/ICanvasComponent'
 import Div from '../creator/dnd-components/Div'
@@ -7,6 +8,7 @@ import Section from '../creator/dnd-components/Section'
 interface CanvasComponentProps {
 	component: ICanvasComponent
 	setHoveredComponentId: (id: string | null) => void
+	hoveredComponentId: string | null
 	onDeleteComponent: (id: string) => void
 	onEditComponent: (id: string) => void
 	activeTab: 'components' | 'parameters'
@@ -15,36 +17,67 @@ interface CanvasComponentProps {
 const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 	component,
 	setHoveredComponentId,
+	hoveredComponentId,
 	onDeleteComponent,
 	onEditComponent,
 	activeTab,
 }) => {
 	const {id, type, style, children} = component
-	const [isHovered, setIsHovered] = useState(false)
 	const containerRef = useRef<HTMLDivElement | null>(null)
+	const [isHovering, setIsHovering] = useState<boolean>(false)
 
 	const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
 		event.preventDefault()
 		event.stopPropagation()
 
+		if (event.currentTarget.contains(event.relatedTarget as Node)) {
+			return
+		}
+
+		console.log(id)
+
 		setHoveredComponentId(id)
-		setIsHovered(true)
 	}
 
 	const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
 		event.preventDefault()
 		event.stopPropagation()
 
-		setHoveredComponentId(null)
-		setIsHovered(false)
+		if (event.currentTarget.contains(event.relatedTarget as Node)) {
+			return
+		}
+
+		const relatedTarget = event.relatedTarget as HTMLElement | null
+
+		console.log(relatedTarget)
+
+		if (relatedTarget && relatedTarget.getAttribute('aria-atomic')) {
+			setHoveredComponentId(relatedTarget.id)
+		} else {
+			setHoveredComponentId(null)
+		}
 	}
 
-	const handleMouseEnter = () => {
-		setIsHovered(true)
+	const handleMouseEnter = (event: React.MouseEvent<HTMLDivElement>) => {
+		event.preventDefault()
+		event.stopPropagation()
+
+		setIsHovering(true)
+		setHoveredComponentId(id)
 	}
 
-	const handleMouseLeave = () => {
-		setIsHovered(false)
+	const handleMouseLeave = (event: React.MouseEvent<HTMLDivElement>) => {
+		event.preventDefault()
+		event.stopPropagation()
+
+		const relatedTarget = event.relatedTarget as HTMLElement | null
+
+		if (relatedTarget && relatedTarget.getAttribute('aria-atomic')) {
+			setHoveredComponentId(relatedTarget.id)
+		} else {
+			setIsHovering(false)
+			setHoveredComponentId(null)
+		}
 	}
 
 	const handleDelete = () => {
@@ -96,12 +129,16 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 			document.removeEventListener('mousemove', handleMouseMove)
 			document.removeEventListener('mouseup', handleMouseUp)
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [])
 
 	let renderedComponent
+	const isCurrentInFocus = component.id === hoveredComponentId
+	const isCurrentHovered = isHovering && isCurrentInFocus
+	const hoveredOutline =
+		'before:absolute before:inset-0 before:left-0 before:top-0 before:z-50 border-yellow-400 border-2 border-dashed'
 	const computedStyle = {
 		...style,
-		border: isHovered ? '2px dashed #4A4A4A' : undefined,
 		position: style?.position,
 	}
 
@@ -111,6 +148,33 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 		computedStyle.width = '100%'
 	}
 
+	const onHoverGUI = (
+		<>
+			{isCurrentInFocus && (
+				<div className='absolute px-2 py-1 text-xs font-bold bg-white rounded bottom-1 right-1 text-primary'>
+					{type}
+				</div>
+			)}
+
+			{isCurrentHovered && (
+				<div className='absolute flex gap-2 px-3 py-2 rounded top-2 right-2 bg-dark bg-opacity-40 z-[100]'>
+					<Gear
+						className='text-yellow-500 transition-all cursor-pointer hover:scale-105'
+						weight='bold'
+						size={25}
+						onClick={handleEdit}
+					/>
+					<Trash
+						className='text-red-500 transition-all cursor-pointer hover:scale-105'
+						weight='bold'
+						size={25}
+						onClick={handleDelete}
+					/>
+				</div>
+			)}
+		</>
+	)
+
 	const renderChildren = () => {
 		return children?.length ? (
 			<React.Fragment>
@@ -119,6 +183,7 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 						key={child.id}
 						component={child}
 						setHoveredComponentId={setHoveredComponentId}
+						hoveredComponentId={hoveredComponentId}
 						onDeleteComponent={onDeleteComponent}
 						onEditComponent={onEditComponent}
 						activeTab={activeTab}
@@ -129,9 +194,6 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 			<React.Fragment />
 		)
 	}
-
-	const iconClass =
-		'absolute top-2 right-2 flex gap-2 py-2 px-3 bg-dark rounded bg-opacity-40'
 
 	const resizeHandles = (
 		<>
@@ -158,38 +220,21 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 			renderedComponent = (
 				<div
 					ref={containerRef}
-					className='relative w-full h-full'
+					className={clsx(
+						isCurrentInFocus && hoveredOutline,
+						'relative w-full h-full'
+					)}
 					style={computedStyle}
 					onDragEnter={handleDragEnter}
 					onDragLeave={handleDragLeave}
 					onMouseEnter={handleMouseEnter}
 					onMouseLeave={handleMouseLeave}
 				>
-					<Section style={{width: '100%', height: '100%'}}>
+					<Section id={id} style={{width: '100%', height: '100%'}}>
 						{renderChildren()}
 					</Section>
-					{isHovered && activeTab !== 'parameters' && (
-						<>
-							<div className='absolute px-2 py-1 text-xs font-bold bg-white rounded bottom-1 right-1 text-primary'>
-								{type}
-							</div>
-							<div className={iconClass}>
-								<Gear
-									className='text-yellow-500 transition-all cursor-pointer hover:scale-105'
-									weight='bold'
-									size={25}
-									onClick={handleEdit}
-								/>
-								<Trash
-									className='text-red-500 transition-all cursor-pointer hover:scale-105'
-									weight='bold'
-									size={25}
-									onClick={handleDelete}
-								/>
-							</div>
-						</>
-					)}
-					{resizeHandles}
+					{activeTab !== 'parameters' && onHoverGUI}
+					{isCurrentHovered && activeTab === 'parameters' && resizeHandles}
 				</div>
 			)
 			break
@@ -197,34 +242,21 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 			renderedComponent = (
 				<div
 					ref={containerRef}
-					className='relative w-full h-full'
+					className={clsx(
+						isCurrentInFocus && hoveredOutline,
+						'relative w-full h-full'
+					)}
 					style={computedStyle}
 					onDragEnter={handleDragEnter}
 					onDragLeave={handleDragLeave}
 					onMouseEnter={handleMouseEnter}
 					onMouseLeave={handleMouseLeave}
 				>
-					<Div style={{width: '100%', height: '100%'}}>{renderChildren()}</Div>
-					{isHovered && activeTab !== 'parameters' && (
-						<>
-							<div className='absolute px-2 py-1 text-xs font-bold bg-white rounded bottom-1 right-1 text-primary'>
-								{type}
-							</div>
-							<div className={iconClass}>
-								<Gear
-									className='cursor-pointer'
-									size={20}
-									onClick={handleEdit}
-								/>
-								<Trash
-									className='cursor-pointer'
-									size={20}
-									onClick={handleDelete}
-								/>
-							</div>
-						</>
-					)}
-					{resizeHandles}
+					<Div id={id} style={{width: '100%', height: '100%'}}>
+						{renderChildren()}
+					</Div>
+					{isCurrentHovered && activeTab !== 'parameters' && onHoverGUI}
+					{isCurrentHovered && activeTab === 'parameters' && resizeHandles}
 				</div>
 			)
 			break
