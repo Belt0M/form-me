@@ -36,8 +36,6 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 			return
 		}
 
-		console.log(id)
-
 		setHoveredComponentId(id)
 	}
 
@@ -51,8 +49,6 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 
 		const relatedTarget = event.relatedTarget as HTMLElement | null
 
-		console.log(relatedTarget)
-
 		if (relatedTarget && relatedTarget.getAttribute('aria-atomic')) {
 			setHoveredComponentId(relatedTarget.id)
 		} else {
@@ -62,10 +58,9 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 
 	const handleMouseEnter = (event: React.MouseEvent<HTMLDivElement>) => {
 		event.preventDefault()
-		event.stopPropagation()
 
-		setIsHovering(true)
 		setHoveredComponentId(id)
+		setIsHovering(true)
 	}
 
 	const handleMouseLeave = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -74,9 +69,14 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 
 		const relatedTarget = event.relatedTarget as HTMLElement | null
 
+		console.log('Leave', relatedTarget, event)
+
 		if (relatedTarget && relatedTarget.getAttribute('aria-atomic')) {
+			console.log(relatedTarget)
+
 			setHoveredComponentId(relatedTarget.id)
 		} else {
+			console.log('setIsHovering', false)
 			setIsHovering(false)
 			setHoveredComponentId(null)
 		}
@@ -138,7 +138,7 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 	const isCurrentInFocus = component.id === hoveredComponentId
 	const isCurrentHovered = isHovering && isCurrentInFocus
 	const hoveredOutline =
-		'before:absolute before:inset-0 before:left-0 before:top-0 before:z-50 border-yellow-400 border-2 border-dashed'
+		'before:absolute before:inset-0 before:left-0 before:top-0 border-yellow-400 border-2 border-dashed'
 	const computedStyle = {
 		...style,
 		position: style?.position,
@@ -150,10 +150,12 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 		computedStyle.width = '100%'
 	}
 
+	console.log(id, isCurrentInFocus, isCurrentHovered, isHovering)
+
 	const onHoverGUI = (
 		<>
 			{isCurrentInFocus && (
-				<div className='absolute px-2 py-1 text-xs font-bold bg-white rounded bottom-1 right-1 text-primary'>
+				<div className='absolute px-2 py-1 text-xs font-bold bg-white rounded select-none bottom-1 right-1 text-primary'>
 					{type}
 				</div>
 			)}
@@ -243,6 +245,7 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 		case EHTMLTag.DIV:
 			renderedComponent = (
 				<div
+					id={id}
 					ref={containerRef}
 					className={clsx(
 						isCurrentInFocus && hoveredOutline,
