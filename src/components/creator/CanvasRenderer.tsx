@@ -69,14 +69,9 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 
 		const relatedTarget = event.relatedTarget as HTMLElement | null
 
-		console.log('Leave', relatedTarget, event)
-
 		if (relatedTarget && relatedTarget.getAttribute('aria-atomic')) {
-			console.log(relatedTarget)
-
 			setHoveredComponentId(relatedTarget.id)
 		} else {
-			console.log('setIsHovering', false)
 			setIsHovering(false)
 			setHoveredComponentId(null)
 		}
@@ -149,8 +144,6 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 		delete computedStyle.top
 		computedStyle.width = '100%'
 	}
-
-	console.log(id, isCurrentInFocus, isCurrentHovered, isHovering)
 
 	const onHoverGUI = (
 		<>
@@ -245,7 +238,6 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 		case EHTMLTag.DIV:
 			renderedComponent = (
 				<div
-					id={id}
 					ref={containerRef}
 					className={clsx(
 						isCurrentInFocus && hoveredOutline,

@@ -64,7 +64,7 @@ const FormCreator: React.FC = () => {
 		})
 	}
 
-	const handleDrop = (x: number, y: number) => {
+	const handleDrop = () => {
 		if (selectedComponent === null) return
 
 		const height = canvasComponents.length === 0 ? '100%' : 'auto'
@@ -75,11 +75,6 @@ const FormCreator: React.FC = () => {
 			type: selectedComponent,
 			style: {position: positionMode, height},
 			children: [],
-		}
-
-		if (positionMode === EPosition.ABSOLUTE) {
-			newComponent.x = x
-			newComponent.y = y
 		}
 
 		if (hoveredComponentId) {
