@@ -1,6 +1,8 @@
 import {Gear, Trash} from '@phosphor-icons/react'
 import clsx from 'clsx'
 import React, {useEffect, useRef, useState} from 'react'
+import {EHTMLTag} from '../../types/EHTMLTag'
+import {ETabs} from '../../types/ETabs'
 import {ICanvasComponent} from '../../types/ICanvasComponent'
 import Div from '../creator/dnd-components/Div'
 import Section from '../creator/dnd-components/Section'
@@ -11,7 +13,7 @@ interface CanvasComponentProps {
 	hoveredComponentId: string | null
 	onDeleteComponent: (id: string) => void
 	onEditComponent: (id: string) => void
-	activeTab: 'components' | 'parameters'
+	activeTab: ETabs
 }
 
 const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
@@ -216,7 +218,7 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 	)
 
 	switch (type) {
-		case 'section':
+		case EHTMLTag.SECTION:
 			renderedComponent = (
 				<div
 					ref={containerRef}
@@ -233,12 +235,12 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 					<Section id={id} style={{width: '100%', height: '100%'}}>
 						{renderChildren()}
 					</Section>
-					{activeTab !== 'parameters' && onHoverGUI}
-					{isCurrentHovered && activeTab === 'parameters' && resizeHandles}
+					{activeTab !== ETabs.PARAMETERS && onHoverGUI}
+					{isCurrentHovered && activeTab === ETabs.PARAMETERS && resizeHandles}
 				</div>
 			)
 			break
-		case 'div':
+		case EHTMLTag.DIV:
 			renderedComponent = (
 				<div
 					ref={containerRef}
@@ -255,8 +257,8 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 					<Div id={id} style={{width: '100%', height: '100%'}}>
 						{renderChildren()}
 					</Div>
-					{isCurrentHovered && activeTab !== 'parameters' && onHoverGUI}
-					{isCurrentHovered && activeTab === 'parameters' && resizeHandles}
+					{isCurrentHovered && activeTab !== ETabs.PARAMETERS && onHoverGUI}
+					{isCurrentHovered && activeTab === ETabs.PARAMETERS && resizeHandles}
 				</div>
 			)
 			break

@@ -5,6 +5,7 @@ import Sidebar from '../components/creator/Sidebar'
 import Header from '../components/Header'
 import {EHTMLTag} from '../types/EHTMLTag'
 import {EPosition} from '../types/EPosition'
+import {ETabs} from '../types/ETabs'
 import {ICanvasComponent} from '../types/ICanvasComponent'
 
 const FormCreator: React.FC = () => {
@@ -23,9 +24,7 @@ const FormCreator: React.FC = () => {
 	const [editingComponentId, setEditingComponentId] = useState<string | null>(
 		null
 	)
-	const [activeTab, setActiveTab] = useState<'components' | 'parameters'>(
-		'components'
-	)
+	const [activeTab, setActiveTab] = useState<ETabs>(ETabs.COMPONENTS)
 
 	const handleDragStart = (type: EHTMLTag, position: EPosition) => {
 		setSelectedComponent(type)
@@ -131,7 +130,7 @@ const FormCreator: React.FC = () => {
 
 	const handleEditComponent = (id: string) => {
 		setEditingComponentId(id)
-		setActiveTab('parameters')
+		setActiveTab(ETabs.PARAMETERS)
 	}
 
 	const handleUpdateStyle = (id: string, updatedStyle: React.CSSProperties) => {
