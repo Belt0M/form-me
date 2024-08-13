@@ -1,5 +1,4 @@
 import {Gear, Trash} from '@phosphor-icons/react'
-import clsx from 'clsx'
 import React, {useEffect, useRef, useState} from 'react'
 import {EHTMLTag} from '../../types/EHTMLTag'
 import {EPosition} from '../../types/EPosition'
@@ -20,6 +19,8 @@ interface CanvasComponentProps {
 		parentId: string | null,
 		newComponent: ICanvasComponent
 	) => void
+	isHintShowing: boolean
+	setIsHintShowing: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
@@ -31,14 +32,15 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 	activeTab,
 	draggingType,
 	addComponent,
+	isHintShowing,
+	setIsHintShowing,
 }) => {
 	const {id, type, style, children, isHint} = component
 	const containerRef = useRef<HTMLDivElement | null>(null)
 	const [isHovering, setIsHovering] = useState<boolean>(false)
-	const [isHintShowing, setIsHintShowing] = useState<boolean>(false)
 
-	const createHintComponent = () => {
-		if (hoveredComponentId) {
+	const createHintComponent = (hoveredID: string) => {
+		if (hoveredID) {
 			const id = crypto.randomUUID()
 			const newComponent: ICanvasComponent = {
 				id,
@@ -48,7 +50,7 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 				isHint: true,
 			}
 
-			addComponent(hoveredComponentId, newComponent)
+			addComponent(hoveredID, newComponent)
 		}
 	}
 
@@ -56,40 +58,66 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 		event.preventDefault()
 		event.stopPropagation()
 
-		if (draggingType) {
-			// createHintComponent()
-
-			setIsHintShowing(true)
-		}
-
 		if (event.currentTarget.contains(event.relatedTarget as Node)) {
 			return
 		}
 
+		const relatedElement = event.relatedTarget as HTMLElement | null
+		const targetElement = event.target as HTMLElement | null
+		const isEnterFromAnotherComponent =
+			targetElement?.getAttribute('aria-atomic') &&
+			relatedElement?.getAttribute('aria-atomic')
+
 		setHoveredComponentId(id)
+
+		if (draggingType) {
+			if (!isEnterFromAnotherComponent) {
+				console.log('create', targetElement, relatedElement)
+				console.log(true)
+				setIsHintShowing(true)
+				createHintComponent(id)
+			}
+		}
 	}
 
 	const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
 		event.preventDefault()
 		event.stopPropagation()
 
-		if (isHintShowing) {
-			console.log(event)
-			onDeleteComponent()
+		const targetElement = event.target as HTMLElement | null
+		const isTargetComponentType = targetElement?.getAttribute('aria-atomic')
 
-			setIsHintShowing(false)
-		}
+		if (isTargetComponentType) {
+			const relatedElement = event.relatedTarget as HTMLElement | null
+			const isLeaveOnNextComponent =
+				targetElement?.getAttribute('aria-atomic') &&
+				relatedElement?.getAttribute('aria-atomic')
 
-		if (event.currentTarget.contains(event.relatedTarget as Node)) {
-			return
-		}
+			if (!relatedElement?.getAttribute('aria-disabled') && isHintShowing) {
+				console.log('delete', targetElement, relatedElement)
+				onDeleteComponent()
 
-		const relatedTarget = event.relatedTarget as HTMLElement | null
+				console.log(false)
+				setIsHintShowing(false)
+			}
 
-		if (relatedTarget && relatedTarget.getAttribute('aria-atomic')) {
-			setHoveredComponentId(relatedTarget.id)
-		} else {
-			setHoveredComponentId(null)
+			if (isLeaveOnNextComponent) {
+				console.log('create2', targetElement, relatedElement, isHintShowing)
+				createHintComponent(relatedElement!.id)
+
+				console.log(true)
+				setIsHintShowing(true)
+			}
+
+			if (event.currentTarget.contains(event.relatedTarget as Node)) {
+				return
+			}
+
+			if (relatedElement && relatedElement.getAttribute('aria-atomic')) {
+				setHoveredComponentId(relatedElement.id)
+			} else {
+				setHoveredComponentId(null)
+			}
 		}
 	}
 
@@ -169,8 +197,8 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 	let renderedComponent
 	const isCurrentInFocus = component.id === hoveredComponentId
 	const isCurrentHovered = isHovering && isCurrentInFocus
-	const hoveredOutline =
-		'before:absolute before:inset-0 before:left-0 before:top-0 border-yellow-400 border-2 border-dashed'
+	// const hoveredOutline =
+	// 	'before:absolute before:inset-0 before:left-0 before:top-0 border-yellow-400 border-2 border-dashed'
 	const computedStyle = {
 		...style,
 		position: style?.position,
@@ -185,13 +213,19 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 	const onHoverGUI = (
 		<>
 			{isCurrentInFocus && (
-				<div className='absolute px-2 py-1 text-xs font-bold bg-white rounded select-none bottom-1 right-1 text-primary'>
+				<div
+					className='absolute px-2 py-1 text-xs font-bold bg-white rounded select-none bottom-1 right-1 text-primary'
+					aria-disabled={true}
+				>
 					{type}
 				</div>
 			)}
 
 			{isCurrentHovered && (
-				<div className='absolute flex gap-2 px-3 py-2 rounded top-2 right-2 bg-dark bg-opacity-40 z-[100]'>
+				<div
+					className='absolute flex gap-2 px-3 py-2 rounded top-2 right-2 bg-dark bg-opacity-40 z-[100]'
+					aria-disabled={true}
+				>
 					<Gear
 						className='text-yellow-500 transition-all cursor-pointer hover:scale-105'
 						weight='bold'
@@ -223,6 +257,8 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 						activeTab={activeTab}
 						draggingType={draggingType}
 						addComponent={addComponent}
+						isHintShowing={isHintShowing}
+						setIsHintShowing={setIsHintShowing}
 					/>
 				))}
 			</React.Fragment>
@@ -253,26 +289,32 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 
 	switch (type) {
 		case EHTMLTag.SECTION:
-			renderedComponent = (
-				<div
-					ref={containerRef}
-					className={clsx(
-						isCurrentInFocus && hoveredOutline,
-						'relative w-full h-full'
-					)}
-					style={computedStyle}
-					onDragEnter={handleDragEnter}
-					onDragLeave={handleDragLeave}
-					onMouseEnter={handleMouseEnter}
-					onMouseLeave={handleMouseLeave}
-				>
-					<Section id={id} style={{width: '100%', height: '100%'}}>
+			if (isHint) {
+				renderedComponent = (
+					<Section id={id} isHint={!!isHint}>
 						{renderChildren()}
 					</Section>
-					{activeTab !== ETabs.PARAMETERS && onHoverGUI}
-					{isCurrentHovered && activeTab === ETabs.PARAMETERS && resizeHandles}
-				</div>
-			)
+				)
+			} else {
+				renderedComponent = (
+					<Section
+						id={id}
+						style={computedStyle}
+						onDragEnter={handleDragEnter}
+						onDragLeave={handleDragLeave}
+						onMouseEnter={handleMouseEnter}
+						onMouseLeave={handleMouseLeave}
+						onHoverGUI={onHoverGUI}
+						resizeHandles={resizeHandles}
+						isParametersTab={activeTab === ETabs.PARAMETERS}
+						isCurrentHovered={isCurrentHovered}
+						isCurrentInFocus={isCurrentInFocus}
+					>
+						{renderChildren()}
+					</Section>
+				)
+			}
+
 			break
 		case EHTMLTag.DIV:
 			if (isHint) {
@@ -283,30 +325,21 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 				)
 			} else {
 				renderedComponent = (
-					<div
-						ref={containerRef}
-						className={clsx(
-							isCurrentInFocus && hoveredOutline,
-							'relative w-full h-full'
-						)}
+					<Div
+						id={id}
 						style={computedStyle}
 						onDragEnter={handleDragEnter}
 						onDragLeave={handleDragLeave}
 						onMouseEnter={handleMouseEnter}
 						onMouseLeave={handleMouseLeave}
+						onHoverGUI={onHoverGUI}
+						resizeHandles={resizeHandles}
+						isParametersTab={activeTab === ETabs.PARAMETERS}
+						isCurrentHovered={isCurrentHovered}
+						isCurrentInFocus={isCurrentInFocus}
 					>
-						<Div
-							id={id}
-							isHint={!!isHint}
-							style={{width: '100%', height: '100%'}}
-						>
-							{renderChildren()}
-						</Div>
-						{isCurrentHovered && activeTab !== ETabs.PARAMETERS && onHoverGUI}
-						{isCurrentHovered &&
-							activeTab === ETabs.PARAMETERS &&
-							resizeHandles}
-					</div>
+						{renderChildren()}
+					</Div>
 				)
 			}
 

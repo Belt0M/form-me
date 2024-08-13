@@ -38,6 +38,12 @@ label {
 		linear-gradient(to bottom, #393939 1px, transparent 1px);
 }
 
+.canvas-grid2 {
+	background-size: 20px 20px;
+	background-image: linear-gradient(to right, #14055e7c 1px, transparent 1px),
+		linear-gradient(to bottom, #14055e7c 1px, transparent 1px);
+}
+
 @media (prefers-color-scheme: light) {
 	:root {
 		color: #1d1d1d;

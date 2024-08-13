@@ -26,6 +26,7 @@ const FormCreator: React.FC = () => {
 	)
 	const [activeTab, setActiveTab] = useState<ETabs>(ETabs.COMPONENTS)
 	const [draggingType, setDraggingType] = useState<EHTMLTag | null>(null)
+	const [isHintShowing, setIsHintShowing] = useState<boolean>(false)
 
 	const handleDragStart = (type: EHTMLTag, position: EPosition) => {
 		setDraggingType(type)
@@ -72,6 +73,8 @@ const FormCreator: React.FC = () => {
 	}
 
 	const handleDrop = () => {
+		handleDeleteComponent()
+
 		if (selectedComponent === null) return
 		if (canvasComponents.length && !hoveredComponentId) return
 
@@ -100,7 +103,7 @@ const FormCreator: React.FC = () => {
 	}
 
 	const handleDeleteComponent = (id?: string) => {
-		const isHint = !!id
+		const isHint = !id
 
 		if (!isHint && id === hoveredComponentId) {
 			setHoveredComponentId(null)
@@ -200,6 +203,8 @@ const FormCreator: React.FC = () => {
 							onEditComponent={handleEditComponent}
 							addComponent={addComponent}
 							activeTab={activeTab}
+							isHintShowing={isHintShowing}
+							setIsHintShowing={setIsHintShowing}
 						/>
 					))}
 				</Canvas>

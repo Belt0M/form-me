@@ -7,6 +7,8 @@ export default {
 				primary: '#9333ea ',
 				secondary: '#292524  ',
 				dark: '#121212',
+				hint: '#60a5fa ',
+				hintBorder: '#1e3a8a ',
 			},
 		},
 	},
