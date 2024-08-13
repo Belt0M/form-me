@@ -25,17 +25,17 @@ const FormCreator: React.FC = () => {
 		null
 	)
 	const [activeTab, setActiveTab] = useState<ETabs>(ETabs.COMPONENTS)
-	const [isDragging, setIsDragging] = useState<boolean>(false)
+	const [draggingType, setDraggingType] = useState<EHTMLTag | null>(null)
 
 	const handleDragStart = (type: EHTMLTag, position: EPosition) => {
-		setIsDragging(true)
+		setDraggingType(type)
 
 		setSelectedComponent(type)
 		setPositionMode(position)
 	}
 
 	const handleDragEnd = () => {
-		setIsDragging(false)
+		setDraggingType(null)
 	}
 
 	const addComponent = (
@@ -73,6 +73,7 @@ const FormCreator: React.FC = () => {
 
 	const handleDrop = () => {
 		if (selectedComponent === null) return
+		if (canvasComponents.length && !hoveredComponentId) return
 
 		const height = canvasComponents.length === 0 ? '100%' : 'auto'
 
@@ -98,9 +99,29 @@ const FormCreator: React.FC = () => {
 		event.preventDefault()
 	}
 
-	const handleDeleteComponent = (id: string) => {
-		if (id === hoveredComponentId) {
+	const handleDeleteComponent = (id?: string) => {
+		const isHint = !!id
+
+		if (!isHint && id === hoveredComponentId) {
 			setHoveredComponentId(null)
+		}
+
+		const removeHintComponent = (
+			components: ICanvasComponent[]
+		): ICanvasComponent[] => {
+			return components
+				.map(component => {
+					if (component.isHint) {
+						return null
+					}
+
+					if (component.children && component.children.length > 0) {
+						component.children = removeHintComponent(component.children)
+					}
+
+					return component
+				})
+				.filter(Boolean) as ICanvasComponent[]
 		}
 
 		const removeComponentById = (
@@ -125,9 +146,13 @@ const FormCreator: React.FC = () => {
 				.filter(Boolean) as ICanvasComponent[]
 		}
 
-		setCanvasComponents(prevComponents =>
-			removeComponentById(prevComponents, id)
-		)
+		if (isHint) {
+			setCanvasComponents(prevComponents => removeHintComponent(prevComponents))
+		} else {
+			setCanvasComponents(prevComponents =>
+				removeComponentById(prevComponents, id!)
+			)
+		}
 	}
 
 	const handleEditComponent = (id: string) => {
@@ -162,16 +187,18 @@ const FormCreator: React.FC = () => {
 					onDrop={handleDrop}
 					onDragOver={handleDragOver}
 					isEmptyCanvas={!canvasComponents.length}
-					isDragging={isDragging}
+					isDragging={!!draggingType}
 				>
 					{canvasComponents.map(component => (
 						<RenderCanvasComponent
 							key={component.id}
 							component={component}
+							draggingType={draggingType}
 							setHoveredComponentId={setHoveredComponentId}
 							hoveredComponentId={hoveredComponentId}
 							onDeleteComponent={handleDeleteComponent}
 							onEditComponent={handleEditComponent}
+							addComponent={addComponent}
 							activeTab={activeTab}
 						/>
 					))}

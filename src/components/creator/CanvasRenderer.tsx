@@ -2,6 +2,7 @@ import {Gear, Trash} from '@phosphor-icons/react'
 import clsx from 'clsx'
 import React, {useEffect, useRef, useState} from 'react'
 import {EHTMLTag} from '../../types/EHTMLTag'
+import {EPosition} from '../../types/EPosition'
 import {ETabs} from '../../types/ETabs'
 import {ICanvasComponent} from '../../types/ICanvasComponent'
 import Div from '../creator/dnd-components/Div'
@@ -11,9 +12,14 @@ interface CanvasComponentProps {
 	component: ICanvasComponent
 	setHoveredComponentId: (id: string | null) => void
 	hoveredComponentId: string | null
-	onDeleteComponent: (id: string) => void
+	onDeleteComponent: (id?: string) => void
 	onEditComponent: (id: string) => void
 	activeTab: ETabs
+	draggingType: EHTMLTag | null
+	addComponent: (
+		parentId: string | null,
+		newComponent: ICanvasComponent
+	) => void
 }
 
 const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
@@ -23,16 +29,38 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 	onDeleteComponent,
 	onEditComponent,
 	activeTab,
+	draggingType,
+	addComponent,
 }) => {
-	const {id, type, style, children} = component
+	const {id, type, style, children, isHint} = component
 	const containerRef = useRef<HTMLDivElement | null>(null)
 	const [isHovering, setIsHovering] = useState<boolean>(false)
+	const [isHintShowing, setIsHintShowing] = useState<boolean>(false)
+
+	const createHintComponent = () => {
+		if (hoveredComponentId) {
+			const id = crypto.randomUUID()
+			const newComponent: ICanvasComponent = {
+				id,
+				type: draggingType!,
+				style: {position: EPosition.RELATIVE, visibility: 'hidden'},
+				children: [],
+				isHint: true,
+			}
+
+			addComponent(hoveredComponentId, newComponent)
+		}
+	}
 
 	const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
 		event.preventDefault()
 		event.stopPropagation()
 
-		console.log('Enter', event)
+		if (draggingType) {
+			// createHintComponent()
+
+			setIsHintShowing(true)
+		}
 
 		if (event.currentTarget.contains(event.relatedTarget as Node)) {
 			return
@@ -44,6 +72,13 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 	const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
 		event.preventDefault()
 		event.stopPropagation()
+
+		if (isHintShowing) {
+			console.log(event)
+			onDeleteComponent()
+
+			setIsHintShowing(false)
+		}
 
 		if (event.currentTarget.contains(event.relatedTarget as Node)) {
 			return
@@ -186,6 +221,8 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 						onDeleteComponent={onDeleteComponent}
 						onEditComponent={onEditComponent}
 						activeTab={activeTab}
+						draggingType={draggingType}
+						addComponent={addComponent}
 					/>
 				))}
 			</React.Fragment>
@@ -238,26 +275,41 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 			)
 			break
 		case EHTMLTag.DIV:
-			renderedComponent = (
-				<div
-					ref={containerRef}
-					className={clsx(
-						isCurrentInFocus && hoveredOutline,
-						'relative w-full h-full'
-					)}
-					style={computedStyle}
-					onDragEnter={handleDragEnter}
-					onDragLeave={handleDragLeave}
-					onMouseEnter={handleMouseEnter}
-					onMouseLeave={handleMouseLeave}
-				>
-					<Div id={id} style={{width: '100%', height: '100%'}}>
+			if (isHint) {
+				renderedComponent = (
+					<Div id={id} isHint={!!isHint}>
 						{renderChildren()}
 					</Div>
-					{isCurrentHovered && activeTab !== ETabs.PARAMETERS && onHoverGUI}
-					{isCurrentHovered && activeTab === ETabs.PARAMETERS && resizeHandles}
-				</div>
-			)
+				)
+			} else {
+				renderedComponent = (
+					<div
+						ref={containerRef}
+						className={clsx(
+							isCurrentInFocus && hoveredOutline,
+							'relative w-full h-full'
+						)}
+						style={computedStyle}
+						onDragEnter={handleDragEnter}
+						onDragLeave={handleDragLeave}
+						onMouseEnter={handleMouseEnter}
+						onMouseLeave={handleMouseLeave}
+					>
+						<Div
+							id={id}
+							isHint={!!isHint}
+							style={{width: '100%', height: '100%'}}
+						>
+							{renderChildren()}
+						</Div>
+						{isCurrentHovered && activeTab !== ETabs.PARAMETERS && onHoverGUI}
+						{isCurrentHovered &&
+							activeTab === ETabs.PARAMETERS &&
+							resizeHandles}
+					</div>
+				)
+			}
+
 			break
 		default:
 			renderedComponent = null
