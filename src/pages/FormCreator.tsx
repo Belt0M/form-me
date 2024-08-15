@@ -7,11 +7,15 @@ import {EHTMLTag} from '../types/EHTMLTag'
 import {EPosition} from '../types/EPosition'
 import {ETabs} from '../types/ETabs'
 import {ICanvasComponent} from '../types/ICanvasComponent'
+import {generateColor} from '../utils/generateColor'
 
 const FormCreator: React.FC = () => {
 	const [canvasComponents, setCanvasComponents] = useState<ICanvasComponent[]>(
 		[]
 	)
+	const [canvasComponentsArr, setCanvasComponentsArr] = useState<
+		ICanvasComponent[]
+	>([])
 	const [selectedComponent, setSelectedComponent] = useState<EHTMLTag | null>(
 		null
 	)
@@ -28,6 +32,11 @@ const FormCreator: React.FC = () => {
 	const [draggingType, setDraggingType] = useState<EHTMLTag | null>(null)
 	const [isHintShowing, setIsHintShowing] = useState<boolean>(false)
 
+	const defaultStyles: React.CSSProperties = {
+		position: 'relative',
+		padding: '.5rem',
+	}
+
 	const handleDragStart = (type: EHTMLTag, position: EPosition) => {
 		setDraggingType(type)
 
@@ -41,7 +50,8 @@ const FormCreator: React.FC = () => {
 
 	const addComponent = (
 		parentId: string | null,
-		newComponent: ICanvasComponent
+		newComponent: ICanvasComponent,
+		isHint?: boolean
 	) => {
 		setCanvasComponents(prevComponents => {
 			if (!parentId) {
@@ -70,6 +80,7 @@ const FormCreator: React.FC = () => {
 
 			return addChild(prevComponents)
 		})
+		!isHint && setCanvasComponentsArr(prev => [...prev, newComponent])
 	}
 
 	const handleDrop = () => {
@@ -80,11 +91,18 @@ const FormCreator: React.FC = () => {
 
 		const height = canvasComponents.length === 0 ? '100%' : 'auto'
 
+		const backgroundColor = generateColor(canvasComponentsArr.length + 1)
+
 		const id = crypto.randomUUID()
 		const newComponent: ICanvasComponent = {
 			id,
 			type: selectedComponent,
-			style: {position: positionMode, height},
+			style: {
+				...defaultStyles,
+				position: positionMode,
+				height,
+				backgroundColor,
+			},
 			children: [],
 		}
 
@@ -155,6 +173,7 @@ const FormCreator: React.FC = () => {
 			setCanvasComponents(prevComponents =>
 				removeComponentById(prevComponents, id!)
 			)
+			setCanvasComponentsArr(prev => prev.filter(el => el.id !== id))
 		}
 	}
 

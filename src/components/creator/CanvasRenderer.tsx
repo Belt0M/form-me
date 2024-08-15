@@ -17,7 +17,8 @@ interface CanvasComponentProps {
 	draggingType: EHTMLTag | null
 	addComponent: (
 		parentId: string | null,
-		newComponent: ICanvasComponent
+		newComponent: ICanvasComponent,
+		isHint?: boolean
 	) => void
 	isHintShowing: boolean
 	setIsHintShowing: React.Dispatch<React.SetStateAction<boolean>>
@@ -50,7 +51,7 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 				isHint: true,
 			}
 
-			addComponent(hoveredID, newComponent)
+			addComponent(hoveredID, newComponent, true)
 		}
 	}
 
@@ -72,8 +73,6 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 
 		if (draggingType) {
 			if (!isEnterFromAnotherComponent) {
-				console.log('create', targetElement, relatedElement)
-				console.log(true)
 				setIsHintShowing(true)
 				createHintComponent(id)
 			}
@@ -94,18 +93,14 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 				relatedElement?.getAttribute('aria-atomic')
 
 			if (!relatedElement?.getAttribute('aria-disabled') && isHintShowing) {
-				console.log('delete', targetElement, relatedElement)
 				onDeleteComponent()
 
-				console.log(false)
 				setIsHintShowing(false)
 			}
 
 			if (isLeaveOnNextComponent) {
-				console.log('create2', targetElement, relatedElement, isHintShowing)
 				createHintComponent(relatedElement!.id)
 
-				console.log(true)
 				setIsHintShowing(true)
 			}
 
