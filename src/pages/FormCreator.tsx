@@ -1,11 +1,11 @@
-import React, {useState} from 'react'
+import React, {useRef, useState} from 'react'
 import Canvas from '../components/creator/Canvas'
 import RenderCanvasComponent from '../components/creator/CanvasRenderer'
 import Sidebar from '../components/creator/Sidebar'
 import Header from '../components/Header'
+import {useClickOutside} from '../hooks/useClickOutside'
 import {EHTMLTag} from '../types/EHTMLTag'
 import {EPosition} from '../types/EPosition'
-import {ETabs} from '../types/ETabs'
 import {ICanvasComponent} from '../types/ICanvasComponent'
 import {generateColor} from '../utils/generateColor'
 
@@ -16,9 +16,8 @@ const FormCreator: React.FC = () => {
 	const [canvasComponentsArr, setCanvasComponentsArr] = useState<
 		ICanvasComponent[]
 	>([])
-	const [selectedComponent, setSelectedComponent] = useState<EHTMLTag | null>(
-		null
-	)
+	const [draggedComponentType, setDraggedComponentType] =
+		useState<EHTMLTag | null>(null)
 	const [positionMode, setPositionMode] = useState<EPosition>(
 		EPosition.RELATIVE
 	)
@@ -28,9 +27,12 @@ const FormCreator: React.FC = () => {
 	const [editingComponentId, setEditingComponentId] = useState<string | null>(
 		null
 	)
-	const [activeTab, setActiveTab] = useState<ETabs>(ETabs.COMPONENTS)
 	const [draggingType, setDraggingType] = useState<EHTMLTag | null>(null)
 	const [isHintShowing, setIsHintShowing] = useState<boolean>(false)
+
+	const canvasRef = useRef<HTMLDivElement>(null)
+
+	useClickOutside(canvasRef, editingComponentId, setEditingComponentId)
 
 	const defaultStyles: React.CSSProperties = {
 		position: 'relative',
@@ -39,8 +41,7 @@ const FormCreator: React.FC = () => {
 
 	const handleDragStart = (type: EHTMLTag, position: EPosition) => {
 		setDraggingType(type)
-
-		setSelectedComponent(type)
+		setDraggedComponentType(type)
 		setPositionMode(position)
 	}
 
@@ -86,7 +87,7 @@ const FormCreator: React.FC = () => {
 	const handleDrop = () => {
 		handleDeleteComponent()
 
-		if (selectedComponent === null) return
+		if (draggedComponentType === null) return
 		if (canvasComponents.length && !hoveredComponentId) return
 
 		const height = canvasComponents.length === 0 ? '100%' : 'auto'
@@ -96,7 +97,7 @@ const FormCreator: React.FC = () => {
 		const id = crypto.randomUUID()
 		const newComponent: ICanvasComponent = {
 			id,
-			type: selectedComponent,
+			type: draggedComponentType,
 			style: {
 				...defaultStyles,
 				position: positionMode,
@@ -112,7 +113,7 @@ const FormCreator: React.FC = () => {
 			addComponent(null, newComponent)
 		}
 
-		setSelectedComponent(null)
+		setDraggedComponentType(null)
 		setHoveredComponentId(null)
 	}
 
@@ -125,6 +126,7 @@ const FormCreator: React.FC = () => {
 
 		if (!isHint && id === hoveredComponentId) {
 			setHoveredComponentId(null)
+			setEditingComponentId(null)
 		}
 
 		const removeHintComponent = (
@@ -179,7 +181,6 @@ const FormCreator: React.FC = () => {
 
 	const handleEditComponent = (id: string) => {
 		setEditingComponentId(id)
-		setActiveTab(ETabs.PARAMETERS)
 	}
 
 	const handleUpdateStyle = (id: string, updatedStyle: React.CSSProperties) => {
@@ -206,6 +207,7 @@ const FormCreator: React.FC = () => {
 			/>
 			<main className='flex h-[calc(100vh-80.8px)] overflow-hidden'>
 				<Canvas
+					ref={canvasRef}
 					onDrop={handleDrop}
 					onDragOver={handleDragOver}
 					isEmptyCanvas={!canvasComponents.length}
@@ -216,12 +218,12 @@ const FormCreator: React.FC = () => {
 							key={component.id}
 							component={component}
 							draggingType={draggingType}
+							editingComponentId={editingComponentId}
 							setHoveredComponentId={setHoveredComponentId}
 							hoveredComponentId={hoveredComponentId}
 							onDeleteComponent={handleDeleteComponent}
 							onEditComponent={handleEditComponent}
 							addComponent={addComponent}
-							activeTab={activeTab}
 							isHintShowing={isHintShowing}
 							setIsHintShowing={setIsHintShowing}
 						/>
@@ -236,8 +238,6 @@ const FormCreator: React.FC = () => {
 						canvasComponents.find(c => c.id === editingComponentId)?.style || {}
 					}
 					onUpdateStyle={handleUpdateStyle}
-					activeTab={activeTab}
-					setActiveTab={setActiveTab}
 				/>
 			</main>
 		</>

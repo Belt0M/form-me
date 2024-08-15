@@ -7,14 +7,15 @@ interface Props {
 	children?: ReactElement | ReactElement[]
 	onHoverGUI?: JSX.Element
 	resizeHandles?: JSX.Element
-	isParametersTab?: boolean
 	isCurrentHovered?: boolean
 	isHint?: boolean
 	isCurrentInFocus?: boolean
+	isEditing?: boolean
 	onDragEnter?: (event: React.DragEvent<HTMLDivElement>) => void
 	onDragLeave?: (event: React.DragEvent<HTMLDivElement>) => void
 	onMouseEnter?: (event: React.MouseEvent<HTMLDivElement>) => void
 	onMouseLeave?: (event: React.MouseEvent<HTMLDivElement>) => void
+	onEditComponent?: (editID: string) => void
 }
 
 const Div: FC<Props> = ({
@@ -22,25 +23,45 @@ const Div: FC<Props> = ({
 	style,
 	children,
 	isHint,
+	isCurrentHovered,
+	onHoverGUI,
+	resizeHandles,
+	isEditing,
+	isCurrentInFocus,
 	onDragEnter,
 	onDragLeave,
 	onMouseEnter,
 	onMouseLeave,
-	isCurrentHovered,
-	isParametersTab,
-	onHoverGUI,
-	resizeHandles,
-	isCurrentInFocus,
+	onEditComponent,
 }) => {
+	const handleClick = (e: React.MouseEvent) => {
+		e.stopPropagation()
+
+		if (
+			e.target &&
+			(e.target as HTMLElement).getAttribute('aria-atomic') &&
+			onEditComponent
+		) {
+			onEditComponent(id)
+		}
+	}
+
 	return !isHint ? (
 		<div
 			className={clsx(
+				isEditing && 'border-orange-400',
+				isCurrentInFocus && !isEditing && 'border-dashed border-yellow-400',
 				isCurrentInFocus &&
-					'before:absolute before:inset-0 before:left-0 before:top-0 border-yellow-400 border-2 border-dashed',
-				'h-24 bg-gray-300 min-h-24'
+					'before:absolute before:inset-0 before:left-0 before:top-0',
+				'h-24 min-h-24 border-2'
 			)}
 			id={id}
-			style={style}
+			style={{
+				...style,
+				borderColor:
+					!isEditing && !isCurrentInFocus ? style?.backgroundColor : '',
+			}}
+			onClick={handleClick}
 			onDragEnter={onDragEnter}
 			onDragLeave={onDragLeave}
 			onMouseEnter={onMouseEnter}
@@ -48,8 +69,8 @@ const Div: FC<Props> = ({
 			aria-atomic={true}
 		>
 			{children}
-			{!isParametersTab && onHoverGUI}
-			{isCurrentHovered && isParametersTab && resizeHandles}
+			{onHoverGUI}
+			{/* {isCurrentHovered && isParametersTab && resizeHandles} */}
 		</div>
 	) : (
 		<div className='w-full border-2 bg-hint border-hintBorder min-h-24 bg-opacity-30 canvas-grid2' />

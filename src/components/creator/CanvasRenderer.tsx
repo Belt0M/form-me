@@ -1,39 +1,38 @@
-import {Gear, Trash} from '@phosphor-icons/react'
+import {Trash} from '@phosphor-icons/react'
 import React, {useEffect, useRef, useState} from 'react'
 import {EHTMLTag} from '../../types/EHTMLTag'
 import {EPosition} from '../../types/EPosition'
-import {ETabs} from '../../types/ETabs'
 import {ICanvasComponent} from '../../types/ICanvasComponent'
 import Div from '../creator/dnd-components/Div'
 import Section from '../creator/dnd-components/Section'
 
 interface CanvasComponentProps {
 	component: ICanvasComponent
-	setHoveredComponentId: (id: string | null) => void
 	hoveredComponentId: string | null
+	draggingType: EHTMLTag | null
+	isHintShowing: boolean
+	editingComponentId: string | null
+	setHoveredComponentId: (id: string | null) => void
 	onDeleteComponent: (id?: string) => void
 	onEditComponent: (id: string) => void
-	activeTab: ETabs
-	draggingType: EHTMLTag | null
 	addComponent: (
 		parentId: string | null,
 		newComponent: ICanvasComponent,
 		isHint?: boolean
 	) => void
-	isHintShowing: boolean
 	setIsHintShowing: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 	component,
-	setHoveredComponentId,
 	hoveredComponentId,
+	draggingType,
+	isHintShowing,
+	editingComponentId,
+	setHoveredComponentId,
 	onDeleteComponent,
 	onEditComponent,
-	activeTab,
-	draggingType,
 	addComponent,
-	isHintShowing,
 	setIsHintShowing,
 }) => {
 	const {id, type, style, children, isHint} = component
@@ -141,8 +140,8 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 		onDeleteComponent(id)
 	}
 
-	const handleEdit = () => {
-		onEditComponent(id)
+	const handleEdit = (editID: string) => {
+		onEditComponent(editID)
 	}
 
 	const handleResize = (e: MouseEvent, direction: string) => {
@@ -221,12 +220,12 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 					className='absolute flex gap-2 px-3 py-2 rounded top-2 right-2 bg-dark bg-opacity-40 z-[100]'
 					aria-disabled={true}
 				>
-					<Gear
+					{/* <Gear
 						className='text-yellow-500 transition-all cursor-pointer hover:scale-105'
 						weight='bold'
 						size={25}
 						onClick={handleEdit}
-					/>
+					/> */}
 					<Trash
 						className='text-red-500 transition-all cursor-pointer hover:scale-105'
 						weight='bold'
@@ -246,10 +245,10 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 						key={child.id}
 						component={child}
 						setHoveredComponentId={setHoveredComponentId}
+						editingComponentId={editingComponentId}
 						hoveredComponentId={hoveredComponentId}
 						onDeleteComponent={onDeleteComponent}
 						onEditComponent={onEditComponent}
-						activeTab={activeTab}
 						draggingType={draggingType}
 						addComponent={addComponent}
 						isHintShowing={isHintShowing}
@@ -282,6 +281,8 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 		</>
 	)
 
+	console.log(editingComponentId === id, editingComponentId, id)
+
 	switch (type) {
 		case EHTMLTag.SECTION:
 			if (isHint) {
@@ -299,9 +300,10 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 						onDragLeave={handleDragLeave}
 						onMouseEnter={handleMouseEnter}
 						onMouseLeave={handleMouseLeave}
+						isEditing={editingComponentId === id}
+						onEditComponent={handleEdit}
 						onHoverGUI={onHoverGUI}
 						resizeHandles={resizeHandles}
-						isParametersTab={activeTab === ETabs.PARAMETERS}
 						isCurrentHovered={isCurrentHovered}
 						isCurrentInFocus={isCurrentInFocus}
 					>
@@ -326,10 +328,11 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 						onDragEnter={handleDragEnter}
 						onDragLeave={handleDragLeave}
 						onMouseEnter={handleMouseEnter}
+						onEditComponent={onEditComponent}
 						onMouseLeave={handleMouseLeave}
 						onHoverGUI={onHoverGUI}
+						isEditing={editingComponentId === id}
 						resizeHandles={resizeHandles}
-						isParametersTab={activeTab === ETabs.PARAMETERS}
 						isCurrentHovered={isCurrentHovered}
 						isCurrentInFocus={isCurrentInFocus}
 					>

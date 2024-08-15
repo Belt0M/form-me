@@ -3,32 +3,27 @@ import React, {useState} from 'react'
 import {sidebarComponents} from '../../data/sidebar-components'
 import {EHTMLTag} from '../../types/EHTMLTag'
 import {EPosition} from '../../types/EPosition'
-import {ETabs} from '../../types/ETabs'
 
 interface SidebarProps {
+	isCanvasEmpty: boolean
+	editingComponentId: string | null
+	componentStyle: React.CSSProperties
 	onDragStart: (
 		type: EHTMLTag,
 		position: EPosition,
 		event: React.DragEvent<HTMLDivElement>
 	) => void
 	onDragEnd: () => void
-	isCanvasEmpty: boolean
-	editingComponentId: string | null
-	componentStyle: React.CSSProperties
 	onUpdateStyle: (id: string, updatedStyle: React.CSSProperties) => void
-	activeTab: ETabs
-	setActiveTab: (tab: ETabs) => void
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
-	onDragStart,
-	onDragEnd,
 	isCanvasEmpty,
 	editingComponentId,
 	componentStyle,
+	onDragStart,
+	onDragEnd,
 	onUpdateStyle,
-	activeTab,
-	setActiveTab,
 }) => {
 	const [position, setPosition] = useState<EPosition>(EPosition.RELATIVE)
 
@@ -47,21 +42,21 @@ const Sidebar: React.FC<SidebarProps> = ({
 	return (
 		<aside className='w-1/4 max-h-full px-5 overflow-y-auto py-7 bg-stone-900'>
 			<div className='flex justify-between mb-4'>
-				{activeTab === ETabs.COMPONENTS ? (
+				{!editingComponentId ? (
 					<h2 className='text-xl'>Components</h2>
 				) : (
 					<div className='flex items-center'>
 						<CaretLeft
 							className='text-white cursor-pointer'
 							size={24}
-							onClick={() => setActiveTab(ETabs.COMPONENTS)}
+							// onClick={() => setActiveTab(ETabs.COMPONENTS)}
 						/>
 						<h2 className='ml-2 text-xl'>Properties</h2>
 					</div>
 				)}
 			</div>
 
-			{activeTab === ETabs.COMPONENTS && (
+			{!editingComponentId && (
 				<>
 					<div className='mb-4'>
 						<label className='block mb-2 text-white'>Position</label>
@@ -99,7 +94,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 				</>
 			)}
 
-			{activeTab === ETabs.PARAMETERS && editingComponentId && (
+			{editingComponentId && editingComponentId && (
 				<div className='flex flex-col gap-2'>
 					<label>
 						Background Color
