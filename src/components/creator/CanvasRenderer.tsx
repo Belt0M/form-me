@@ -1,8 +1,8 @@
-import {Trash} from '@phosphor-icons/react'
-import React, {useEffect, useRef, useState} from 'react'
-import {EHTMLTag} from '../../types/EHTMLTag'
-import {EPosition} from '../../types/EPosition'
-import {ICanvasComponent} from '../../types/ICanvasComponent'
+import { Trash } from '@phosphor-icons/react'
+import React, { useEffect, useRef, useState } from 'react'
+import { EHTMLTag } from '../../types/EHTMLTag'
+import { EPosition } from '../../types/EPosition'
+import { ICanvasComponent } from '../../types/ICanvasComponent'
 import Div from '../creator/dnd-components/Div'
 import Section from '../creator/dnd-components/Section'
 
@@ -220,12 +220,6 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 					className='absolute flex gap-2 px-3 py-2 rounded top-2 right-2 bg-dark bg-opacity-40 z-[100]'
 					aria-disabled={true}
 				>
-					{/* <Gear
-						className='text-yellow-500 transition-all cursor-pointer hover:scale-105'
-						weight='bold'
-						size={25}
-						onClick={handleEdit}
-					/> */}
 					<Trash
 						className='text-red-500 transition-all cursor-pointer hover:scale-105'
 						weight='bold'
