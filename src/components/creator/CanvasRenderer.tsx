@@ -128,7 +128,7 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 
 		const relatedTarget = event.relatedTarget as HTMLElement | null
 
-		if (relatedTarget && relatedTarget.getAttribute('aria-atomic')) {
+		if (relatedTarget && relatedTarget.getAttribute?.('aria-atomic')) {
 			setHoveredComponentId(relatedTarget.id)
 		} else {
 			setIsHovering(false)
@@ -274,8 +274,6 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 			/>
 		</>
 	)
-
-	console.log(editingComponentId === id, editingComponentId, id)
 
 	switch (type) {
 		case EHTMLTag.SECTION:

@@ -1,5 +1,6 @@
 import { CaretLeft } from '@phosphor-icons/react'
-import React, { useState } from 'react'
+import _ from 'lodash'
+import React, { useEffect, useState } from 'react'
 import { sidebarComponents } from '../../data/sidebar-components'
 import { EHTMLTag } from '../../types/EHTMLTag'
 import { EPosition } from '../../types/EPosition'
@@ -24,10 +25,26 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [position, setPosition] = useState<EPosition>(EPosition.RELATIVE);
   const [activeSections, setActiveSections] = useState<string[]>([]);
   const [backgroundGradient, setBackgroundGradient] = useState({
+    enabled: false,
     direction: 'to right',
     startColor: '#ffffff',
     endColor: '#000000',
   });
+
+  // Використання useEffect для ініціалізації градієнта
+  useEffect(() => {
+    if (componentStyle.backgroundImage) {
+      const gradientMatch = componentStyle.backgroundImage.match(/linear-gradient\(([^,]+),\s*(#[0-9A-Fa-f]+),\s*(#[0-9A-Fa-f]+)\)/);
+      if (gradientMatch) {
+        setBackgroundGradient({
+          enabled: true,
+          direction: gradientMatch[1],
+          startColor: gradientMatch[2],
+          endColor: gradientMatch[3],
+        });
+      }
+    }
+  }, [componentStyle.backgroundImage]);
 
   const toggleSection = (section: string) => {
     setActiveSections(prev =>
@@ -47,22 +64,63 @@ const Sidebar: React.FC<SidebarProps> = ({
     onUpdateStyle(editingComponentId as string, updatedStyle);
   };
 
+  useEffect(() => {
+    const debouncedHandleGradientChange = _.debounce((gradient) => {
+      if (gradient.enabled) {
+        const updatedStyle = {
+          backgroundImage: `linear-gradient(${gradient.direction}, ${gradient.startColor}, ${gradient.endColor})`,
+        };
+        onUpdateStyle(editingComponentId as string, updatedStyle);
+      } else {
+        onUpdateStyle(editingComponentId as string, { backgroundImage: '' });
+      }
+    }, 5);
+
+    debouncedHandleGradientChange(backgroundGradient);
+
+    return () => {
+      debouncedHandleGradientChange.cancel();
+    };
+  }, [backgroundGradient, editingComponentId, onUpdateStyle]);
+
   const handleGradientColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setBackgroundGradient(prev => ({ ...prev, [name]: value }));
-    handleGradientChange();
   };
 
   const handleGradientDirectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
     setBackgroundGradient(prev => ({ ...prev, [name]: value }));
-    handleGradientChange();
   };
 
-  const handleGradientChange = () => {
-    const updatedStyle = {
-      backgroundImage: `linear-gradient(${backgroundGradient.direction}, ${backgroundGradient.startColor}, ${backgroundGradient.endColor})`,
+  const handleToggleGradient = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const enabled = e.target.checked;
+    setBackgroundGradient(prev => ({ ...prev, enabled }));
+  };
+
+  const handleDisplayChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { value } = e.target;
+    let updatedStyle: React.CSSProperties = {
+      display: value,
     };
+
+    if (value === 'flex') {
+      updatedStyle = {
+        ...updatedStyle,
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        alignItems: 'stretch',
+        gap: '0px',
+      };
+    } else if (value === 'grid') {
+      updatedStyle = {
+        ...updatedStyle,
+        gridTemplateColumns: '',
+        gridTemplateRows: '',
+        gap: '0px',
+      };
+    }
+
     onUpdateStyle(editingComponentId as string, updatedStyle);
   };
 
@@ -136,32 +194,45 @@ const Sidebar: React.FC<SidebarProps> = ({
                   className="w-full h-10 px-2 py-1 border rounded"
                 />
                 <div className="mt-4">
-                  <label className="block mb-2 text-white">Gradient</label>
-                  <select
-                    name="direction"
-                    value={backgroundGradient.direction}
-                    onChange={handleGradientDirectionChange}
-                    className="w-full p-2 mb-2 text-white rounded bg-stone-700"
-                  >
-                    <option value="to right">To Right</option>
-                    <option value="to left">To Left</option>
-                    <option value="to bottom">To Bottom</option>
-                    <option value="to top">To Top</option>
-                  </select>
-                  <input
-                    type="color"
-                    name="startColor"
-                    value={backgroundGradient.startColor}
-                    onChange={handleGradientColorChange}
-                    className="w-full h-10 px-2 py-1 mb-2 border rounded"
-                  />
-                  <input
-                    type="color"
-                    name="endColor"
-                    value={backgroundGradient.endColor}
-                    onChange={handleGradientColorChange}
-                    className="w-full h-10 px-2 py-1 border rounded"
-                  />
+                  <label className="flex items-center mb-2 text-white">
+                    <input
+                      type="checkbox"
+                      name="enableGradient"
+                      checked={backgroundGradient.enabled}
+                      onChange={handleToggleGradient}
+                      className="mr-2"
+                    />
+                    Enable Gradient
+                  </label>
+                  {backgroundGradient.enabled && (
+                    <>
+                      <select
+                        name="direction"
+                        value={backgroundGradient.direction}
+                        onChange={handleGradientDirectionChange}
+                        className="w-full p-2 mb-2 text-white rounded bg-stone-700"
+                      >
+                        <option value="to right">To Right</option>
+                        <option value="to left">To Left</option>
+                        <option value="to bottom">To Bottom</option>
+                        <option value="to top">To Top</option>
+                      </select>
+                      <input
+                        type="color"
+                        name="startColor"
+                        value={backgroundGradient.startColor}
+                        onChange={handleGradientColorChange}
+                        className="w-full h-10 px-2 py-1 mb-2 border rounded"
+                      />
+                      <input
+                        type="color"
+                        name="endColor"
+                        value={backgroundGradient.endColor}
+                        onChange={handleGradientColorChange}
+                        className="w-full h-10 px-2 py-1 border rounded"
+                      />
+                    </>
+                  )}
                 </div>
               </div>
             )}
@@ -225,6 +296,41 @@ const Sidebar: React.FC<SidebarProps> = ({
             )}
           </div>
 
+          {/* Padding & Margin Section */}
+          <div className="group">
+            <div className="flex justify-between cursor-pointer" onClick={() => toggleSection('spacing')}>
+              <span className="text-white">Spacing</span>
+              <span>{activeSections.includes('spacing') ? '▲' : '▼'}</span>
+            </div>
+            {activeSections.includes('spacing') && (
+              <div className="mt-2">
+                <label className="block mb-2 text-white">Padding</label>
+                <input
+                  type="range"
+                  name="padding"
+                  min="0"
+                  max="100"
+                  value={parseInt(componentStyle.padding as string) || 0}
+                  onChange={handleRangeChange}
+                  className="w-full"
+                />
+                <span className="text-white">{parseInt(componentStyle.padding as string) || 0}px</span>
+
+                <label className="block mt-4 mb-2 text-white">Margin</label>
+                <input
+                  type="range"
+                  name="margin"
+                  min="0"
+                  max="100"
+                  value={parseInt(componentStyle.margin as string) || 0}
+                  onChange={handleRangeChange}
+                  className="w-full"
+                />
+                <span className="text-white">{parseInt(componentStyle.margin as string) || 0}px</span>
+              </div>
+            )}
+          </div>
+
           {/* Display Section */}
           <div className="group">
             <div className="flex justify-between cursor-pointer" onClick={() => toggleSection('display')}>
@@ -237,11 +343,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <select
                   name="display"
                   value={componentStyle.display || 'block'}
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                    const { name, value } = e.target;
-                    const updatedStyle = { ...componentStyle, [name]: value };
-                    onUpdateStyle(editingComponentId as string, updatedStyle);
-                  }}
+                  onChange={handleDisplayChange}
                   className="w-full p-2 mb-2 text-white rounded bg-stone-700"
                 >
                   <option value="block">Block</option>
@@ -304,6 +406,18 @@ const Sidebar: React.FC<SidebarProps> = ({
                       <option value="flex-end">Flex End</option>
                       <option value="baseline">Baseline</option>
                     </select>
+
+                    <label className="block mb-2 text-white">Gap</label>
+                    <input
+                      type="range"
+                      name="gap"
+                      min="0"
+                      max="50"
+                      value={parseInt(componentStyle.gap as string) || 0}
+                      onChange={handleRangeChange}
+                      className="w-full"
+                    />
+                    <span className="text-white">{parseInt(componentStyle.gap as string) || 0}px</span>
                   </div>
                 )}
 
@@ -329,6 +443,18 @@ const Sidebar: React.FC<SidebarProps> = ({
                       className="w-full px-2 py-1 mb-2 border rounded"
                       placeholder="e.g., auto auto"
                     />
+
+                    <label className="block mb-2 text-white">Gap</label>
+                    <input
+                      type="range"
+                      name="gap"
+                      min="0"
+                      max="50"
+                      value={parseInt(componentStyle.gap as string) || 0}
+                      onChange={handleRangeChange}
+                      className="w-full"
+                    />
+                    <span className="text-white">{parseInt(componentStyle.gap as string) || 0}px</span>
                   </div>
                 )}
               </div>

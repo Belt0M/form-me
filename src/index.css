@@ -56,3 +56,22 @@ label {
 		background-color: #f9f9f9;
 	}
 }
+
+/* Scrollbar */
+
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  background-color: #4e4e4e;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  background-color: #363636;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background-image: linear-gradient(to top, #b1086d 28%, #6a08b1 84%);
+}
