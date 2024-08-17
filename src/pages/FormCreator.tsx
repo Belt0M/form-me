@@ -184,12 +184,32 @@ const FormCreator: React.FC = () => {
 	}
 
 	const handleUpdateStyle = (id: string, updatedStyle: React.CSSProperties) => {
-		setCanvasComponents(prevComponents =>
-			prevComponents.map(component =>
-				component.id === id
-					? {...component, style: {...component.style, ...updatedStyle}}
-					: component
-			)
+		const updateComponentStyle = (
+			components: ICanvasComponent[]
+		): ICanvasComponent[] => {
+			return components.map(component => {
+				if (component.id === id) {
+					return {...component, style: {...component.style, ...updatedStyle}}
+				}
+				if (component.children) {
+					return {
+						...component,
+						children: updateComponentStyle(component.children),
+					}
+				}
+				return component
+			})
+		}
+
+		setCanvasComponents(prevComponents => updateComponentStyle(prevComponents))
+		setCanvasComponentsArr(prev =>
+			prev.map(component => {
+				if (component.id === id) {
+					return {...component, style: {...component.style, ...updatedStyle}}
+				}
+
+				return component
+			})
 		)
 	}
 
@@ -236,7 +256,8 @@ const FormCreator: React.FC = () => {
 					isFirstComponent={canvasComponents?.[0]?.id === editingComponentId}
 					editingComponentId={editingComponentId}
 					componentStyle={
-						canvasComponents.find(c => c.id === editingComponentId)?.style || {}
+						canvasComponentsArr.find(c => c.id === editingComponentId)?.style ||
+						{}
 					}
 					onUpdateStyle={handleUpdateStyle}
 				/>

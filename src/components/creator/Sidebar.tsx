@@ -16,7 +16,7 @@ interface SidebarProps {
 	) => void
 	onDragEnd: () => void
 	onUpdateStyle: (id: string, updatedStyle: React.CSSProperties) => void
-	isFirstComponent: boolean // Новий пропс для перевірки, чи є компонент першим
+	isFirstComponent: boolean
 }
 
 enum ESpacing {
@@ -35,6 +35,13 @@ enum EDirection {
 	BOTTOM = 'Bottom',
 }
 
+const defaultGradient = {
+	enabled: false,
+	direction: 'to right',
+	startColor: '#ffffff',
+	endColor: '#000000',
+}
+
 const Sidebar: React.FC<SidebarProps> = ({
 	isCanvasEmpty,
 	editingComponentId,
@@ -46,13 +53,16 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
 	const [position, setPosition] = useState<EPosition>(EPosition.RELATIVE)
 	const [activeSections, setActiveSections] = useState<string[]>([])
-	const [backgroundGradient, setBackgroundGradient] = useState({
-		enabled: false,
-		direction: 'to right',
-		startColor: '#ffffff',
-		endColor: '#000000',
-	})
+	const [backgroundGradient, setBackgroundGradient] = useState(defaultGradient)
 	const [spacingMode, setSpacingMode] = useState<ESpacing>(ESpacing.ALL)
+
+	useEffect(() => {
+		if (editingComponentId) {
+			setSpacingMode(ESpacing.ALL)
+			setBackgroundGradient(defaultGradient)
+			setActiveSections([])
+		}
+	}, [editingComponentId])
 
 	useEffect(() => {
 		if (componentStyle.backgroundImage) {
@@ -221,7 +231,6 @@ const Sidebar: React.FC<SidebarProps> = ({
 		}
 	}
 
-	// Debounced function to handle gradient updates
 	const handleGradientChange = _.debounce(gradient => {
 		if (gradient.enabled) {
 			const updatedStyle = {

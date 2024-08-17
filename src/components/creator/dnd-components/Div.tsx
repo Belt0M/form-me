@@ -49,8 +49,7 @@ const Div: FC<Props> = ({
 	return !isHint ? (
 		<div
 			className={clsx(
-				isEditing && 'border-orange-400',
-				isCurrentInFocus && !isEditing && 'border-dashed border-yellow-400',
+				isCurrentInFocus && !isEditing && 'border-dashed',
 				isCurrentInFocus &&
 					'before:absolute before:inset-0 before:left-0 before:top-0',
 				'h-24 min-h-24 border-2'
@@ -59,7 +58,11 @@ const Div: FC<Props> = ({
 			style={{
 				...style,
 				borderColor:
-					!isEditing && !isCurrentInFocus ? style?.backgroundColor : '',
+					!isEditing && !isCurrentInFocus
+						? style?.borderColor || style?.backgroundColor
+						: isCurrentInFocus && !isEditing
+						? '#facc15'
+						: '#fb923c',
 			}}
 			onClick={handleClick}
 			onDragEnter={onDragEnter}
