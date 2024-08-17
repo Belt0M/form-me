@@ -73,7 +73,7 @@ const Section: FC<Props> = ({
 			{/* {isCurrentHovered && isParametersTab && resizeHandles} */}
 		</section>
 	) : (
-		<section className='w-full border-2 bg-hint border-hintBorder min-h-36 bg-opacity-30 canvas-grid2' />
+		<section className='w-full border-2 bg-hint border-hintBorder min-h-36 bg-opacity-30 hint-grid' />
 	)
 }
 

@@ -1,13 +1,13 @@
-import React, { useRef, useState } from 'react'
+import React, {useRef, useState} from 'react'
 import Canvas from '../components/creator/Canvas'
 import RenderCanvasComponent from '../components/creator/CanvasRenderer'
 import Sidebar from '../components/creator/Sidebar'
 import Header from '../components/Header'
-import { useClickOutside } from '../hooks/useClickOutside'
-import { EHTMLTag } from '../types/EHTMLTag'
-import { EPosition } from '../types/EPosition'
-import { ICanvasComponent } from '../types/ICanvasComponent'
-import { generateColor } from '../utils/generateColor'
+import {useClickOutside} from '../hooks/useClickOutside'
+import {EHTMLTag} from '../types/EHTMLTag'
+import {EPosition} from '../types/EPosition'
+import {ICanvasComponent} from '../types/ICanvasComponent'
+import {generateColor} from '../utils/generateColor'
 
 const FormCreator: React.FC = () => {
 	const [canvasComponents, setCanvasComponents] = useState<ICanvasComponent[]>(
@@ -187,11 +187,11 @@ const FormCreator: React.FC = () => {
 		setCanvasComponents(prevComponents =>
 			prevComponents.map(component =>
 				component.id === id
-					? { ...component, style: { ...component.style, ...updatedStyle } }
+					? {...component, style: {...component.style, ...updatedStyle}}
 					: component
 			)
-		);
-	};
+		)
+	}
 
 	return (
 		<>
@@ -233,6 +233,7 @@ const FormCreator: React.FC = () => {
 					onDragStart={handleDragStart}
 					onDragEnd={handleDragEnd}
 					isCanvasEmpty={canvasComponents.length === 0}
+					isFirstComponent={canvasComponents?.[0]?.id === editingComponentId}
 					editingComponentId={editingComponentId}
 					componentStyle={
 						canvasComponents.find(c => c.id === editingComponentId)?.style || {}

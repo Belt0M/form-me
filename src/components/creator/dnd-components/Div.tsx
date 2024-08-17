@@ -73,7 +73,7 @@ const Div: FC<Props> = ({
 			{/* {isCurrentHovered && isParametersTab && resizeHandles} */}
 		</div>
 	) : (
-		<div className='w-full border-2 bg-hint border-hintBorder min-h-24 bg-opacity-30 canvas-grid2' />
+		<div className='w-full border-2 bg-hint border-hintBorder min-h-24 bg-opacity-30 hint-grid' />
 	)
 }
 
