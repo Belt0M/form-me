@@ -403,7 +403,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 	}
 
 	return (
-		<aside className='w-1/4 max-h-full px-5 overflow-y-auto py-7 bg-stone-900'>
+		<aside className='w-1/4 max-h-full px-5 overflow-y-auto py-7 bg-stone-900 min-w-72'>
 			<div className='flex justify-between mb-4'>
 				{!editingComponentId ? (
 					<h2 className='text-xl'>Components</h2>

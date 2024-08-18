@@ -1,8 +1,8 @@
-import { Trash } from '@phosphor-icons/react'
-import React, { useEffect, useRef, useState } from 'react'
-import { EHTMLTag } from '../../types/EHTMLTag'
-import { EPosition } from '../../types/EPosition'
-import { ICanvasComponent } from '../../types/ICanvasComponent'
+import {Trash} from '@phosphor-icons/react'
+import React, {useEffect, useRef, useState} from 'react'
+import {EHTMLTag} from '../../types/EHTMLTag'
+import {EPosition} from '../../types/EPosition'
+import {ICanvasComponent} from '../../types/ICanvasComponent'
 import Div from '../creator/dnd-components/Div'
 import Section from '../creator/dnd-components/Section'
 
@@ -206,7 +206,7 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 
 	const onHoverGUI = (
 		<>
-			{isCurrentInFocus && (
+			{isCurrentInFocus && !editingComponentId && (
 				<div
 					className='absolute px-2 py-1 text-xs font-bold bg-white rounded select-none bottom-1 right-1 text-primary'
 					aria-disabled={true}
@@ -217,7 +217,7 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 
 			{isCurrentHovered && (
 				<div
-					className='absolute flex gap-2 px-3 py-2 rounded top-2 right-2 bg-dark bg-opacity-40 z-[100]'
+					className='absolute flex gap-2 px-3 py-2 rounded top-3 right-3 bg-dark bg-opacity-40 z-[100]'
 					aria-disabled={true}
 				>
 					<Trash
@@ -295,7 +295,6 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 						isEditing={editingComponentId === id}
 						onEditComponent={handleEdit}
 						onHoverGUI={onHoverGUI}
-						resizeHandles={resizeHandles}
 						isCurrentHovered={isCurrentHovered}
 						isCurrentInFocus={isCurrentInFocus}
 					>

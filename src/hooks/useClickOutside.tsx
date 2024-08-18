@@ -11,7 +11,13 @@ export const useClickOutside = (
 				if (editingComponentId !== null && event?.target) {
 					const clickedElement = event.target as HTMLElement
 
-					if (clickedElement.id !== editingComponentId) {
+					if (
+						clickedElement.id !== editingComponentId &&
+						!clickedElement.getAttribute('aria-expanded') &&
+						!(clickedElement.parentNode as Element)?.getAttribute(
+							'aria-expanded'
+						)
+					) {
 						if (
 							clickedElement.getAttribute('aria-atomic') &&
 							clickedElement.id

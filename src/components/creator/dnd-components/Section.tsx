@@ -1,5 +1,9 @@
+import {Resize} from '@phosphor-icons/react'
 import clsx from 'clsx'
-import React, {CSSProperties, FC, ReactElement} from 'react'
+import React, {CSSProperties, FC, ReactElement, useRef} from 'react'
+import {resizeHandlers} from '../../../data/resizeHandles'
+import useResizable from '../../../hooks/useResizable'
+import {getParentDimensions} from '../../../utils/getParentDimensions'
 
 interface Props {
 	id: string
@@ -23,8 +27,6 @@ const Section: FC<Props> = ({
 	style,
 	children,
 	onHoverGUI,
-	resizeHandles,
-	isCurrentHovered,
 	isEditing,
 	isCurrentInFocus,
 	isHint,
@@ -34,6 +36,18 @@ const Section: FC<Props> = ({
 	onMouseLeave,
 	onEditComponent,
 }) => {
+	const resizableRef = useRef<HTMLDivElement>(null)
+
+	const parentDimension = getParentDimensions(resizableRef.current)
+
+	console.log(parentDimension?.width, parentDimension?.height)
+
+	const {dimensions, startResize} = useResizable(
+		parentDimension?.width || 0,
+		parentDimension?.height || 0,
+		resizableRef
+	)
+
 	const handleClick = (e: React.MouseEvent) => {
 		e.stopPropagation()
 
@@ -48,11 +62,12 @@ const Section: FC<Props> = ({
 
 	return !isHint ? (
 		<section
+			ref={resizableRef}
 			className={clsx(
 				isCurrentInFocus && !isEditing && 'border-dashed',
 				isCurrentInFocus &&
 					'before:absolute before:inset-0 before:left-0 before:top-0',
-				'h-full min-h-[200px] cursor-pointer border-2'
+				'h-full min-h-[100px] cursor-pointer border-2'
 			)}
 			id={id}
 			style={{
@@ -62,7 +77,9 @@ const Section: FC<Props> = ({
 						? style?.borderColor || style?.backgroundColor
 						: isCurrentInFocus && !isEditing
 						? '#facc15'
-						: '#fb923c',
+						: 'transparent',
+				width: dimensions?.width ? `${dimensions.width}px` : style?.width,
+				height: dimensions?.height ? `${dimensions.height}px` : style?.height,
 			}}
 			onClick={handleClick}
 			onDragEnter={onDragEnter}
@@ -73,7 +90,30 @@ const Section: FC<Props> = ({
 		>
 			{children}
 			{onHoverGUI}
-			{/* {isCurrentHovered && isParametersTab && resizeHandles} */}
+			{isEditing && (
+				<>
+					{resizeHandlers?.map(handle => (
+						<div
+							className='bg-gray-500'
+							onMouseDown={e => startResize(e, handle.direction)}
+							aria-expanded={true}
+							key={handle.direction}
+							style={{
+								position: 'absolute',
+								...handle.styles,
+							}}
+						/>
+					))}
+					<div
+						className='absolute bottom-0 right-0 grid w-8 h-8 transition-all bg-black rounded place-items-center hover:brightness-110 cursor-se-resize'
+						onMouseDown={e => startResize(e, 'bottom-right')}
+						aria-expanded={true}
+						key='bottom-right'
+					>
+						<Resize size={20} aria-expanded={true} />
+					</div>
+				</>
+			)}
 		</section>
 	) : (
 		<section className='w-full border-2 bg-hint border-hintBorder min-h-36 bg-opacity-30 hint-grid' />
