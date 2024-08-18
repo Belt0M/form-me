@@ -72,7 +72,9 @@ const Section: FC<Props> = ({
 		parentDimension?.height || 0,
 		resizableRef,
 		isCenteredX,
-		isCenteredY
+		isCenteredY,
+		384,
+		384
 	)
 
 	let width: number | string = dimensions
@@ -112,14 +114,24 @@ const Section: FC<Props> = ({
 		}
 	}
 
+	const onMouseUp = () => {
+		setIsResizing && setIsResizing(false)
+
+		document.removeEventListener('mouseup', onMouseUp)
+	}
+
 	const handleResize = (
 		e: React.MouseEvent,
 		direction: string,
 		isStart: boolean
 	) => {
-		setIsResizing && setIsResizing(isStart)
+		setIsResizing && setIsResizing(true)
 
-		startResize(e, direction)
+		if (isStart) {
+			document.addEventListener('mouseup', onMouseUp)
+
+			startResize(e, direction)
+		}
 	}
 
 	return !isHint ? (
@@ -129,7 +141,7 @@ const Section: FC<Props> = ({
 				isCurrentInFocus && !isEditing && 'border-dashed',
 				isCurrentInFocus &&
 					'before:absolute before:inset-0 before:left-0 before:top-0',
-				'h-full min-h-[100px] cursor-pointer border-2'
+				'h-full min-h-96 cursor-pointer border-2 min-w-96'
 			)}
 			id={id}
 			style={{
@@ -158,7 +170,6 @@ const Section: FC<Props> = ({
 						<div
 							className='bg-gray-500'
 							onMouseDown={e => handleResize(e, handle.direction, true)}
-							onMouseUp={e => handleResize(e, handle.direction, false)}
 							aria-expanded={true}
 							key={handle.direction}
 							style={{
@@ -170,7 +181,6 @@ const Section: FC<Props> = ({
 					<div
 						className='absolute bottom-0 right-0 grid w-8 h-8 transition-all bg-black rounded place-items-center hover:brightness-110 cursor-se-resize'
 						onMouseDown={e => handleResize(e, 'bottom-right', true)}
-						onMouseUp={e => handleResize(e, 'bottom-right', false)}
 						aria-expanded={true}
 						key='bottom-right'
 					>

@@ -67,8 +67,6 @@ const Div: FC<Props> = ({
 				computedStyles.placeItems === 'center'))
 	)
 
-	console.log(isCenteredX, isCenteredY)
-
 	const {dimensions, startResize} = useResizable(
 		parentDimension?.width || 0,
 		parentDimension?.height ? 96 : 0,
@@ -114,14 +112,24 @@ const Div: FC<Props> = ({
 		}
 	}
 
+	const onMouseUp = () => {
+		setIsResizing && setIsResizing(false)
+
+		document.removeEventListener('mouseup', onMouseUp)
+	}
+
 	const handleResize = (
 		e: React.MouseEvent,
 		direction: string,
 		isStart: boolean
 	) => {
-		setIsResizing && setIsResizing(isStart)
+		setIsResizing && setIsResizing(true)
 
-		startResize(e, direction)
+		if (isStart) {
+			document.addEventListener('mouseup', onMouseUp)
+
+			startResize(e, direction)
+		}
 	}
 
 	return !isHint ? (
@@ -160,7 +168,6 @@ const Div: FC<Props> = ({
 						<div
 							className='bg-gray-500'
 							onMouseDown={e => handleResize(e, handle.direction, true)}
-							onMouseUp={e => handleResize(e, handle.direction, false)}
 							aria-expanded={true}
 							key={handle.direction}
 							style={{
@@ -172,7 +179,6 @@ const Div: FC<Props> = ({
 					<div
 						className='absolute bottom-0 right-0 grid w-8 h-8 transition-all bg-black rounded place-items-center hover:brightness-110 cursor-se-resize'
 						onMouseDown={e => handleResize(e, 'bottom-right', true)}
-						onMouseUp={e => handleResize(e, 'bottom-right', false)}
 						aria-expanded={true}
 						key='bottom-right'
 					>

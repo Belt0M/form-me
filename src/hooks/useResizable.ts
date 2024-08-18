@@ -5,7 +5,9 @@ const useResizable = (
 	initialHeight: number,
 	resizableRef: React.RefObject<HTMLDivElement>,
 	isCenteredX: boolean,
-	isCenteredY: boolean
+	isCenteredY: boolean,
+	minWidth: number = 100,
+	minHeight: number = 100
 ) => {
 	const [dimensions, setDimensions] = useState({
 		width: initialWidth,
@@ -51,19 +53,19 @@ const useResizable = (
 						newWidth = Math.min(startWidth + cursorDiffX, parentWidth)
 					}
 					if (direction === 'left') {
-						newWidth = Math.max(startWidth - cursorDiffX, 100)
+						newWidth = Math.max(startWidth - cursorDiffX, minWidth)
 					}
 
 					if (direction === 'bottom' || direction === 'bottom-right') {
 						newHeight = Math.min(startHeight + cursorDiffY, parentHeight)
 					}
 					if (direction === 'top') {
-						newHeight = Math.max(startHeight - cursorDiffY, 100)
+						newHeight = Math.max(startHeight - cursorDiffY, minHeight)
 					}
 
 					setDimensions({
-						width: Math.max(newWidth, 100),
-						height: Math.max(newHeight, 100),
+						width: Math.max(newWidth, minWidth),
+						height: Math.max(newHeight, minHeight),
 					})
 				}
 			}

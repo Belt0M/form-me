@@ -63,7 +63,6 @@ const Sidebar: React.FC<SidebarProps> = ({
 			setActiveSections([])
 		}
 	}, [editingComponentId])
-	console.log(componentStyle?.display)
 
 	useEffect(() => {
 		if (componentStyle.backgroundImage) {
