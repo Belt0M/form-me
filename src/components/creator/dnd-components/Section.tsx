@@ -15,11 +15,13 @@ interface Props {
 	isCurrentInFocus?: boolean
 	isHint?: boolean
 	isEditing?: boolean
+	isResizing?: boolean
 	onDragEnter?: (event: React.DragEvent<HTMLDivElement>) => void
 	onDragLeave?: (event: React.DragEvent<HTMLDivElement>) => void
 	onMouseEnter?: (event: React.MouseEvent<HTMLDivElement>) => void
 	onMouseLeave?: (event: React.MouseEvent<HTMLDivElement>) => void
 	onEditComponent?: (editID: string) => void
+	setIsResizing?: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const Section: FC<Props> = ({
@@ -30,23 +32,73 @@ const Section: FC<Props> = ({
 	isEditing,
 	isCurrentInFocus,
 	isHint,
+	isResizing,
 	onDragEnter,
 	onDragLeave,
 	onMouseEnter,
 	onMouseLeave,
 	onEditComponent,
+	setIsResizing,
 }) => {
 	const resizableRef = useRef<HTMLDivElement>(null)
+	const parentElement = resizableRef.current
+		?.parentElement as HTMLElement | null
 
 	const parentDimension = getParentDimensions(resizableRef.current)
 
-	console.log(parentDimension?.width, parentDimension?.height)
+	const computedStyles = parentElement ? getComputedStyle(parentElement) : null
+
+	const isCenteredX = !!(
+		style &&
+		parentElement &&
+		computedStyles &&
+		((computedStyles.display === 'flex' &&
+			computedStyles.justifyContent === 'center') ||
+			(computedStyles.display === 'grid' &&
+				computedStyles.placeItems === 'center'))
+	)
+	const isCenteredY = !!(
+		style &&
+		parentElement &&
+		computedStyles &&
+		((computedStyles.display === 'flex' &&
+			computedStyles.alignItems === 'center') ||
+			(computedStyles.display === 'grid' &&
+				computedStyles.placeItems === 'center'))
+	)
 
 	const {dimensions, startResize} = useResizable(
 		parentDimension?.width || 0,
 		parentDimension?.height || 0,
-		resizableRef
+		resizableRef,
+		isCenteredX,
+		isCenteredY
 	)
+
+	let width: number | string = dimensions
+		? dimensions.width
+		: style && style.width
+		? style.width
+		: 50
+	let height: number | string = dimensions
+		? dimensions.height
+		: style && style.height
+		? style.height
+		: 50
+
+	if (
+		parentDimension &&
+		parentDimension.width &&
+		parentDimension.height &&
+		width &&
+		height
+	) {
+		width = (+width / parentDimension.width) * 100 + '%'
+		height = (+height / parentDimension.height) * 100 + '%'
+	} else {
+		width = width + 'px'
+		height = height + 'px'
+	}
 
 	const handleClick = (e: React.MouseEvent) => {
 		e.stopPropagation()
@@ -58,6 +110,16 @@ const Section: FC<Props> = ({
 		) {
 			onEditComponent(id)
 		}
+	}
+
+	const handleResize = (
+		e: React.MouseEvent,
+		direction: string,
+		isStart: boolean
+	) => {
+		setIsResizing && setIsResizing(isStart)
+
+		startResize(e, direction)
 	}
 
 	return !isHint ? (
@@ -75,11 +137,11 @@ const Section: FC<Props> = ({
 				borderColor:
 					!isEditing && !isCurrentInFocus
 						? style?.borderColor || style?.backgroundColor
-						: isCurrentInFocus && !isEditing
+						: isCurrentInFocus && !isEditing && !isResizing
 						? '#facc15'
 						: 'transparent',
-				width: dimensions?.width ? `${dimensions.width}px` : style?.width,
-				height: dimensions?.height ? `${dimensions.height}px` : style?.height,
+				width,
+				height,
 			}}
 			onClick={handleClick}
 			onDragEnter={onDragEnter}
@@ -89,13 +151,14 @@ const Section: FC<Props> = ({
 			aria-atomic={true}
 		>
 			{children}
-			{onHoverGUI}
+			{!isResizing && onHoverGUI}
 			{isEditing && (
 				<>
 					{resizeHandlers?.map(handle => (
 						<div
 							className='bg-gray-500'
-							onMouseDown={e => startResize(e, handle.direction)}
+							onMouseDown={e => handleResize(e, handle.direction, true)}
+							onMouseUp={e => handleResize(e, handle.direction, false)}
 							aria-expanded={true}
 							key={handle.direction}
 							style={{
@@ -106,7 +169,8 @@ const Section: FC<Props> = ({
 					))}
 					<div
 						className='absolute bottom-0 right-0 grid w-8 h-8 transition-all bg-black rounded place-items-center hover:brightness-110 cursor-se-resize'
-						onMouseDown={e => startResize(e, 'bottom-right')}
+						onMouseDown={e => handleResize(e, 'bottom-right', true)}
+						onMouseUp={e => handleResize(e, 'bottom-right', false)}
 						aria-expanded={true}
 						key='bottom-right'
 					>

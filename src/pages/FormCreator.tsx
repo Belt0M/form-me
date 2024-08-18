@@ -30,6 +30,8 @@ const FormCreator: React.FC = () => {
 	const [draggingType, setDraggingType] = useState<EHTMLTag | null>(null)
 	const [isHintShowing, setIsHintShowing] = useState<boolean>(false)
 
+	const [isResizing, setIsResizing] = useState<boolean>(false)
+
 	const canvasRef = useRef<HTMLDivElement>(null)
 
 	useClickOutside(canvasRef, editingComponentId, setEditingComponentId)
@@ -246,6 +248,8 @@ const FormCreator: React.FC = () => {
 							addComponent={addComponent}
 							isHintShowing={isHintShowing}
 							setIsHintShowing={setIsHintShowing}
+							isResizing={isResizing}
+							setIsResizing={setIsResizing}
 						/>
 					))}
 				</Canvas>

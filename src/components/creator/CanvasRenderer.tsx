@@ -12,6 +12,8 @@ interface CanvasComponentProps {
 	draggingType: EHTMLTag | null
 	isHintShowing: boolean
 	editingComponentId: string | null
+	isResizing?: boolean
+	setIsResizing?: React.Dispatch<React.SetStateAction<boolean>>
 	setHoveredComponentId: (id: string | null) => void
 	onDeleteComponent: (id?: string) => void
 	onEditComponent: (id: string) => void
@@ -29,11 +31,13 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 	draggingType,
 	isHintShowing,
 	editingComponentId,
+	isResizing,
 	setHoveredComponentId,
 	onDeleteComponent,
 	onEditComponent,
 	addComponent,
 	setIsHintShowing,
+	setIsResizing,
 }) => {
 	const {id, type, style, children, isHint} = component
 	const containerRef = useRef<HTMLDivElement | null>(null)
@@ -247,6 +251,8 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 						addComponent={addComponent}
 						isHintShowing={isHintShowing}
 						setIsHintShowing={setIsHintShowing}
+						isResizing={isResizing}
+						setIsResizing={setIsResizing}
 					/>
 				))}
 			</React.Fragment>
@@ -297,6 +303,8 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 						onHoverGUI={onHoverGUI}
 						isCurrentHovered={isCurrentHovered}
 						isCurrentInFocus={isCurrentInFocus}
+						isResizing={isResizing}
+						setIsResizing={setIsResizing}
 					>
 						{renderChildren()}
 					</Section>
@@ -326,6 +334,8 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 						resizeHandles={resizeHandles}
 						isCurrentHovered={isCurrentHovered}
 						isCurrentInFocus={isCurrentInFocus}
+						isResizing={isResizing}
+						setIsResizing={setIsResizing}
 					>
 						{renderChildren()}
 					</Div>

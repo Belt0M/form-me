@@ -3,7 +3,9 @@ import {useEffect, useState} from 'react'
 const useResizable = (
 	initialWidth: number,
 	initialHeight: number,
-	resizableRef: React.RefObject<HTMLDivElement>
+	resizableRef: React.RefObject<HTMLDivElement>,
+	isCenteredX: boolean,
+	isCenteredY: boolean
 ) => {
 	const [dimensions, setDimensions] = useState({
 		width: initialWidth,
@@ -12,7 +14,6 @@ const useResizable = (
 
 	useEffect(() => {
 		if (!dimensions.width && !dimensions.height) {
-			console.log({width: initialWidth, height: initialHeight})
 			setDimensions({width: initialWidth, height: initialHeight})
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -41,30 +42,24 @@ const useResizable = (
 						parentElement.clientHeight -
 						parseFloat(parentRect.paddingTop) -
 						parseFloat(parentRect.paddingBottom)
+					const cursorDiffX = (event.clientX - startX) * (isCenteredX ? 2 : 1)
+					const cursorDiffY = (event.clientY - startY) * (isCenteredY ? 2 : 1)
 					let newWidth = startWidth
 					let newHeight = startHeight
 
 					if (direction === 'right' || direction === 'bottom-right') {
-						newWidth = Math.min(
-							startWidth + (event.clientX - startX),
-							parentWidth
-						)
+						newWidth = Math.min(startWidth + cursorDiffX, parentWidth)
 					}
 					if (direction === 'left') {
-						newWidth = Math.max(startWidth - (event.clientX - startX), 100)
+						newWidth = Math.max(startWidth - cursorDiffX, 100)
 					}
 
 					if (direction === 'bottom' || direction === 'bottom-right') {
-						newHeight = Math.min(
-							startHeight + (event.clientY - startY),
-							parentHeight
-						)
+						newHeight = Math.min(startHeight + cursorDiffY, parentHeight)
 					}
 					if (direction === 'top') {
-						newHeight = Math.max(startHeight - (event.clientY - startY), 100)
+						newHeight = Math.max(startHeight - cursorDiffY, 100)
 					}
-
-					console.log(Math.max(newWidth, 100), Math.max(newHeight, 100))
 
 					setDimensions({
 						width: Math.max(newWidth, 100),
