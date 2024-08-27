@@ -8,4 +8,5 @@ export interface ICanvasComponent {
 	isHint?: boolean
 	style?: React.CSSProperties
 	children?: ICanvasComponent[]
+	parent?: HTMLElement
 }

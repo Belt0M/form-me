@@ -4,12 +4,12 @@ import React, {CSSProperties, useEffect, useState} from 'react'
 import {sidebarComponents} from '../../data/sidebar-components'
 import {EHTMLTag} from '../../types/EHTMLTag'
 import {EPosition} from '../../types/EPosition'
+import {ICanvasComponent} from '../../types/ICanvasComponent'
+import {getElementMinDimensions} from '../../utils/getElementMinDimensions'
 
 interface SidebarProps {
-	isCanvasEmpty: boolean
 	editingComponentId: string | null
-	componentStyle: React.CSSProperties
-	isFirstComponent: boolean
+	canvasComponentsArr: ICanvasComponent[]
 	onDragStart: (
 		type: EHTMLTag,
 		position: EPosition,
@@ -43,18 +43,26 @@ const defaultGradient = {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
-	isCanvasEmpty,
 	editingComponentId,
-	componentStyle,
+	canvasComponentsArr,
 	onDragStart,
 	onDragEnd,
 	onUpdateStyle,
-	isFirstComponent,
 }) => {
 	const [position, setPosition] = useState<EPosition>(EPosition.RELATIVE)
 	const [activeSections, setActiveSections] = useState<string[]>([])
 	const [backgroundGradient, setBackgroundGradient] = useState(defaultGradient)
 	const [spacingMode, setSpacingMode] = useState<ESpacing>(ESpacing.ALL)
+
+	const editingComponent = editingComponentId
+		? canvasComponentsArr.find(el => el.id === editingComponentId)
+		: null
+	const isFirstComponent = canvasComponentsArr?.[0]?.id === editingComponentId
+	const isCanvasEmpty = canvasComponentsArr.length === 0
+	// const componentType = editingComponent?.type || EHTMLTag.DIV
+	const parent = editingComponent?.parent || null
+	const componentStyle = editingComponent?.style || {}
+	const {width: minWidth, height: minHeight} = getElementMinDimensions(parent)
 
 	useEffect(() => {
 		if (editingComponentId) {
@@ -195,7 +203,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 		const {name, value} = e.target
 
 		if (name && value !== undefined) {
-			const newValue = !value || value === '0' ? '-1' : value
+			const minValue = name === 'width' ? minWidth : minHeight
+			const newValue =
+				!value || value === '0' || +value < minValue ? minValue : value
 			const updatedStyle = {...componentStyle, [name]: newValue + '%'}
 
 			onUpdateStyle(editingComponentId as string, updatedStyle)
@@ -285,6 +295,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 			return newGradient
 		})
 	}
+
+	console.log(componentStyle.width, parseFloat(componentStyle.width as string))
 
 	const handleDisplayChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		const {value} = e.target
@@ -444,6 +456,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 					</div>
 					<div className='grid grid-cols-2 gap-4'>
 						{sidebarComponents.map(({icon: IconComponent, type}) => {
+							if (type === EHTMLTag.SECTION && !isCanvasEmpty) {
+								return null
+							}
+
 							const isSection = type === EHTMLTag.SECTION
 							const isDisabled = isCanvasEmpty ? !isSection : false
 							return (
@@ -811,16 +827,20 @@ const Sidebar: React.FC<SidebarProps> = ({
 									<input
 										type='range'
 										name='width'
-										min='10'
+										min={minWidth}
 										max='100'
-										value={parseFloat(componentStyle.width as string) || 100}
+										value={
+											parseFloat(componentStyle.width as string) || minWidth
+										}
 										onChange={handleRangePercentageChange}
 										className='w-full'
 									/>
 									<input
 										type='number'
 										name='width'
-										value={parseFloat(componentStyle.width as string) || 100}
+										value={
+											parseFloat(componentStyle.width as string) || minWidth
+										}
 										onChange={handleRangePercentageChange}
 										className='w-16 p-1 ml-2 text-white rounded bg-stone-700'
 										style={{appearance: 'textfield'}}
@@ -832,16 +852,20 @@ const Sidebar: React.FC<SidebarProps> = ({
 									<input
 										type='range'
 										name='height'
-										min='10'
-										max='100'
-										value={parseFloat(componentStyle.height as string) || 100}
+										min={minHeight}
+										max='minWidth'
+										value={
+											parseFloat(componentStyle.height as string) || minHeight
+										}
 										onChange={handleRangePercentageChange}
 										className='w-full'
 									/>
 									<input
 										type='number'
 										name='height'
-										value={parseFloat(componentStyle.height as string) || 100}
+										value={
+											parseFloat(componentStyle.height as string) || minHeight
+										}
 										onChange={handleRangePercentageChange}
 										className='w-16 p-1 ml-2 text-white rounded bg-stone-700'
 										style={{appearance: 'textfield'}}

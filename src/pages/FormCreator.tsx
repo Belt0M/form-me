@@ -144,6 +144,14 @@ const FormCreator: React.FC = () => {
 		}
 
 		if (hoveredComponentId) {
+			const parent = document.getElementById(hoveredComponentId)
+
+			if (parent) {
+				newComponent.parent = parent
+			}
+		}
+
+		if (hoveredComponentId) {
 			addComponent(hoveredComponentId, newComponent)
 		} else {
 			addComponent(null, newComponent)
@@ -291,13 +299,8 @@ const FormCreator: React.FC = () => {
 				<Sidebar
 					onDragStart={handleDragStart}
 					onDragEnd={handleDragEnd}
-					isCanvasEmpty={canvasComponents.length === 0}
-					isFirstComponent={canvasComponents?.[0]?.id === editingComponentId}
 					editingComponentId={editingComponentId}
-					componentStyle={
-						canvasComponentsArr.find(c => c.id === editingComponentId)?.style ||
-						{}
-					}
+					canvasComponentsArr={canvasComponentsArr}
 					onUpdateStyle={handleUpdateStyle}
 				/>
 			</main>
