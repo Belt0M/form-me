@@ -156,16 +156,18 @@ const Div: FC<Props> = ({
 		}
 	}
 
-	let width: number | string = isResizing
-		? localDimensions.width
-		: style?.width
-		? style.width
-		: '50%'
-	let height: number | string = isResizing
-		? localDimensions.height
-		: style?.height
-		? style.height
-		: '50%'
+	let width: number | string =
+		isResizing || isUpdating
+			? localDimensions.width
+			: style?.width
+			? style.width
+			: '50%'
+	let height: number | string =
+		isResizing || isUpdating
+			? localDimensions.height
+			: style?.height
+			? style.height
+			: '50%'
 
 	if (
 		isResizing &&
