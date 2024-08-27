@@ -8,6 +8,7 @@ import {EHTMLTag} from '../types/EHTMLTag'
 import {EPosition} from '../types/EPosition'
 import {ICanvasComponent} from '../types/ICanvasComponent'
 import {generateColor} from '../utils/generateColor'
+import {getElementHeightWithoutBorderAndPadding} from '../utils/getElementHeightWithoutBorderAndPadding'
 
 const FormCreator: React.FC = () => {
 	const [canvasComponents, setCanvasComponents] = useState<ICanvasComponent[]>(
@@ -92,7 +93,39 @@ const FormCreator: React.FC = () => {
 		if (draggedComponentType === null) return
 		if (canvasComponents.length && !hoveredComponentId) return
 
-		const height = canvasComponents.length === 0 ? '100%' : 'auto'
+		const getHeightByComponentType = (
+			type: EHTMLTag,
+			parentID: string | null
+		) => {
+			let parentHeight = null
+
+			if (parentID) {
+				const parent = document.getElementById(parentID)
+
+				if (parent) {
+					parentHeight = getElementHeightWithoutBorderAndPadding(parent)
+				}
+			}
+
+			let result = '100%'
+
+			switch (type) {
+				case EHTMLTag.DIV:
+					result = parentHeight
+						? Math.round((100 / parentHeight) * 100) + '%'
+						: '100px'
+					break
+				default:
+					break
+			}
+
+			return result
+		}
+
+		const height = getHeightByComponentType(
+			draggedComponentType,
+			hoveredComponentId
+		)
 
 		const backgroundColor = generateColor(canvasComponentsArr.length + 1)
 
@@ -104,6 +137,7 @@ const FormCreator: React.FC = () => {
 				...defaultStyles,
 				position: positionMode,
 				height,
+				width: '100%',
 				backgroundColor,
 			},
 			children: [],
@@ -250,6 +284,7 @@ const FormCreator: React.FC = () => {
 							setIsHintShowing={setIsHintShowing}
 							isResizing={isResizing}
 							setIsResizing={setIsResizing}
+							onUpdateStyle={handleUpdateStyle}
 						/>
 					))}
 				</Canvas>

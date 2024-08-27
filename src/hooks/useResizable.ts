@@ -15,10 +15,7 @@ const useResizable = (
 	})
 
 	useEffect(() => {
-		if (!dimensions.width && !dimensions.height) {
-			setDimensions({width: initialWidth, height: initialHeight})
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
+		setDimensions({width: initialWidth, height: initialHeight})
 	}, [initialWidth, initialHeight])
 
 	const startResize = (e: React.MouseEvent, direction: string) => {

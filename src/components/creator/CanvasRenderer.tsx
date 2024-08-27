@@ -13,6 +13,7 @@ interface CanvasComponentProps {
 	isHintShowing: boolean
 	editingComponentId: string | null
 	isResizing?: boolean
+	onUpdateStyle: (id: string, updatedStyle: React.CSSProperties) => void
 	setIsResizing?: React.Dispatch<React.SetStateAction<boolean>>
 	setHoveredComponentId: (id: string | null) => void
 	onDeleteComponent: (id?: string) => void
@@ -32,6 +33,7 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 	isHintShowing,
 	editingComponentId,
 	isResizing,
+	onUpdateStyle,
 	setHoveredComponentId,
 	onDeleteComponent,
 	onEditComponent,
@@ -205,7 +207,6 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 	if (style?.position === 'relative') {
 		delete computedStyle.left
 		delete computedStyle.top
-		computedStyle.width = '100%'
 	}
 
 	const onHoverGUI = (
@@ -253,6 +254,7 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 						setIsHintShowing={setIsHintShowing}
 						isResizing={isResizing}
 						setIsResizing={setIsResizing}
+						onUpdateStyle={onUpdateStyle}
 					/>
 				))}
 			</React.Fragment>
@@ -336,6 +338,7 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 						isCurrentInFocus={isCurrentInFocus}
 						isResizing={isResizing}
 						setIsResizing={setIsResizing}
+						onUpdateStyle={onUpdateStyle}
 					>
 						{renderChildren()}
 					</Div>

@@ -1,6 +1,13 @@
 import {Resize} from '@phosphor-icons/react'
 import clsx from 'clsx'
-import React, {CSSProperties, FC, ReactElement, useRef} from 'react'
+import React, {
+	CSSProperties,
+	FC,
+	ReactElement,
+	useEffect,
+	useRef,
+	useState,
+} from 'react'
 import {resizeHandlers} from '../../../data/resizeHandles'
 import useResizable from '../../../hooks/useResizable'
 import {getParentDimensions} from '../../../utils/getParentDimensions'
@@ -22,6 +29,7 @@ interface Props {
 	onMouseLeave?: (event: React.MouseEvent<HTMLDivElement>) => void
 	onEditComponent?: (editID: string) => void
 	setIsResizing?: React.Dispatch<React.SetStateAction<boolean>>
+	onUpdateStyle?: (id: string, updatedStyle: React.CSSProperties) => void
 }
 
 const Div: FC<Props> = ({
@@ -39,6 +47,7 @@ const Div: FC<Props> = ({
 	onMouseLeave,
 	onEditComponent,
 	setIsResizing,
+	onUpdateStyle,
 }) => {
 	const resizableRef = useRef<HTMLDivElement>(null)
 	const parentElement = resizableRef.current
@@ -67,38 +76,54 @@ const Div: FC<Props> = ({
 				computedStyles.placeItems === 'center'))
 	)
 
+	const resizeInitWidth =
+		parentDimension?.width && style?.width
+			? (parentDimension.width / 100) * parseInt(style.width as string)
+			: 0
+	const resizeInitHeight =
+		parentDimension?.height && style?.height
+			? (parentDimension.height / 100) * parseInt(style.height as string)
+			: 0
+
 	const {dimensions, startResize} = useResizable(
-		parentDimension?.width || 0,
-		parentDimension?.height ? 96 : 0,
+		resizeInitWidth,
+		resizeInitHeight,
 		resizableRef,
 		isCenteredX,
 		isCenteredY
 	)
 
-	let width: number | string = dimensions
-		? dimensions.width
-		: style && style.width
-		? style.width
-		: 50
-	let height: number | string = dimensions
-		? dimensions.height
-		: style && style.height
-		? style.height
-		: 50
+	const [localDimensions, setLocalDimensions] = useState({
+		width: dimensions.width,
+		height: dimensions.height,
+	})
 
-	if (
-		parentDimension &&
-		parentDimension.width &&
-		parentDimension.height &&
-		width &&
-		height
-	) {
-		width = (+width / parentDimension.width) * 100 + '%'
-		height = (+height / parentDimension.height) * 100 + '%'
-	} else {
-		width = width + 'px'
-		height = height + 'px'
-	}
+	const [isUpdating, setIsUpdating] = useState(false)
+
+	// Оновлення локальних розмірів під час перетягування
+	useEffect(() => {
+		setLocalDimensions(dimensions)
+	}, [dimensions])
+
+	// Оновлення стилю після завершення перетягування
+	useEffect(() => {
+		if (!isResizing && parentDimension && onUpdateStyle && isUpdating) {
+			const updatedStyle = {
+				width: `${(localDimensions.width / parentDimension.width) * 100}%`,
+				height: `${(localDimensions.height / parentDimension.height) * 100}%`,
+			}
+
+			onUpdateStyle(id, updatedStyle)
+			setIsUpdating(false)
+		}
+	}, [
+		isResizing,
+		localDimensions,
+		parentDimension,
+		onUpdateStyle,
+		id,
+		isUpdating,
+	])
 
 	const handleClick = (e: React.MouseEvent) => {
 		e.stopPropagation()
@@ -114,7 +139,7 @@ const Div: FC<Props> = ({
 
 	const onMouseUp = () => {
 		setIsResizing && setIsResizing(false)
-
+		setIsUpdating(true)
 		document.removeEventListener('mouseup', onMouseUp)
 	}
 
@@ -127,9 +152,31 @@ const Div: FC<Props> = ({
 
 		if (isStart) {
 			document.addEventListener('mouseup', onMouseUp)
-
 			startResize(e, direction)
 		}
+	}
+
+	let width: number | string = isResizing
+		? localDimensions.width
+		: style?.width
+		? style.width
+		: '50%'
+	let height: number | string = isResizing
+		? localDimensions.height
+		: style?.height
+		? style.height
+		: '50%'
+
+	if (
+		isResizing &&
+		parentDimension &&
+		parentDimension.width &&
+		parentDimension.height &&
+		width &&
+		height
+	) {
+		width = (+width / parentDimension.width) * 100 + '%'
+		height = (+height / parentDimension.height) * 100 + '%'
 	}
 
 	return !isHint ? (

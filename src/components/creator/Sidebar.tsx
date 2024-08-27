@@ -9,6 +9,7 @@ interface SidebarProps {
 	isCanvasEmpty: boolean
 	editingComponentId: string | null
 	componentStyle: React.CSSProperties
+	isFirstComponent: boolean
 	onDragStart: (
 		type: EHTMLTag,
 		position: EPosition,
@@ -16,7 +17,6 @@ interface SidebarProps {
 	) => void
 	onDragEnd: () => void
 	onUpdateStyle: (id: string, updatedStyle: React.CSSProperties) => void
-	isFirstComponent: boolean
 }
 
 enum ESpacing {
@@ -189,6 +189,19 @@ const Sidebar: React.FC<SidebarProps> = ({
 		return Object.values(EDirection).includes(value as EDirectionType)
 	}
 
+	const handleRangePercentageChange = (
+		e: React.ChangeEvent<HTMLInputElement>
+	) => {
+		const {name, value} = e.target
+
+		if (name && value !== undefined) {
+			const newValue = !value || value === '0' ? '-1' : value
+			const updatedStyle = {...componentStyle, [name]: newValue + '%'}
+
+			onUpdateStyle(editingComponentId as string, updatedStyle)
+		}
+	}
+
 	const handleRangeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const {name, value} = e.target
 		const newValue = !value || value === '0' ? '-1' : value
@@ -310,9 +323,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 			<input
 				type='range'
 				name={name}
-				min='0'
+				min='10'
 				max='100'
-				value={parseInt(value as string) || 0}
+				value={parseInt(value as string) || 100}
 				onChange={handleRangeChange}
 				className='w-full'
 				disabled={disabled}
@@ -320,9 +333,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 			<input
 				type='number'
 				name={name}
-				value={parseInt(value as string) || 0}
+				value={parseInt(value as string) || 100}
 				onChange={handleRangeChange}
 				className='w-16 p-1 ml-2 text-white rounded bg-stone-700'
+				style={{appearance: 'textfield'}}
 				disabled={disabled}
 			/>
 		</div>
@@ -780,6 +794,62 @@ const Sidebar: React.FC<SidebarProps> = ({
 							</div>
 						)}
 					</div>
+
+					{/* Width & Height Section */}
+					{!isFirstComponent && (
+						<div className='group'>
+							<div
+								className='flex justify-between cursor-pointer'
+								onClick={() => toggleSection('dimensions')}
+							>
+								<span className='text-white'>Dimensions</span>
+								<span>{activeSections.includes('dimensions') ? '▲' : '▼'}</span>
+							</div>
+							{activeSections.includes('dimensions') && (
+								<div className='mt-2'>
+									<label className='block mb-2 text-white'>Width (%)</label>
+									<input
+										type='range'
+										name='width'
+										min='10'
+										max='100'
+										value={parseFloat(componentStyle.width as string) || 100}
+										onChange={handleRangePercentageChange}
+										className='w-full'
+									/>
+									<input
+										type='number'
+										name='width'
+										value={parseFloat(componentStyle.width as string) || 100}
+										onChange={handleRangePercentageChange}
+										className='w-16 p-1 ml-2 text-white rounded bg-stone-700'
+										style={{appearance: 'textfield'}}
+									/>
+
+									<label className='block mt-4 mb-2 text-white'>
+										Height (%)
+									</label>
+									<input
+										type='range'
+										name='height'
+										min='10'
+										max='100'
+										value={parseFloat(componentStyle.height as string) || 100}
+										onChange={handleRangePercentageChange}
+										className='w-full'
+									/>
+									<input
+										type='number'
+										name='height'
+										value={parseFloat(componentStyle.height as string) || 100}
+										onChange={handleRangePercentageChange}
+										className='w-16 p-1 ml-2 text-white rounded bg-stone-700'
+										style={{appearance: 'textfield'}}
+									/>
+								</div>
+							)}
+						</div>
+					)}
 				</div>
 			)}
 		</aside>
