@@ -198,7 +198,7 @@ const Div: FC<Props> = ({
 						? style?.borderColor || style?.backgroundColor
 						: isCurrentInFocus && !isEditing && !isResizing
 						? '#facc15'
-						: 'transparent',
+						: style?.borderColor || 'transparent',
 				width,
 				height,
 			}}

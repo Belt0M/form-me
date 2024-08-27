@@ -1,3 +1,4 @@
+/* eslint-disable no-mixed-spaces-and-tabs */
 import {CaretLeft} from '@phosphor-icons/react'
 import _ from 'lodash'
 import React, {CSSProperties, useEffect, useState} from 'react'
@@ -63,6 +64,29 @@ const Sidebar: React.FC<SidebarProps> = ({
 	const parent = editingComponent?.parent || null
 	const componentStyle = editingComponent?.style || {}
 	const {width: minWidth, height: minHeight} = getElementMinDimensions(parent)
+
+	const [dimensions, setDimensions] = useState<{
+		width: string
+		height: string
+		isEditing?: boolean
+	}>({
+		width: '',
+		height: '',
+		isEditing: false,
+	})
+
+	useEffect(() => {
+		if (editingComponentId) {
+			setDimensions({
+				width:
+					Math.round(parseFloat(componentStyle.width as string)).toString() ||
+					'',
+				height:
+					Math.round(parseFloat(componentStyle.height as string)).toString() ||
+					'',
+			})
+		}
+	}, [componentStyle.height, componentStyle.width, editingComponentId])
 
 	useEffect(() => {
 		if (editingComponentId) {
@@ -197,6 +221,47 @@ const Sidebar: React.FC<SidebarProps> = ({
 		return Object.values(EDirection).includes(value as EDirectionType)
 	}
 
+	const handleDimensionInputChange = (
+		e: React.ChangeEvent<HTMLInputElement>,
+		name: 'width' | 'height'
+	) => {
+		const {value} = e.target
+		setDimensions(prev => ({
+			...prev,
+			[name]: value,
+		}))
+	}
+
+	const handleBlur = (target: HTMLElement, name: 'width' | 'height') => {
+		const value = dimensions[name]
+
+		setDimensions(prev => ({...prev, isEditing: false}))
+
+		target.blur()
+
+		if (value) {
+			const minValue = name === 'width' ? minWidth : minHeight
+			const newValue =
+				!value || value === '0' || +value < minValue
+					? minValue
+					: +value > 100
+					? 100
+					: value
+			const updatedStyle = {...componentStyle, [name]: newValue + '%'}
+
+			onUpdateStyle(editingComponentId as string, updatedStyle)
+		}
+	}
+
+	const handleKeyDown = (
+		e: React.KeyboardEvent<HTMLInputElement>,
+		name: 'width' | 'height'
+	) => {
+		if (e.key === 'Enter') {
+			handleBlur(e.target as HTMLElement, name)
+		}
+	}
+
 	const handleRangePercentageChange = (
 		e: React.ChangeEvent<HTMLInputElement>
 	) => {
@@ -296,7 +361,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 		})
 	}
 
-	console.log(componentStyle.width, parseFloat(componentStyle.width as string))
+	console.log(dimensions)
 
 	const handleDisplayChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		const {value} = e.target
@@ -581,7 +646,11 @@ const Sidebar: React.FC<SidebarProps> = ({
 								<input
 									type='color'
 									name='borderColor'
-									value={componentStyle.borderColor || '#000000'}
+									value={
+										componentStyle.borderColor ||
+										componentStyle.backgroundColor ||
+										'#000000'
+									}
 									onChange={handleInputChange}
 									className='w-full h-10 px-2 py-1 border rounded'
 								/>
@@ -830,7 +899,11 @@ const Sidebar: React.FC<SidebarProps> = ({
 										min={minWidth}
 										max='100'
 										value={
-											parseFloat(componentStyle.width as string) || minWidth
+											dimensions.isEditing
+												? dimensions.width.length
+													? dimensions.width
+													: 0
+												: Math.round(parseFloat(componentStyle.width as string))
 										}
 										onChange={handleRangePercentageChange}
 										className='w-full'
@@ -839,9 +912,16 @@ const Sidebar: React.FC<SidebarProps> = ({
 										type='number'
 										name='width'
 										value={
-											parseFloat(componentStyle.width as string) || minWidth
+											dimensions.isEditing
+												? dimensions.width
+												: Math.round(parseFloat(componentStyle.width as string))
 										}
-										onChange={handleRangePercentageChange}
+										onChange={e => handleDimensionInputChange(e, 'width')}
+										onBlur={e => handleBlur(e.target as HTMLElement, 'width')}
+										onKeyDown={e => handleKeyDown(e, 'width')}
+										onFocus={() =>
+											setDimensions(prev => ({...prev, isEditing: true}))
+										}
 										className='w-16 p-1 ml-2 text-white rounded bg-stone-700'
 										style={{appearance: 'textfield'}}
 									/>
@@ -855,7 +935,13 @@ const Sidebar: React.FC<SidebarProps> = ({
 										min={minHeight}
 										max='minWidth'
 										value={
-											parseFloat(componentStyle.height as string) || minHeight
+											dimensions.isEditing
+												? dimensions.height.length
+													? dimensions.height
+													: 0
+												: Math.round(
+														parseFloat(componentStyle.height as string)
+												  )
 										}
 										onChange={handleRangePercentageChange}
 										className='w-full'
@@ -864,9 +950,18 @@ const Sidebar: React.FC<SidebarProps> = ({
 										type='number'
 										name='height'
 										value={
-											parseFloat(componentStyle.height as string) || minHeight
+											dimensions.isEditing
+												? dimensions.height
+												: Math.round(
+														parseFloat(componentStyle.height as string)
+												  )
 										}
-										onChange={handleRangePercentageChange}
+										onChange={e => handleDimensionInputChange(e, 'height')}
+										onBlur={e => handleBlur(e.target as HTMLElement, 'height')}
+										onKeyDown={e => handleKeyDown(e, 'height')}
+										onFocus={() =>
+											setDimensions(prev => ({...prev, isEditing: true}))
+										}
 										className='w-16 p-1 ml-2 text-white rounded bg-stone-700'
 										style={{appearance: 'textfield'}}
 									/>
