@@ -1,52 +1,48 @@
 import {Resize} from '@phosphor-icons/react'
 import clsx from 'clsx'
-import React, {
-	CSSProperties,
-	FC,
-	ReactElement,
-	useEffect,
-	useRef,
-	useState,
-} from 'react'
+import React, {ElementType, FC, useEffect, useRef, useState} from 'react'
 import {resizeHandlers} from '../../../data/resizeHandles'
 import useResizable from '../../../hooks/useResizable'
+import {IExtendedCSSProperties} from '../../../types/IExtendedCSSProperties'
 import {getParentDimensions} from '../../../utils/getParentDimensions'
 
-interface Props {
+interface HeadingProps {
 	id: string
-	style?: CSSProperties
-	children?: ReactElement | ReactElement[]
-	onHoverGUI?: JSX.Element
+	style?: IExtendedCSSProperties
+	level: number
 	isCurrentInFocus?: boolean
 	isHint?: boolean
-	isResizing?: boolean
 	editingComponentId?: string | null
+	isResizing?: boolean
+	onHoverGUI?: JSX.Element
+	setIsResizing?: React.Dispatch<React.SetStateAction<boolean>>
 	onDragEnter?: (event: React.DragEvent<HTMLDivElement>) => void
 	onDragLeave?: (event: React.DragEvent<HTMLDivElement>) => void
 	onMouseEnter?: (event: React.MouseEvent<HTMLDivElement>) => void
 	onMouseLeave?: (event: React.MouseEvent<HTMLDivElement>) => void
-	onEditComponent?: (editID: string) => void
-	setIsResizing?: React.Dispatch<React.SetStateAction<boolean>>
 	onUpdateStyle?: (id: string, updatedStyle: React.CSSProperties) => void
+	onEditComponent?: (editID: string) => void
 }
 
-const Div: FC<Props> = ({
+const Heading: FC<HeadingProps> = ({
 	id,
 	style,
-	children,
-	onHoverGUI,
 	isCurrentInFocus,
 	isHint,
-	isResizing,
 	editingComponentId,
+	level,
+	isResizing,
+	onHoverGUI,
+	onUpdateStyle,
+	setIsResizing,
 	onDragEnter,
 	onDragLeave,
 	onMouseEnter,
 	onMouseLeave,
 	onEditComponent,
-	setIsResizing,
-	onUpdateStyle,
 }) => {
+	const Tag: ElementType = `h${level}` as ElementType
+
 	const resizableRef = useRef<HTMLDivElement>(null)
 	const parentElement = resizableRef.current
 		?.parentElement as HTMLElement | null
@@ -180,13 +176,12 @@ const Div: FC<Props> = ({
 	}
 
 	return !isHint ? (
-		<div
-			ref={resizableRef}
+		<Tag
 			className={clsx(
 				isCurrentInFocus && !isEditing && 'border-dashed',
 				isCurrentInFocus &&
 					'before:absolute before:inset-0 before:left-0 before:top-0',
-				'h-full min-h-[100px] cursor-pointer border-2'
+				'cursor-pointer border-2'
 			)}
 			id={id}
 			style={{
@@ -194,20 +189,18 @@ const Div: FC<Props> = ({
 				borderColor:
 					!isEditing && !isCurrentInFocus
 						? style?.borderColor || style?.backgroundColor
-						: isCurrentInFocus && !isEditing && !isResizing
+						: isCurrentInFocus && !isEditing
 						? '#facc15'
-						: style?.borderColor || 'transparent',
-				width,
-				height,
+						: 'transparent',
 			}}
 			onClick={handleClick}
-			onDragEnter={onDragEnter}
-			onDragLeave={onDragLeave}
+			onDragEnter={onDragEnter as React.DragEventHandler<HTMLDivElement>}
+			onDragLeave={onDragLeave as React.DragEventHandler<HTMLDivElement>}
 			onMouseEnter={onMouseEnter}
 			onMouseLeave={onMouseLeave}
 			aria-atomic={true}
 		>
-			{children}
+			{style?.text || 'Heading'}
 			{!isResizing && onHoverGUI}
 			{isEditing && (
 				<>
@@ -233,10 +226,12 @@ const Div: FC<Props> = ({
 					</div>
 				</>
 			)}
-		</div>
+		</Tag>
 	) : (
-		<div className='w-full border-2 bg-hint border-hintBorder min-h-24 bg-opacity-30 hint-grid' />
+		<Tag className='w-full p-2 border-2 bg-hint border-hintBorder bg-opacity-30 hint-grid'>
+			{style?.text || 'Heading'}
+		</Tag>
 	)
 }
 
-export default Div
+export default Heading

@@ -52,6 +52,30 @@ label {
 		linear-gradient(to bottom, #890757 1px, transparent 1px);
 }
 
+h1 {
+	font-size: 2rem;
+}
+
+h2 {
+	font-size: 1.6rem;
+}
+
+h3 {
+	font-size: 1.4rem;
+}
+
+h4 {
+	font-size: 1.2rem;
+}
+
+h5 {
+	font-size: 1rem;
+}
+
+h6 {
+	font-size: 0.8rem;
+}
+
 @media (prefers-color-scheme: light) {
 	:root {
 		color: #1d1d1d;

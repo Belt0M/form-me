@@ -14,8 +14,12 @@ export const useClickOutside = (
 					if (
 						clickedElement.id !== editingComponentId &&
 						!clickedElement.getAttribute('aria-expanded') &&
+						!clickedElement.getAttribute('aria-disabled') &&
 						!(clickedElement.parentNode as Element)?.getAttribute(
 							'aria-expanded'
+						) &&
+						!(clickedElement.parentNode as Element)?.getAttribute(
+							'aria-disabled'
 						)
 					) {
 						if (
@@ -37,6 +41,12 @@ export const useClickOutside = (
 				element.addEventListener('mousedown', handleClickOutside)
 			} else {
 				element.removeEventListener('mousedown', handleClickOutside)
+			}
+
+			return () => {
+				if (element) {
+					element.removeEventListener('mousedown', handleClickOutside)
+				}
 			}
 		}
 	}, [editingComponentId, ref, setEditingComponentId])

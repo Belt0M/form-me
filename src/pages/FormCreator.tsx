@@ -8,15 +8,13 @@ import {EHTMLTag} from '../types/EHTMLTag'
 import {EPosition} from '../types/EPosition'
 import {ICanvasComponent} from '../types/ICanvasComponent'
 import {generateColor} from '../utils/generateColor'
+import {getComponentsQuantity} from '../utils/getComponentsQuantity'
 import {getElementHeightWithoutBorderAndPadding} from '../utils/getElementHeightWithoutBorderAndPadding'
 
 const FormCreator: React.FC = () => {
 	const [canvasComponents, setCanvasComponents] = useState<ICanvasComponent[]>(
 		[]
 	)
-	const [canvasComponentsArr, setCanvasComponentsArr] = useState<
-		ICanvasComponent[]
-	>([])
 	const [draggedComponentType, setDraggedComponentType] =
 		useState<EHTMLTag | null>(null)
 	const [positionMode, setPositionMode] = useState<EPosition>(
@@ -54,8 +52,7 @@ const FormCreator: React.FC = () => {
 
 	const addComponent = (
 		parentId: string | null,
-		newComponent: ICanvasComponent,
-		isHint?: boolean
+		newComponent: ICanvasComponent
 	) => {
 		setCanvasComponents(prevComponents => {
 			if (!parentId) {
@@ -84,7 +81,6 @@ const FormCreator: React.FC = () => {
 
 			return addChild(prevComponents)
 		})
-		!isHint && setCanvasComponentsArr(prev => [...prev, newComponent])
 	}
 
 	const handleDrop = () => {
@@ -115,6 +111,9 @@ const FormCreator: React.FC = () => {
 						? Math.round((100 / parentHeight) * 100) + '%'
 						: '100px'
 					break
+				case EHTMLTag.HEADING:
+					result = 'auto'
+					break
 				default:
 					break
 			}
@@ -122,12 +121,30 @@ const FormCreator: React.FC = () => {
 			return result
 		}
 
+		const getWidthByComponentType = (type: EHTMLTag) => {
+			let result = '100%'
+
+			switch (type) {
+				case EHTMLTag.HEADING:
+					result = 'auto'
+					break
+				default:
+					break
+			}
+
+			return result
+		}
+
+		const width = getWidthByComponentType(draggedComponentType)
+
 		const height = getHeightByComponentType(
 			draggedComponentType,
 			hoveredComponentId
 		)
 
-		const backgroundColor = generateColor(canvasComponentsArr.length + 1)
+		const backgroundColor = generateColor(
+			getComponentsQuantity(canvasComponents) + 1
+		)
 
 		const id = crypto.randomUUID()
 		const newComponent: ICanvasComponent = {
@@ -136,8 +153,8 @@ const FormCreator: React.FC = () => {
 			style: {
 				...defaultStyles,
 				position: positionMode,
+				width,
 				height,
-				width: '100%',
 				backgroundColor,
 			},
 			children: [],
@@ -219,7 +236,6 @@ const FormCreator: React.FC = () => {
 			setCanvasComponents(prevComponents =>
 				removeComponentById(prevComponents, id!)
 			)
-			setCanvasComponentsArr(prev => prev.filter(el => el.id !== id))
 		}
 	}
 
@@ -246,16 +262,9 @@ const FormCreator: React.FC = () => {
 		}
 
 		setCanvasComponents(prevComponents => updateComponentStyle(prevComponents))
-		setCanvasComponentsArr(prev =>
-			prev.map(component => {
-				if (component.id === id) {
-					return {...component, style: {...component.style, ...updatedStyle}}
-				}
-
-				return component
-			})
-		)
 	}
+
+	console.log(editingComponentId)
 
 	return (
 		<>
@@ -300,7 +309,7 @@ const FormCreator: React.FC = () => {
 					onDragStart={handleDragStart}
 					onDragEnd={handleDragEnd}
 					editingComponentId={editingComponentId}
-					canvasComponentsArr={canvasComponentsArr}
+					canvasComponents={canvasComponents}
 					onUpdateStyle={handleUpdateStyle}
 				/>
 			</main>

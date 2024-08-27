@@ -5,8 +5,9 @@ import {EPosition} from '../../types/EPosition'
 import {ICanvasComponent} from '../../types/ICanvasComponent'
 import Div from '../creator/dnd-components/Div'
 import Section from '../creator/dnd-components/Section'
+import Heading from './dnd-components/Heading'
 
-interface CanvasComponentProps {
+interface Props {
 	component: ICanvasComponent
 	hoveredComponentId: string | null
 	draggingType: EHTMLTag | null
@@ -26,7 +27,7 @@ interface CanvasComponentProps {
 	setIsHintShowing: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
+const RenderCanvasComponent: React.FC<Props> = ({
 	component,
 	hoveredComponentId,
 	draggingType,
@@ -178,14 +179,6 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 		handleResize(e, direction)
 	}
 
-	const startResizing = (direction: string) => {
-		if (containerRef.current) {
-			containerRef.current.dataset.direction = direction
-		}
-		document.addEventListener('mousemove', handleMouseMove)
-		document.addEventListener('mouseup', handleMouseUp)
-	}
-
 	useEffect(() => {
 		return () => {
 			document.removeEventListener('mousemove', handleMouseMove)
@@ -197,8 +190,6 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 	let renderedComponent
 	const isCurrentInFocus = component.id === hoveredComponentId
 	const isCurrentHovered = isHovering && isCurrentInFocus
-	// const hoveredOutline =
-	// 	'before:absolute before:inset-0 before:left-0 before:top-0 border-yellow-400 border-2 border-dashed'
 	const computedStyle = {
 		...style,
 		position: style?.position,
@@ -211,7 +202,7 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 
 	const onHoverGUI = (
 		<>
-			{isCurrentInFocus && !editingComponentId && (
+			{isCurrentInFocus && editingComponentId !== id && (
 				<div
 					className='absolute px-2 py-1 text-xs font-bold bg-white rounded select-none bottom-1 right-1 text-primary'
 					aria-disabled={true}
@@ -220,9 +211,37 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 				</div>
 			)}
 
-			{isCurrentHovered && (
+			{editingComponentId === id && (
 				<div
-					className='absolute flex gap-2 px-3 py-2 rounded top-3 right-3 bg-dark bg-opacity-40 z-[100]'
+					className='absolute flex gap-2 px-6 py-6 rounded-lg top-1/2 -translate-y-1/2  bg-dark bg-opacity-80 z-[100] -translate-x-1/2 left-1/2'
+					aria-disabled={true}
+				>
+					<Trash
+						className='text-red-500 transition-all cursor-pointer hover:scale-105'
+						weight='bold'
+						size={25}
+						aria-disabled={true}
+						onClick={handleDelete}
+					/>
+				</div>
+			)}
+		</>
+	)
+
+	const onHoverGUI2 = (
+		<>
+			{isCurrentInFocus && editingComponentId !== id && (
+				<div
+					className='absolute px-2 py-1 text-xs font-bold bg-white rounded select-none bottom-1 right-1 text-primary'
+					aria-disabled={true}
+				>
+					{type}
+				</div>
+			)}
+
+			{editingComponentId === id && (
+				<div
+					className='absolute flex gap-2 px-6 py-2 rounded-lg bg-dark bg-opacity-80 z-[100] left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2'
 					aria-disabled={true}
 				>
 					<Trash
@@ -262,26 +281,6 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 			<React.Fragment />
 		)
 	}
-
-	const resizeHandles = (
-		<>
-			<div
-				onMouseDown={() => startResizing('right')}
-				className='absolute top-0 right-0 w-2 h-full cursor-e-resize'
-				style={{zIndex: 10}}
-			/>
-			<div
-				onMouseDown={() => startResizing('bottom')}
-				className='absolute bottom-0 left-0 w-full h-2 cursor-s-resize'
-				style={{zIndex: 10}}
-			/>
-			<div
-				onMouseDown={() => startResizing('bottom-right')}
-				className='absolute bottom-0 right-0 w-4 h-4 bg-gray-500 cursor-se-resize'
-				style={{zIndex: 10}}
-			/>
-		</>
-	)
 
 	switch (type) {
 		case EHTMLTag.SECTION:
@@ -332,9 +331,7 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 						onEditComponent={onEditComponent}
 						onMouseLeave={handleMouseLeave}
 						onHoverGUI={onHoverGUI}
-						isEditing={editingComponentId === id}
-						resizeHandles={resizeHandles}
-						isCurrentHovered={isCurrentHovered}
+						editingComponentId={editingComponentId}
 						isCurrentInFocus={isCurrentInFocus}
 						isResizing={isResizing}
 						setIsResizing={setIsResizing}
@@ -345,6 +342,27 @@ const RenderCanvasComponent: React.FC<CanvasComponentProps> = ({
 				)
 			}
 
+			break
+		case EHTMLTag.HEADING:
+			renderedComponent = (
+				<Heading
+					id={id}
+					level={style?.level || 6}
+					style={computedStyle}
+					onDragEnter={handleDragEnter}
+					onDragLeave={handleDragLeave}
+					onMouseEnter={handleMouseEnter}
+					onMouseLeave={handleMouseLeave}
+					onHoverGUI={onHoverGUI2}
+					editingComponentId={editingComponentId}
+					isCurrentInFocus={isCurrentInFocus}
+					isResizing={isResizing}
+					setIsResizing={setIsResizing}
+					onUpdateStyle={onUpdateStyle}
+					isHint={isHint}
+					onEditComponent={handleEdit}
+				/>
+			)
 			break
 		default:
 			renderedComponent = null

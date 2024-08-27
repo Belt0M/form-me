@@ -10,7 +10,7 @@ import {ISidebarComponent} from './../types/ISidebarComponent'
 export const sidebarComponents: ISidebarComponent[] = [
 	{type: EHTMLTag.SECTION, icon: Square},
 	{type: EHTMLTag.DIV, icon: Rectangle},
-	{type: EHTMLTag.H1, icon: TextH},
+	{type: EHTMLTag.HEADING, icon: TextH},
 	{type: EHTMLTag.INPUT, icon: Keyboard},
 	{type: EHTMLTag.BUTTON, icon: HandPointing},
 ] as const

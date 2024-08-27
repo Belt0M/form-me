@@ -1,4 +1,5 @@
 import {EHTMLTag} from './EHTMLTag'
+import {IExtendedCSSProperties} from './IExtendedCSSProperties'
 
 export interface ICanvasComponent {
 	id: string
@@ -6,7 +7,7 @@ export interface ICanvasComponent {
 	x?: number
 	y?: number
 	isHint?: boolean
-	style?: React.CSSProperties
+	style?: IExtendedCSSProperties
 	children?: ICanvasComponent[]
 	parent?: HTMLElement
 }

@@ -6,11 +6,12 @@ import {sidebarComponents} from '../../data/sidebar-components'
 import {EHTMLTag} from '../../types/EHTMLTag'
 import {EPosition} from '../../types/EPosition'
 import {ICanvasComponent} from '../../types/ICanvasComponent'
+import {findComponentById} from '../../utils/getComponentByID'
 import {getElementMinDimensions} from '../../utils/getElementMinDimensions'
 
 interface SidebarProps {
 	editingComponentId: string | null
-	canvasComponentsArr: ICanvasComponent[]
+	canvasComponents: ICanvasComponent[]
 	onDragStart: (
 		type: EHTMLTag,
 		position: EPosition,
@@ -45,7 +46,7 @@ const defaultGradient = {
 
 const Sidebar: React.FC<SidebarProps> = ({
 	editingComponentId,
-	canvasComponentsArr,
+	canvasComponents,
 	onDragStart,
 	onDragEnd,
 	onUpdateStyle,
@@ -55,11 +56,12 @@ const Sidebar: React.FC<SidebarProps> = ({
 	const [backgroundGradient, setBackgroundGradient] = useState(defaultGradient)
 	const [spacingMode, setSpacingMode] = useState<ESpacing>(ESpacing.ALL)
 
-	const editingComponent = editingComponentId
-		? canvasComponentsArr.find(el => el.id === editingComponentId)
-		: null
-	const isFirstComponent = canvasComponentsArr?.[0]?.id === editingComponentId
-	const isCanvasEmpty = canvasComponentsArr.length === 0
+	const editingComponent = findComponentById(
+		canvasComponents,
+		editingComponentId
+	)
+	const isFirstComponent = canvasComponents?.[0]?.id === editingComponentId
+	const isCanvasEmpty = canvasComponents.length === 0
 	// const componentType = editingComponent?.type || EHTMLTag.DIV
 	const parent = editingComponent?.parent || null
 	const componentStyle = editingComponent?.style || {}
@@ -120,9 +122,16 @@ const Sidebar: React.FC<SidebarProps> = ({
 		)
 	}
 
-	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleInputChange = (
+		e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+		suffix?: string
+	) => {
 		const {name, value} = e.target
-		const updatedStyle = {...componentStyle, [name]: value}
+		const updatedStyle = {
+			...componentStyle,
+			[name]: value + (suffix ? suffix : ''),
+		}
+
 		onUpdateStyle(editingComponentId as string, updatedStyle)
 	}
 
@@ -361,8 +370,6 @@ const Sidebar: React.FC<SidebarProps> = ({
 		})
 	}
 
-	console.log(dimensions)
-
 	const handleDisplayChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		const {value} = e.target
 		let updatedStyle: React.CSSProperties = {
@@ -493,6 +500,210 @@ const Sidebar: React.FC<SidebarProps> = ({
 		}
 	}
 
+	const renderHeadingSection = () => {
+		if (editingComponent?.type === EHTMLTag.HEADING) {
+			return (
+				<>
+					{/* Heading Level */}
+					<div className='group'>
+						<div className='flex justify-between cursor-pointer'>
+							<span className='text-white'>Heading Level</span>
+						</div>
+						<div className='mt-2'>
+							<select
+								name='level'
+								value={componentStyle.level || 6}
+								onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+									const updatedStyle = {
+										...componentStyle,
+										level: +e.target.value,
+									}
+									onUpdateStyle(editingComponentId as string, updatedStyle)
+								}}
+								className='w-full p-2 mb-4 text-white rounded bg-stone-700'
+							>
+								{[1, 2, 3, 4, 5, 6].map(level => (
+									<option key={level} value={level}>{`h${level}`}</option>
+								))}
+							</select>
+						</div>
+					</div>
+
+					{/* Heading Text */}
+					<div className='group'>
+						<div className='flex justify-between cursor-pointer'>
+							<span className='text-white'>Heading Text</span>
+						</div>
+						<div className='mt-2'>
+							<input
+								type='text'
+								name='text'
+								value={componentStyle.text || ''}
+								onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+									const updatedStyle = {
+										...componentStyle,
+										text: e.target.value,
+									}
+									onUpdateStyle(editingComponentId as string, updatedStyle)
+								}}
+								className='w-full p-2 mb-4 text-white rounded bg-stone-700'
+							/>
+						</div>
+					</div>
+
+					{/* Text Color */}
+					<div className='group'>
+						<div className='flex justify-between cursor-pointer'>
+							<span className='text-white'>Text Color</span>
+						</div>
+						<div className='mt-2'>
+							<input
+								type='color'
+								name='color'
+								value={componentStyle.color || '#fff'}
+								onChange={handleInputChange}
+								className='w-full h-10 px-2 py-1 border rounded'
+							/>
+						</div>
+					</div>
+
+					{/* Font Weight */}
+					<div className='group'>
+						<div className='flex justify-between cursor-pointer'>
+							<span className='text-white'>Font Weight</span>
+						</div>
+						<div className='mt-2'>
+							<select
+								name='fontWeight'
+								value={componentStyle.fontWeight || 'normal'}
+								onChange={handleInputChange}
+								className='w-full p-2 mb-4 text-white rounded bg-stone-700'
+							>
+								<option value='normal'>Normal</option>
+								<option value='bold'>Bold</option>
+								<option value='bolder'>Bolder</option>
+								<option value='lighter'>Lighter</option>
+								<option value='100'>100</option>
+								<option value='200'>200</option>
+								<option value='300'>300</option>
+								<option value='400'>400</option>
+								<option value='500'>500</option>
+								<option value='600'>600</option>
+								<option value='700'>700</option>
+								<option value='800'>800</option>
+								<option value='900'>900</option>
+							</select>
+						</div>
+					</div>
+
+					{/* Text Decoration */}
+					<div className='group'>
+						<div className='flex justify-between cursor-pointer'>
+							<span className='text-white'>Text Decoration</span>
+						</div>
+						<div className='mt-2'>
+							<select
+								name='textDecoration'
+								value={componentStyle.textDecoration || 'none'}
+								onChange={handleInputChange}
+								className='w-full p-2 mb-4 text-white rounded bg-stone-700'
+							>
+								<option value='none'>None</option>
+								<option value='underline'>Underline</option>
+								<option value='line-through'>Line Through</option>
+								<option value='overline'>Overline</option>
+							</select>
+						</div>
+					</div>
+
+					{/* Font Style */}
+					<div className='group'>
+						<div className='flex justify-between cursor-pointer'>
+							<span className='text-white'>Font Style</span>
+						</div>
+						<div className='mt-2'>
+							<select
+								name='fontStyle'
+								value={componentStyle.fontStyle || 'normal'}
+								onChange={handleInputChange}
+								className='w-full p-2 mb-4 text-white rounded bg-stone-700'
+							>
+								<option value='normal'>Normal</option>
+								<option value='italic'>Italic</option>
+								<option value='oblique'>Oblique</option>
+							</select>
+						</div>
+					</div>
+
+					{/* Font Size */}
+					<div className='group'>
+						<div className='flex justify-between cursor-pointer'>
+							<span className='text-white'>Font Size</span>
+						</div>
+						<div className='mt-2'>
+							<input
+								type='number'
+								name='fontSize'
+								value={parseFloat(componentStyle.fontSize as string) || 16}
+								onChange={e => handleInputChange(e, 'px')}
+								className='w-full p-2 mb-4 text-white rounded bg-stone-700'
+							/>
+						</div>
+					</div>
+
+					{/* Text Gradient */}
+					<div className='group'>
+						<div className='flex justify-between cursor-pointer'>
+							<span className='text-white'>Text Gradient</span>
+						</div>
+						<div className='mt-2'>
+							<label className='flex items-center mb-2 text-white'>
+								<input
+									type='checkbox'
+									name='enableTextGradient'
+									checked={backgroundGradient.enabled}
+									onChange={handleToggleGradient}
+									className='mr-2'
+								/>
+								Enable Gradient
+							</label>
+							{backgroundGradient.enabled && (
+								<>
+									<select
+										name='gradientDirection'
+										value={backgroundGradient.direction}
+										onChange={handleGradientDirectionChange}
+										className='w-full p-2 mb-2 text-white rounded bg-stone-700'
+									>
+										<option value='to right'>To Right</option>
+										<option value='to left'>To Left</option>
+										<option value='to bottom'>To Bottom</option>
+										<option value='to top'>To Top</option>
+									</select>
+									<input
+										type='color'
+										name='startColor'
+										value={backgroundGradient.startColor}
+										onChange={handleGradientColorChange}
+										className='w-full h-10 px-2 py-1 mb-2 border rounded'
+									/>
+									<input
+										type='color'
+										name='endColor'
+										value={backgroundGradient.endColor}
+										onChange={handleGradientColorChange}
+										className='w-full h-10 px-2 py-1 border rounded'
+									/>
+								</>
+							)}
+						</div>
+					</div>
+				</>
+			)
+		}
+		return null
+	}
+
 	return (
 		<aside className='w-1/4 max-h-full px-5 overflow-y-auto py-7 bg-stone-900 min-w-72'>
 			<div className='flex justify-between mb-4'>
@@ -521,12 +732,11 @@ const Sidebar: React.FC<SidebarProps> = ({
 					</div>
 					<div className='grid grid-cols-2 gap-4'>
 						{sidebarComponents.map(({icon: IconComponent, type}) => {
-							if (type === EHTMLTag.SECTION && !isCanvasEmpty) {
-								return null
-							}
-
 							const isSection = type === EHTMLTag.SECTION
-							const isDisabled = isCanvasEmpty ? !isSection : false
+							const isDisabled =
+								(isCanvasEmpty && !isSection) || (isSection && !isCanvasEmpty)
+									? true
+									: false
 							return (
 								<div
 									key={type}
@@ -879,6 +1089,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 							</div>
 						)}
 					</div>
+
+					{renderHeadingSection()}
 
 					{/* Width & Height Section */}
 					{!isFirstComponent && (
