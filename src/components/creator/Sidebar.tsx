@@ -733,6 +733,170 @@ const Sidebar: React.FC<SidebarProps> = ({
 		return null
 	}
 
+	const renderInputSection = () => {
+		if (editingComponent?.type === EHTMLTag.INPUT) {
+			return (
+				<>
+					{/* Input Type */}
+					<div className='group'>
+						<div className='flex justify-between cursor-pointer'>
+							<span className='text-white'>Input Type</span>
+						</div>
+						<div className='mt-2'>
+							<select
+								name='inputType'
+								value={componentStyle.inputType || 'text'}
+								onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+									const updatedStyle = {
+										...componentStyle,
+										inputType: e.target.value,
+									}
+									onUpdateStyle(editingComponentId as string, updatedStyle)
+								}}
+								className='w-full p-2 mb-4 text-white rounded bg-stone-700'
+							>
+								{/* Додайте всі типи інпутів тут */}
+								<option value='text'>Text</option>
+								<option value='number'>Number</option>
+								{/* Додайте інші варіанти */}
+							</select>
+						</div>
+					</div>
+
+					{/* Input Placeholder */}
+					<div className='group'>
+						<div className='flex justify-between cursor-pointer'>
+							<span className='text-white'>Placeholder</span>
+						</div>
+						<div className='mt-2'>
+							<input
+								type='text'
+								name='placeholder'
+								value={componentStyle.placeholder || ''}
+								onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+									const updatedStyle = {
+										...componentStyle,
+										placeholder: e.target.value,
+									}
+									onUpdateStyle(editingComponentId as string, updatedStyle)
+								}}
+								className='w-full p-2 mb-4 text-white rounded bg-stone-700'
+							/>
+						</div>
+					</div>
+				</>
+			)
+		}
+		return null
+	}
+
+	const renderConstraintsSection = () => {
+		if (editingComponent?.type === EHTMLTag.INPUT) {
+			const inputType = componentStyle.inputType || 'text'
+
+			const renderConstraint = (
+				label: string,
+				name: string,
+				type = 'text',
+				placeholder = ''
+			) => (
+				<div className='group'>
+					<label className='block mb-2 text-white'>{label}</label>
+					<input
+						type={type}
+						name={name}
+						value={componentStyle[name as keyof IExtendedCSSProperties] || ''}
+						onChange={handleInputChange}
+						className='w-full p-2 mb-4 text-white rounded bg-stone-700'
+						placeholder={placeholder}
+					/>
+				</div>
+			)
+
+			const renderCheckboxConstraint = (label: string, name: string) => (
+				<div className='group'>
+					<label className='block mb-2 text-white'>{label}</label>
+					<input
+						type='checkbox'
+						name={name}
+						checked={!!componentStyle[name as keyof IExtendedCSSProperties]}
+						onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+							const updatedStyle = {
+								...componentStyle,
+								[name]: e.target.checked,
+							}
+							onUpdateStyle(editingComponentId as string, updatedStyle)
+						}}
+						className='w-full p-2 mb-4 text-white rounded bg-stone-700'
+					/>
+				</div>
+			)
+
+			const constraints = []
+
+			switch (inputType) {
+				case 'text':
+				case 'email':
+				case 'password':
+				case 'search':
+				case 'tel':
+				case 'url':
+					constraints.push(
+						renderConstraint('Max Length', 'maxLength', 'number')
+					)
+					constraints.push(renderConstraint('Pattern (Regex)', 'pattern'))
+					constraints.push(renderCheckboxConstraint('Required', 'required'))
+					break
+
+				case 'number':
+				case 'range':
+					constraints.push(renderConstraint('Min Value', 'min', 'number'))
+					constraints.push(renderConstraint('Max Value', 'max', 'number'))
+					constraints.push(renderConstraint('Step', 'step', 'number'))
+					constraints.push(renderCheckboxConstraint('Required', 'required'))
+					break
+
+				case 'date':
+				case 'time':
+				case 'month':
+				case 'week':
+				case 'datetime-local':
+					constraints.push(renderConstraint('Min Value', 'min', 'date'))
+					constraints.push(renderConstraint('Max Value', 'max', 'date'))
+					constraints.push(renderCheckboxConstraint('Required', 'required'))
+					break
+
+				case 'checkbox':
+				case 'radio':
+					constraints.push(renderCheckboxConstraint('Required', 'required'))
+					break
+
+				case 'file':
+					constraints.push(renderCheckboxConstraint('Required', 'required'))
+					break
+
+				default:
+					break
+			}
+
+			return (
+				<div className='group'>
+					<div
+						className='flex justify-between cursor-pointer'
+						onClick={() => toggleSection('constraints')}
+					>
+						<span className='text-white'>Constraints</span>
+						<span>{activeSections.includes('constraints') ? '▲' : '▼'}</span>
+					</div>
+					{activeSections.includes('constraints') && (
+						<div className='mt-2'>{constraints}</div>
+					)}
+				</div>
+			)
+		}
+		return null
+	}
+
 	return (
 		<aside className='w-1/4 max-h-full px-5 overflow-y-auto py-7 bg-stone-900 min-w-72'>
 			<div className='flex justify-between mb-4'>
@@ -1137,6 +1301,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 					)}
 
 					{renderHeadingSection()}
+					{renderInputSection()}
+					{renderConstraintsSection()}
 
 					{/* Width & Height Section */}
 					{!isFirstComponent &&

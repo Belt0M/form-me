@@ -6,6 +6,7 @@ import Div from '../creator/dnd-components/Div'
 import Section from '../creator/dnd-components/Section'
 import Button from './dnd-components/Button'
 import Heading from './dnd-components/Heading'
+import Input from './dnd-components/Input'
 
 interface Props {
 	component: ICanvasComponent
@@ -348,6 +349,29 @@ const RenderCanvasComponent: React.FC<Props> = ({
 						editingComponentId={editingComponentId}
 						isCurrentInFocus={isCurrentInFocus}
 						isResizing={isResizing}
+					/>
+				)
+			}
+			break
+		case EHTMLTag.INPUT:
+			if (isHint) {
+				renderedComponent = (
+					<Input id={id} type={style?.inputType || 'text'} isHint={!!isHint} />
+				)
+			} else {
+				renderedComponent = (
+					<Input
+						id={id}
+						style={computedStyle}
+						type={style?.inputType || 'text'}
+						onDragEnter={handleDragEnter}
+						onDragLeave={handleDragLeave}
+						onMouseEnter={handleMouseEnter}
+						onMouseLeave={handleMouseLeave}
+						onEditComponent={handleEdit}
+						isCurrentInFocus={isCurrentInFocus}
+						isResizing={isResizing}
+						onHoverGUI={onHoverGUI}
 					/>
 				)
 			}

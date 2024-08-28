@@ -1,6 +1,7 @@
 import React, {useRef, useState} from 'react'
 import Canvas from '../components/creator/Canvas'
 import RenderCanvasComponent from '../components/creator/CanvasRenderer'
+import InputTypeModal from '../components/creator/InputTypeModal'
 import Sidebar from '../components/creator/Sidebar'
 import Header from '../components/Header'
 import {useClickOutside} from '../hooks/useClickOutside'
@@ -31,6 +32,11 @@ const FormCreator: React.FC = () => {
 	const [isHintShowing, setIsHintShowing] = useState<boolean>(false)
 
 	const [isResizing, setIsResizing] = useState<boolean>(false)
+
+	const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+	const [selectedInputType, setSelectedInputType] = useState<string | null>(
+		null
+	)
 
 	const canvasRef = useRef<HTMLDivElement>(null)
 
@@ -87,7 +93,13 @@ const FormCreator: React.FC = () => {
 	const handleDrop = () => {
 		handleDeleteComponent()
 
+		if (draggedComponentType === EHTMLTag.INPUT) {
+			setIsModalOpen(true)
+			return
+		}
+
 		if (draggedComponentType === null) return
+
 		if (canvasComponents.length && !hoveredComponentId) return
 
 		const getHeightByComponentType = (
@@ -194,6 +206,37 @@ const FormCreator: React.FC = () => {
 				newComponent.parent = parent
 			}
 		}
+
+		if (hoveredComponentId) {
+			addComponent(hoveredComponentId, newComponent)
+		} else {
+			addComponent(null, newComponent)
+		}
+
+		setDraggedComponentType(null)
+		setHoveredComponentId(null)
+	}
+
+	const handleSelectInputType = (type: string) => {
+		setSelectedInputType(type)
+		setIsModalOpen(false)
+
+		const id = crypto.randomUUID()
+		const newComponent: ICanvasComponent = {
+			id,
+			type: EHTMLTag.INPUT,
+			style: {
+				...defaultStyles,
+				position: positionMode,
+				width: '100px',
+				height: '40px',
+				borderColor: '#ccc',
+			},
+			children: [],
+			isBlock: false,
+		}
+
+		newComponent.style!.inputType = type
 
 		if (hoveredComponentId) {
 			addComponent(hoveredComponentId, newComponent)
@@ -339,6 +382,12 @@ const FormCreator: React.FC = () => {
 					canvasComponents={canvasComponents}
 					onUpdateStyle={handleUpdateStyle}
 				/>
+				{isModalOpen && (
+					<InputTypeModal
+						onSelectType={handleSelectInputType}
+						onClose={() => setIsModalOpen(false)}
+					/>
+				)}
 			</main>
 		</>
 	)
