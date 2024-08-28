@@ -10,7 +10,7 @@ export const resizeHandlers: IResizeHandle[] = [
 		direction: 'top',
 		styles: {
 			width: '100%',
-			height: '7px',
+			height: '5px',
 			top: 0,
 			left: 0,
 			cursor: 'n-resize',
@@ -20,7 +20,7 @@ export const resizeHandlers: IResizeHandle[] = [
 		direction: 'bottom',
 		styles: {
 			width: '100%',
-			height: '7px',
+			height: '5px',
 			bottom: 0,
 			left: 0,
 			cursor: 's-resize',
@@ -29,7 +29,7 @@ export const resizeHandlers: IResizeHandle[] = [
 	{
 		direction: 'left',
 		styles: {
-			width: '7px',
+			width: '5px',
 			height: '100%',
 			left: 0,
 			top: 0,
@@ -39,7 +39,7 @@ export const resizeHandlers: IResizeHandle[] = [
 	{
 		direction: 'right',
 		styles: {
-			width: '7px',
+			width: '5px',
 			height: '100%',
 			right: 0,
 			top: 0,

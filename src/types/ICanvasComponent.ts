@@ -10,4 +10,5 @@ export interface ICanvasComponent {
 	style?: IExtendedCSSProperties
 	children?: ICanvasComponent[]
 	parent?: HTMLElement
+	isBlock?: boolean
 }

@@ -1,4 +1,3 @@
-import {Trash} from '@phosphor-icons/react'
 import React, {useEffect, useRef, useState} from 'react'
 import {EHTMLTag} from '../../types/EHTMLTag'
 import {EPosition} from '../../types/EPosition'
@@ -143,10 +142,6 @@ const RenderCanvasComponent: React.FC<Props> = ({
 		}
 	}
 
-	const handleDelete = () => {
-		onDeleteComponent(id)
-	}
-
 	const handleEdit = (editID: string) => {
 		onEditComponent(editID)
 	}
@@ -176,6 +171,7 @@ const RenderCanvasComponent: React.FC<Props> = ({
 
 	const handleMouseMove = (e: MouseEvent) => {
 		const direction = containerRef.current?.dataset.direction || ''
+
 		handleResize(e, direction)
 	}
 
@@ -208,48 +204,6 @@ const RenderCanvasComponent: React.FC<Props> = ({
 					aria-disabled={true}
 				>
 					{type}
-				</div>
-			)}
-
-			{editingComponentId === id && (
-				<div
-					className='absolute flex gap-2 px-6 py-6 rounded-lg top-1/2 -translate-y-1/2  bg-dark bg-opacity-80 z-[100] -translate-x-1/2 left-1/2'
-					aria-disabled={true}
-				>
-					<Trash
-						className='text-red-500 transition-all cursor-pointer hover:scale-105'
-						weight='bold'
-						size={25}
-						aria-disabled={true}
-						onClick={handleDelete}
-					/>
-				</div>
-			)}
-		</>
-	)
-
-	const onHoverGUI2 = (
-		<>
-			{isCurrentInFocus && editingComponentId !== id && (
-				<div
-					className='absolute px-2 py-1 text-xs font-bold bg-white rounded select-none bottom-1 right-1 text-primary'
-					aria-disabled={true}
-				>
-					{type}
-				</div>
-			)}
-
-			{editingComponentId === id && (
-				<div
-					className='absolute flex gap-2 px-6 py-2 rounded-lg bg-dark bg-opacity-80 z-[100] left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2'
-					aria-disabled={true}
-				>
-					<Trash
-						className='text-red-500 transition-all cursor-pointer hover:scale-105'
-						weight='bold'
-						size={25}
-						onClick={handleDelete}
-					/>
 				</div>
 			)}
 		</>
@@ -349,17 +303,15 @@ const RenderCanvasComponent: React.FC<Props> = ({
 					id={id}
 					level={style?.level || 6}
 					style={computedStyle}
+					editingComponentId={editingComponentId}
+					isCurrentInFocus={isCurrentInFocus}
+					isResizing={isResizing}
+					isHint={isHint}
+					onHoverGUI={onHoverGUI}
 					onDragEnter={handleDragEnter}
 					onDragLeave={handleDragLeave}
 					onMouseEnter={handleMouseEnter}
 					onMouseLeave={handleMouseLeave}
-					onHoverGUI={onHoverGUI2}
-					editingComponentId={editingComponentId}
-					isCurrentInFocus={isCurrentInFocus}
-					isResizing={isResizing}
-					setIsResizing={setIsResizing}
-					onUpdateStyle={onUpdateStyle}
-					isHint={isHint}
 					onEditComponent={handleEdit}
 				/>
 			)

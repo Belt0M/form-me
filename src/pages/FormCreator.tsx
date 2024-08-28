@@ -10,6 +10,7 @@ import {ICanvasComponent} from '../types/ICanvasComponent'
 import {generateColor} from '../utils/generateColor'
 import {getComponentsQuantity} from '../utils/getComponentsQuantity'
 import {getElementHeightWithoutBorderAndPadding} from '../utils/getElementHeightWithoutBorderAndPadding'
+import {getIsBlockComponentByType} from '../utils/getIsBlockComponentByType'
 
 const FormCreator: React.FC = () => {
 	const [canvasComponents, setCanvasComponents] = useState<ICanvasComponent[]>(
@@ -142,9 +143,7 @@ const FormCreator: React.FC = () => {
 			hoveredComponentId
 		)
 
-		const backgroundColor = generateColor(
-			getComponentsQuantity(canvasComponents) + 1
-		)
+		const isBlock = getIsBlockComponentByType(draggedComponentType)
 
 		const id = crypto.randomUUID()
 		const newComponent: ICanvasComponent = {
@@ -155,9 +154,20 @@ const FormCreator: React.FC = () => {
 				position: positionMode,
 				width,
 				height,
-				backgroundColor,
 			},
 			children: [],
+			isBlock,
+		}
+
+		if (isBlock) {
+			const backgroundColor = generateColor(
+				getComponentsQuantity(canvasComponents) + 1
+			)
+
+			newComponent.style!.backgroundColor = backgroundColor
+			newComponent.style!.borderColor = backgroundColor
+		} else {
+			newComponent.style!.fontSize = '16px'
 		}
 
 		if (hoveredComponentId) {
@@ -185,7 +195,7 @@ const FormCreator: React.FC = () => {
 	const handleDeleteComponent = (id?: string) => {
 		const isHint = !id
 
-		if (!isHint && id === hoveredComponentId) {
+		if (!isHint) {
 			setHoveredComponentId(null)
 			setEditingComponentId(null)
 		}
@@ -264,8 +274,6 @@ const FormCreator: React.FC = () => {
 		setCanvasComponents(prevComponents => updateComponentStyle(prevComponents))
 	}
 
-	console.log(editingComponentId)
-
 	return (
 		<>
 			<Header
@@ -283,6 +291,8 @@ const FormCreator: React.FC = () => {
 					ref={canvasRef}
 					onDrop={handleDrop}
 					onDragOver={handleDragOver}
+					editingComponentId={editingComponentId}
+					onDeleteComponent={handleDeleteComponent}
 					isEmptyCanvas={!canvasComponents.length}
 					isDragging={!!draggingType}
 				>

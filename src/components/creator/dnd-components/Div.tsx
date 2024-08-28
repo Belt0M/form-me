@@ -235,7 +235,7 @@ const Div: FC<Props> = ({
 			)}
 		</div>
 	) : (
-		<div className='w-full border-2 bg-hint border-hintBorder min-h-24 bg-opacity-30 hint-grid' />
+		<div className='w-full border-2 bg-hint border-hintBorder min-h-24 bg-opacity-30' />
 	)
 }
 
