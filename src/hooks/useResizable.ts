@@ -3,7 +3,7 @@ import {useEffect, useState} from 'react'
 const useResizable = (
 	initialWidth: number,
 	initialHeight: number,
-	resizableRef: React.RefObject<HTMLDivElement>,
+	resizableRef: React.RefObject<HTMLDivElement | HTMLButtonElement>,
 	isCenteredX: boolean,
 	isCenteredY: boolean,
 	minWidth: number = 100,

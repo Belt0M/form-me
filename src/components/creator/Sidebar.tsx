@@ -106,6 +106,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 				}))
 			}
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [componentStyle.height, componentStyle.width, editingComponentId])
 
 	useEffect(() => {
@@ -561,38 +562,45 @@ const Sidebar: React.FC<SidebarProps> = ({
 	}
 
 	const renderHeadingSection = () => {
-		if (editingComponent?.type === EHTMLTag.HEADING) {
+		if (
+			editingComponent?.type === EHTMLTag.HEADING ||
+			editingComponent?.type === EHTMLTag.BUTTON
+		) {
+			const isHeading = editingComponent?.type === EHTMLTag.HEADING
+			const componentName = isHeading ? 'Heading' : 'Button'
 			return (
 				<>
 					{/* Heading Level */}
-					<div className='group'>
-						<div className='flex justify-between cursor-pointer'>
-							<span className='text-white'>Heading Level</span>
+					{isHeading && (
+						<div className='group'>
+							<div className='flex justify-between cursor-pointer'>
+								<span className='text-white'>Heading Level</span>
+							</div>
+							<div className='mt-2'>
+								<select
+									name='level'
+									value={componentStyle.level || 6}
+									onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+										const updatedStyle = {
+											...componentStyle,
+											level: +e.target.value,
+										}
+										onUpdateStyle(editingComponentId as string, updatedStyle)
+									}}
+									className='w-full p-2 mb-4 text-white rounded bg-stone-700'
+								>
+									{[1, 2, 3, 4, 5, 6].map(level => (
+										<option key={level} value={level}>{`h${level}`}</option>
+									))}
+								</select>
+							</div>
 						</div>
-						<div className='mt-2'>
-							<select
-								name='level'
-								value={componentStyle.level || 6}
-								onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-									const updatedStyle = {
-										...componentStyle,
-										level: +e.target.value,
-									}
-									onUpdateStyle(editingComponentId as string, updatedStyle)
-								}}
-								className='w-full p-2 mb-4 text-white rounded bg-stone-700'
-							>
-								{[1, 2, 3, 4, 5, 6].map(level => (
-									<option key={level} value={level}>{`h${level}`}</option>
-								))}
-							</select>
-						</div>
-					</div>
+					)}
 
 					{/* Heading Text */}
 					<div className='group'>
 						<div className='flex justify-between cursor-pointer'>
-							<span className='text-white'>Heading Text</span>
+							<span className='text-white'>{componentName} Text</span>
 						</div>
 						<div className='mt-2'>
 							<input
@@ -1131,94 +1139,104 @@ const Sidebar: React.FC<SidebarProps> = ({
 					{renderHeadingSection()}
 
 					{/* Width & Height Section */}
-					{!isFirstComponent && isBlock && (
-						<div className='group'>
-							<div
-								className='flex justify-between cursor-pointer'
-								onClick={() => toggleSection('dimensions')}
-							>
-								<span className='text-white'>Dimensions</span>
-								<span>{activeSections.includes('dimensions') ? '▲' : '▼'}</span>
-							</div>
-							{activeSections.includes('dimensions') && (
-								<div className='mt-2'>
-									<label className='block mb-2 text-white'>Width (%)</label>
-									<input
-										type='range'
-										name='width'
-										min={minWidth}
-										max='100'
-										value={
-											dimensions.isEditing
-												? dimensions.width.length
-													? dimensions.width
-													: 0
-												: Math.round(parseFloat(componentStyle.width as string))
-										}
-										onChange={handleRangePercentageChange}
-										className='w-full'
-									/>
-									<input
-										type='number'
-										name='width'
-										value={
-											dimensions.isEditing
-												? dimensions.width
-												: Math.round(parseFloat(componentStyle.width as string))
-										}
-										onChange={e => handleDimensionInputChange(e, 'width')}
-										onBlur={e => handleBlur(e.target as HTMLElement, 'width')}
-										onKeyDown={e => handleKeyDown(e, 'width')}
-										onFocus={() =>
-											setDimensions(prev => ({...prev, isEditing: true}))
-										}
-										className='w-16 p-1 ml-2 text-white rounded bg-stone-700'
-										style={{appearance: 'textfield'}}
-									/>
-
-									<label className='block mt-4 mb-2 text-white'>
-										Height (%)
-									</label>
-									<input
-										type='range'
-										name='height'
-										min={minHeight}
-										max='minWidth'
-										value={
-											dimensions.isEditing
-												? dimensions.height.length
-													? dimensions.height
-													: 0
-												: Math.round(
-														parseFloat(componentStyle.height as string)
-												  )
-										}
-										onChange={handleRangePercentageChange}
-										className='w-full'
-									/>
-									<input
-										type='number'
-										name='height'
-										value={
-											dimensions.isEditing
-												? dimensions.height
-												: Math.round(
-														parseFloat(componentStyle.height as string)
-												  )
-										}
-										onChange={e => handleDimensionInputChange(e, 'height')}
-										onBlur={e => handleBlur(e.target as HTMLElement, 'height')}
-										onKeyDown={e => handleKeyDown(e, 'height')}
-										onFocus={() =>
-											setDimensions(prev => ({...prev, isEditing: true}))
-										}
-										className='w-16 p-1 ml-2 text-white rounded bg-stone-700'
-										style={{appearance: 'textfield'}}
-									/>
+					{!isFirstComponent &&
+						isBlock &&
+						editingComponent?.type !== EHTMLTag.BUTTON && (
+							<div className='group'>
+								<div
+									className='flex justify-between cursor-pointer'
+									onClick={() => toggleSection('dimensions')}
+								>
+									<span className='text-white'>Dimensions</span>
+									<span>
+										{activeSections.includes('dimensions') ? '▲' : '▼'}
+									</span>
 								</div>
-							)}
-						</div>
-					)}
+								{activeSections.includes('dimensions') && (
+									<div className='mt-2'>
+										<label className='block mb-2 text-white'>Width (%)</label>
+										<input
+											type='range'
+											name='width'
+											min={minWidth}
+											max='100'
+											value={
+												dimensions.isEditing
+													? dimensions.width.length
+														? dimensions.width
+														: 0
+													: Math.round(
+															parseFloat(componentStyle.width as string)
+													  )
+											}
+											onChange={handleRangePercentageChange}
+											className='w-full'
+										/>
+										<input
+											type='number'
+											name='width'
+											value={
+												dimensions.isEditing
+													? dimensions.width
+													: Math.round(
+															parseFloat(componentStyle.width as string)
+													  )
+											}
+											onChange={e => handleDimensionInputChange(e, 'width')}
+											onBlur={e => handleBlur(e.target as HTMLElement, 'width')}
+											onKeyDown={e => handleKeyDown(e, 'width')}
+											onFocus={() =>
+												setDimensions(prev => ({...prev, isEditing: true}))
+											}
+											className='w-16 p-1 ml-2 text-white rounded bg-stone-700'
+											style={{appearance: 'textfield'}}
+										/>
+
+										<label className='block mt-4 mb-2 text-white'>
+											Height (%)
+										</label>
+										<input
+											type='range'
+											name='height'
+											min={minHeight}
+											max='minWidth'
+											value={
+												dimensions.isEditing
+													? dimensions.height.length
+														? dimensions.height
+														: 0
+													: Math.round(
+															parseFloat(componentStyle.height as string)
+													  )
+											}
+											onChange={handleRangePercentageChange}
+											className='w-full'
+										/>
+										<input
+											type='number'
+											name='height'
+											value={
+												dimensions.isEditing
+													? dimensions.height
+													: Math.round(
+															parseFloat(componentStyle.height as string)
+													  )
+											}
+											onChange={e => handleDimensionInputChange(e, 'height')}
+											onBlur={e =>
+												handleBlur(e.target as HTMLElement, 'height')
+											}
+											onKeyDown={e => handleKeyDown(e, 'height')}
+											onFocus={() =>
+												setDimensions(prev => ({...prev, isEditing: true}))
+											}
+											className='w-16 p-1 ml-2 text-white rounded bg-stone-700'
+											style={{appearance: 'textfield'}}
+										/>
+									</div>
+								)}
+							</div>
+						)}
 				</div>
 			)}
 		</aside>

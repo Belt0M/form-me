@@ -4,6 +4,7 @@ import {EPosition} from '../../types/EPosition'
 import {ICanvasComponent} from '../../types/ICanvasComponent'
 import Div from '../creator/dnd-components/Div'
 import Section from '../creator/dnd-components/Section'
+import Button from './dnd-components/Button'
 import Heading from './dnd-components/Heading'
 
 interface Props {
@@ -60,7 +61,9 @@ const RenderCanvasComponent: React.FC<Props> = ({
 		}
 	}
 
-	const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
+	const handleDragEnter = (
+		event: React.DragEvent<HTMLDivElement | HTMLButtonElement>
+	) => {
 		event.preventDefault()
 		event.stopPropagation()
 
@@ -84,7 +87,9 @@ const RenderCanvasComponent: React.FC<Props> = ({
 		}
 	}
 
-	const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+	const handleDragLeave = (
+		event: React.DragEvent<HTMLDivElement | HTMLButtonElement>
+	) => {
 		event.preventDefault()
 		event.stopPropagation()
 
@@ -121,14 +126,18 @@ const RenderCanvasComponent: React.FC<Props> = ({
 		}
 	}
 
-	const handleMouseEnter = (event: React.MouseEvent<HTMLDivElement>) => {
+	const handleMouseEnter = (
+		event: React.MouseEvent<HTMLDivElement | HTMLButtonElement>
+	) => {
 		event.preventDefault()
 
 		setHoveredComponentId(id)
 		setIsHovering(true)
 	}
 
-	const handleMouseLeave = (event: React.MouseEvent<HTMLDivElement>) => {
+	const handleMouseLeave = (
+		event: React.MouseEvent<HTMLDivElement | HTMLButtonElement>
+	) => {
 		event.preventDefault()
 		event.stopPropagation()
 
@@ -298,23 +307,50 @@ const RenderCanvasComponent: React.FC<Props> = ({
 
 			break
 		case EHTMLTag.HEADING:
-			renderedComponent = (
-				<Heading
-					id={id}
-					level={style?.level || 6}
-					style={computedStyle}
-					editingComponentId={editingComponentId}
-					isCurrentInFocus={isCurrentInFocus}
-					isResizing={isResizing}
-					isHint={isHint}
-					onHoverGUI={onHoverGUI}
-					onDragEnter={handleDragEnter}
-					onDragLeave={handleDragLeave}
-					onMouseEnter={handleMouseEnter}
-					onMouseLeave={handleMouseLeave}
-					onEditComponent={handleEdit}
-				/>
-			)
+			if (isHint) {
+				renderedComponent = (
+					<Heading level={style?.level || 6} id={id} isHint={!!isHint} />
+				)
+			} else {
+				renderedComponent = (
+					<Heading
+						id={id}
+						level={style?.level || 6}
+						style={computedStyle}
+						editingComponentId={editingComponentId}
+						isCurrentInFocus={isCurrentInFocus}
+						isResizing={isResizing}
+						isHint={isHint}
+						onHoverGUI={onHoverGUI}
+						onDragEnter={handleDragEnter}
+						onDragLeave={handleDragLeave}
+						onMouseEnter={handleMouseEnter}
+						onMouseLeave={handleMouseLeave}
+						onEditComponent={handleEdit}
+					/>
+				)
+			}
+			break
+		case EHTMLTag.BUTTON:
+			if (isHint) {
+				renderedComponent = <Button id={id} isHint={!!isHint} />
+			} else {
+				renderedComponent = (
+					<Button
+						id={id}
+						style={computedStyle}
+						onDragEnter={handleDragEnter}
+						onDragLeave={handleDragLeave}
+						onMouseEnter={handleMouseEnter}
+						onEditComponent={onEditComponent}
+						onMouseLeave={handleMouseLeave}
+						onHoverGUI={onHoverGUI}
+						editingComponentId={editingComponentId}
+						isCurrentInFocus={isCurrentInFocus}
+						isResizing={isResizing}
+					/>
+				)
+			}
 			break
 		default:
 			renderedComponent = null

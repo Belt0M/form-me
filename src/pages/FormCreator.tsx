@@ -115,6 +115,9 @@ const FormCreator: React.FC = () => {
 				case EHTMLTag.HEADING:
 					result = 'auto'
 					break
+				case EHTMLTag.BUTTON:
+					result = '40px'
+					break
 				default:
 					break
 			}
@@ -129,19 +132,15 @@ const FormCreator: React.FC = () => {
 				case EHTMLTag.HEADING:
 					result = 'auto'
 					break
+				case EHTMLTag.BUTTON:
+					result = '100px'
+					break
 				default:
 					break
 			}
 
 			return result
 		}
-
-		const width = getWidthByComponentType(draggedComponentType)
-
-		const height = getHeightByComponentType(
-			draggedComponentType,
-			hoveredComponentId
-		)
 
 		const isBlock = getIsBlockComponentByType(draggedComponentType)
 
@@ -152,8 +151,6 @@ const FormCreator: React.FC = () => {
 			style: {
 				...defaultStyles,
 				position: positionMode,
-				width,
-				height,
 			},
 			children: [],
 			isBlock,
@@ -164,9 +161,29 @@ const FormCreator: React.FC = () => {
 				getComponentsQuantity(canvasComponents) + 1
 			)
 
+			if (draggingType !== EHTMLTag.BUTTON) {
+				const width = getWidthByComponentType(draggedComponentType)
+				const height = getHeightByComponentType(
+					draggedComponentType,
+					hoveredComponentId
+				)
+
+				newComponent.style!.width = width
+				newComponent.style!.height = height
+				newComponent.style!.borderColor = backgroundColor
+			} else {
+				newComponent.style!.padding = '9px 25px 11px 25px'
+				newComponent.style!.borderRadius = '6px'
+				newComponent.style!.borderColor = '#ffffff'
+			}
+
 			newComponent.style!.backgroundColor = backgroundColor
-			newComponent.style!.borderColor = backgroundColor
+			newComponent.style!.borderWidth = '2px'
 		} else {
+			newComponent.style!.fontSize = '16px'
+		}
+
+		if (draggingType === EHTMLTag.BUTTON) {
 			newComponent.style!.fontSize = '16px'
 		}
 
