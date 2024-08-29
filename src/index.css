@@ -100,10 +100,13 @@ h6 {
 
 ::-webkit-scrollbar {
 	width: 8px;
+	height: 8px;
 	background-color: #363636;
 }
 
 ::-webkit-scrollbar-thumb {
 	border-radius: 10px;
-	background-image: linear-gradient(to top, #b1086d 28%, #6a08b1 84%);
+	/* background-image: linear-gradient(to top, #b1086d 28%, #6a08b1 84%); */
+	background-color: #b1086d;
+	cursor: pointer;
 }

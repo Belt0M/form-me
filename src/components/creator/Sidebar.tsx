@@ -351,6 +351,18 @@ const Sidebar: React.FC<SidebarProps> = ({
 		}
 	}
 
+	const handleSimpleRangeChange = (
+		e: React.ChangeEvent<HTMLInputElement>,
+		units: string = 'rem'
+	) => {
+		const {name, value} = e.target
+		const newValue = !value || value === '0' ? '-1' : value
+
+		const updatedStyle = {...componentStyle, [name]: newValue + units}
+
+		onUpdateStyle(editingComponentId as string, updatedStyle)
+	}
+
 	const handleRangeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const {name, value} = e.target
 		const newValue = !value || value === '0' ? '-1' : value
@@ -1231,14 +1243,15 @@ const Sidebar: React.FC<SidebarProps> = ({
 											<input
 												type='range'
 												name='gap'
+												step={0.1}
 												min='0'
-												max='50'
-												value={parseInt(componentStyle.gap as string) || 0}
-												onChange={handleRangeChange}
+												max='10'
+												value={parseFloat(componentStyle.gap as string) || 0}
+												onChange={handleSimpleRangeChange}
 												className='w-full'
 											/>
 											<span className='text-white'>
-												{parseInt(componentStyle.gap as string) || 0}px
+												{parseFloat(componentStyle.gap as string) || 0}rem
 											</span>
 										</div>
 									)}

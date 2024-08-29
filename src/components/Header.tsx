@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import {Link} from 'react-router-dom'
 import Logo from '../assets/img/logo.png'
 
 interface Props {
@@ -13,7 +13,7 @@ const Header: React.FC<Props> = ({actions}) => {
 				<img src={Logo} alt='Logo' className='h-16' />
 				Form...me
 			</Link>
-			<div>{actions}</div>
+			<div className='flex gap-4'>{actions}</div>
 		</header>
 	)
 }

@@ -1,88 +1,97 @@
-import React from 'react'
+import {Check, Clipboard} from '@phosphor-icons/react'
+import React, {useState} from 'react'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import {atomOneDark} from 'react-syntax-highlighter/dist/esm/styles/hljs'
+import {Bounce, toast, ToastContainer} from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 interface ExportModalProps {
-	isOpen: boolean
 	onClose: () => void
 	exportedCode: string
 }
 
-const ExportModal: React.FC<ExportModalProps> = ({
-	isOpen,
-	onClose,
-	exportedCode,
-}) => {
-	if (!isOpen) return null
+const ExportModal: React.FC<ExportModalProps> = ({onClose, exportedCode}) => {
+	const [isCopied, setIsCopied] = useState<boolean>(false)
+
+	const handleCopy = () => {
+		navigator.clipboard.writeText(exportedCode)
+
+		toast('The code was successfully copied to the clipboard!', {
+			position: 'top-center',
+			autoClose: 2000,
+			hideProgressBar: false,
+			closeOnClick: true,
+			pauseOnHover: true,
+			type: 'success',
+			style: {padding: '0.5rem'},
+			draggable: true,
+			progress: undefined,
+			theme: 'dark',
+			transition: Bounce,
+		})
+
+		setIsCopied(true)
+
+		setTimeout(() => {
+			setIsCopied(false)
+		}, 2600)
+	}
 
 	return (
-		<div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50'>
-			<div className='flex flex-col w-3/4 p-4 rounded shadow-lg bg-dark'>
-				<h2 className='mb-4 text-lg font-bold'>Preview</h2>
-				<div className='flex justify-center w-full p-4'>
-					{/* <div
-						className='p-4 overflow-auto border border-gray-300 rounded h-96'
-						dangerouslySetInnerHTML={{__html: exportedCode}}
-					/> */}
-					<div className='w-1/3 h-52'>
-						<section
-							style={{
-								position: 'relative',
-								padding: '.5rem',
-								width: '100%',
-								height: '100%',
-								borderColor: '#3c0a6e',
-								backgroundColor: '#3c0a6e',
-								borderWidth: '2px',
-							}}
-						>
-							<div
-								style={{
-									position: 'relative',
-									padding: '.5rem',
-									width: '100%',
-									height: '19%',
-									borderColor: '#461478',
-									backgroundColor: '#461478',
-									borderWidth: '2px',
-								}}
-							></div>
-						</section>
-					</div>
-				</div>
+		<section className='fixed inset-0 flex flex-col items-center z-[1000] bg-dark canvas-grid'>
+			<header className='w-full px-6 pt-3.5 pb-4 bg-stone-800 border-b-2 border-pink-600 border-opacity-70'>
+				<h1 className='text-xl font-bold'>Form Export</h1>
+				<p className='mt-2 text-sm italic font-bold text-stone-400'>
+					Here you will find the source code that you can copy and paste into
+					your project
+				</p>
+			</header>
 
-				<div className='w-full text-white'>
-					<h2 className='mb-4 text-lg font-bold'>Exported Code</h2>
-					<div className='p-4 border border-gray-300 rounded'>
-						<SyntaxHighlighter
-							language='html'
-							style={atomOneDark}
-							customStyle={{
-								padding: '.7rem 1rem',
-								fontSize: '12px',
-								height: '10rem',
-							}}
-							showLineNumbers
-						>
-							{exportedCode}
-						</SyntaxHighlighter>
-						<button
-							className='px-4 py-2 mt-4 text-white bg-blue-600 rounded hover:bg-blue-700'
-							onClick={() => navigator.clipboard.writeText(exportedCode)}
-						>
-							Copy Code
-						</button>
-					</div>
-				</div>
-
-				{/* <button
-					onClick={onClose}
-					className='absolute text-gray-500 top-2 right-2 hover:text-gray-700'
+			<div className='relative w-2/3 h-full p-4 my-12 rounded-xl bg-stone-700'>
+				<SyntaxHighlighter
+					language='xml'
+					style={atomOneDark}
+					customStyle={{
+						padding: '.7rem 1rem',
+						fontSize: '12px',
+						height: '100%',
+						width: '100%',
+					}}
+					showLineNumbers
 				>
-					&times;
-				</button> */}
+					{exportedCode}
+				</SyntaxHighlighter>
+				<button
+					className='absolute flex items-center justify-center text-white transition-all bg-blue-600 border-2 border-blue-700 rounded-lg w-11 h-11 bg-opacity-20 bottom-11 right-7 hover:enabled:bg-blue-700 disabled:border-green-600 disabled:bg-green-600'
+					disabled={isCopied}
+					onClick={handleCopy}
+				>
+					{isCopied ? (
+						<Check size={20} weight='bold' />
+					) : (
+						<Clipboard size={17} weight='bold' />
+					)}
+				</button>
 			</div>
-		</div>
+
+			<button
+				className='absolute p-2 text-white transition-all bg-red-500 rounded-full top-4 right-3.5 hover:brightness-75 '
+				onClick={onClose}
+			></button>
+			<ToastContainer
+				position='top-center'
+				autoClose={2000}
+				hideProgressBar={false}
+				newestOnTop={false}
+				closeOnClick
+				rtl={false}
+				pauseOnFocusLoss
+				draggable
+				pauseOnHover
+				theme='dark'
+				// transition={Bounce}
+			/>
+		</section>
 	)
 }
 

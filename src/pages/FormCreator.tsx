@@ -1,11 +1,14 @@
+import {Export, Eye, File} from '@phosphor-icons/react'
 import {html} from 'js-beautify'
 import React, {useRef, useState} from 'react'
+import {Tooltip} from 'react-tooltip'
 import Canvas from '../components/creator/Canvas'
 import RenderCanvasComponent from '../components/creator/CanvasRenderer'
 import InputTypeModal from '../components/creator/InputTypeModal'
 import Sidebar from '../components/creator/Sidebar'
 import ExportModal from '../components/ExportModal'
 import Header from '../components/Header'
+import PreviewModal from '../components/PreviewModal'
 import {useClickOutside} from '../hooks/useClickOutside'
 import {EHTMLTag} from '../types/EHTMLTag'
 import {EPosition} from '../types/EPosition'
@@ -36,8 +39,11 @@ const FormCreator: React.FC = () => {
 
 	const [isResizing, setIsResizing] = useState<boolean>(false)
 
-	const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
-	const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false)
+	const [isModalOpen, setIsModalOpen] = useState<{
+		input: boolean
+		preview: boolean
+		export: boolean
+	}>({export: false, input: false, preview: false})
 	const [exportedCode, setExportedCode] = useState<string>('')
 
 	const canvasRef = useRef<HTMLDivElement>(null)
@@ -96,7 +102,7 @@ const FormCreator: React.FC = () => {
 		handleDeleteComponent()
 
 		if (draggedComponentType === EHTMLTag.INPUT && !isInputWithType) {
-			setIsModalOpen(true)
+			setIsModalOpen({export: false, input: true, preview: false})
 			return
 		}
 
@@ -250,7 +256,7 @@ const FormCreator: React.FC = () => {
 		setHoveredComponentId(null)
 
 		if (isInputWithType) {
-			setIsModalOpen(false)
+			setIsModalOpen({export: false, input: false, preview: false})
 		}
 	}
 
@@ -383,24 +389,77 @@ const FormCreator: React.FC = () => {
 			})
 
 			setExportedCode(exportedCode)
-			setIsExportModalOpen(true)
+			setIsModalOpen({export: true, input: false, preview: false})
 		} catch (error) {
 			console.error('Error formatting code:', error)
 		}
 	}
 
+	const handlePreview = () => {
+		const exportedCode = exportFormAsJSX(canvasComponents)
+
+		setExportedCode(exportedCode)
+		setIsModalOpen({export: false, input: false, preview: true})
+	}
+
+	const handleCloseModal = () => {
+		setIsModalOpen({export: false, input: false, preview: false})
+	}
+
+	const buttonsStyle =
+		'px-4 pt-2.5 pb-[0.525rem] border-2 transition-all disabled:border-stone-500 disabled:cursor-not-allowed rounded-lg disabled:text-stone-400 hover:enabled:bg-opacity-20'
+
 	return (
 		<>
 			<Header
 				actions={
-					<button
-						className='px-4 pt-2 pb-[0.55rem] text-white bg-purple-800 rounded hover:enabled::brightness-110 transition-all disabled:bg-stone-500 disabled:cursor-not-allowed'
-						type='button'
-						onClick={handleExport}
-						disabled={!canvasComponents.length}
-					>
-						Export Form
-					</button>
+					<>
+						<button
+							className={
+								buttonsStyle +
+								' border-violet-800 text-violet-800 hover:enabled:bg-violet-800'
+							}
+							type='button'
+							onClick={handlePreview}
+							disabled={!canvasComponents.length}
+							id='preview'
+						>
+							<Eye weight='bold' size={16} />
+						</button>
+						<button
+							className={
+								buttonsStyle +
+								' border-purple-800 text-purple-800 hover:enabled:bg-purple-800'
+							}
+							type='button'
+							// onClick={handleSave
+							disabled={!canvasComponents.length}
+							id='save'
+						>
+							<File weight='bold' className='mb-[0.1rem]' size={16} />
+						</button>
+						<button
+							className={
+								buttonsStyle +
+								' border-fuchsia-800 text-fuchsia-800 hover:enabled:bg-fuchsia-800'
+							}
+							type='button'
+							onClick={handleExport}
+							disabled={!canvasComponents.length}
+							id='export'
+						>
+							<Export weight='bold' className='mb-[0.1rem]' size={16} />
+						</button>
+						<Tooltip anchorSelect='#preview' place='top'>
+							Preview
+						</Tooltip>
+						<Tooltip anchorSelect='#save' place='top'>
+							Save
+						</Tooltip>
+						<Tooltip anchorSelect='#export' place='top'>
+							Export
+						</Tooltip>
+					</>
 				}
 			/>
 
@@ -441,16 +500,18 @@ const FormCreator: React.FC = () => {
 					canvasComponents={canvasComponents}
 					onUpdateStyle={handleUpdateStyle}
 				/>
-				{isModalOpen && (
+				{isModalOpen.input && (
 					<InputTypeModal
 						onSelectType={handleDrop}
-						onClose={() => setIsModalOpen(false)}
+						onClose={handleCloseModal}
 					/>
 				)}
-				{isExportModalOpen && (
-					<ExportModal
-						isOpen={isExportModalOpen}
-						onClose={() => setIsExportModalOpen(false)}
+				{isModalOpen.export && (
+					<ExportModal onClose={handleCloseModal} exportedCode={exportedCode} />
+				)}
+				{isModalOpen.preview && (
+					<PreviewModal
+						onClose={handleCloseModal}
 						exportedCode={exportedCode}
 					/>
 				)}
