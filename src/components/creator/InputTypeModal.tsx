@@ -1,24 +1,24 @@
 import {FC, useState} from 'react'
 
 interface InputTypeModalProps {
-	onSelectType: (type: string) => void
+	onSelectType: (isInputWithType?: boolean) => void
 	onClose: () => void
 }
 
 const inputTypes = [
-	'checkbox',
-	'color',
-	'date',
+	'text',
 	'email',
-	'file',
 	'number',
 	'password',
-	'radio',
-	'range',
-	'submit',
-	'tel',
-	'text',
-	'time',
+	// 'submit',
+	// 'checkbox',
+	// 'color',
+	// 'date',
+	// 'file',
+	// 'radio',
+	// 'range',
+	// 'tel',
+	// 'time',
 ]
 
 const InputTypeModal: FC<InputTypeModalProps> = ({onSelectType, onClose}) => {
@@ -32,7 +32,7 @@ const InputTypeModal: FC<InputTypeModalProps> = ({onSelectType, onClose}) => {
 						type="{selectedType || '...'}"
 					</span>
 				</div>
-				<ul className='grid grid-cols-5 gap-4'>
+				<ul className='grid grid-cols-4 gap-4'>
 					{inputTypes.map(type => (
 						<li
 							key={type}
@@ -42,7 +42,7 @@ const InputTypeModal: FC<InputTypeModalProps> = ({onSelectType, onClose}) => {
 						>
 							<button
 								className='w-full h-full p-2 text-white transition-all border-2 rounded-lg bg-stone-800 border-primary hover:brightness-110'
-								onClick={() => onSelectType(type)}
+								onClick={() => onSelectType(true)}
 							>
 								{type}
 							</button>

@@ -14,6 +14,7 @@ interface Props {
 	draggingType: EHTMLTag | null
 	isHintShowing: boolean
 	editingComponentId: string | null
+	canvasComponents: ICanvasComponent[]
 	isResizing?: boolean
 	onUpdateStyle: (id: string, updatedStyle: React.CSSProperties) => void
 	setIsResizing?: React.Dispatch<React.SetStateAction<boolean>>
@@ -35,6 +36,7 @@ const RenderCanvasComponent: React.FC<Props> = ({
 	isHintShowing,
 	editingComponentId,
 	isResizing,
+	canvasComponents,
 	onUpdateStyle,
 	setHoveredComponentId,
 	onDeleteComponent,
@@ -228,6 +230,7 @@ const RenderCanvasComponent: React.FC<Props> = ({
 						component={child}
 						setHoveredComponentId={setHoveredComponentId}
 						editingComponentId={editingComponentId}
+						canvasComponents={canvasComponents}
 						hoveredComponentId={hoveredComponentId}
 						onDeleteComponent={onDeleteComponent}
 						onEditComponent={onEditComponent}
@@ -369,6 +372,7 @@ const RenderCanvasComponent: React.FC<Props> = ({
 						onMouseEnter={handleMouseEnter}
 						onMouseLeave={handleMouseLeave}
 						onEditComponent={handleEdit}
+						editingComponentId={editingComponentId}
 						isCurrentInFocus={isCurrentInFocus}
 						isResizing={isResizing}
 						onHoverGUI={onHoverGUI}

@@ -9,7 +9,7 @@ interface InputProps {
 	isHint?: boolean
 	editingComponentId?: string | null
 	isResizing?: boolean
-	onHoverGUI?: JSX.Element // Додано onHoverGUI
+	onHoverGUI?: JSX.Element
 	onDragEnter?: (event: React.DragEvent<HTMLDivElement>) => void
 	onDragLeave?: (event: React.DragEvent<HTMLDivElement>) => void
 	onMouseEnter?: (event: React.MouseEvent<HTMLDivElement>) => void
@@ -26,7 +26,7 @@ const Input: FC<InputProps> = ({
 	isHint,
 	editingComponentId,
 	isResizing,
-	onHoverGUI, // Додано onHoverGUI
+	onHoverGUI,
 	onDragEnter,
 	onDragLeave,
 	onMouseEnter,
@@ -49,7 +49,11 @@ const Input: FC<InputProps> = ({
 
 	return !isHint ? (
 		<div
-			style={{position: 'relative', display: 'inline-block'}}
+			className='relative inline-block'
+			style={{
+				width: style?.width || 'auto',
+				height: style?.height || 'auto',
+			}}
 			onDragEnter={onDragEnter}
 			onDragLeave={onDragLeave}
 			onMouseEnter={onMouseEnter}
@@ -57,7 +61,8 @@ const Input: FC<InputProps> = ({
 		>
 			<input
 				type={type}
-				className='border-2 cursor-pointer'
+				className='border-2 outline-none cursor-pointer focus:outline-none'
+				// readOnly={true}
 				id={id}
 				style={{
 					...style,
@@ -67,6 +72,8 @@ const Input: FC<InputProps> = ({
 							: isCurrentInFocus && !isEditing && !isResizing
 							? '#facc15'
 							: style?.borderColor || 'transparent',
+					width: '100%',
+					height: '100%',
 				}}
 				onClick={handleClick}
 				aria-atomic={true}

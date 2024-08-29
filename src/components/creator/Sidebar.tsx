@@ -6,6 +6,7 @@ import {sidebarComponents} from '../../data/sidebar-components'
 import {EHTMLTag} from '../../types/EHTMLTag'
 import {EPosition} from '../../types/EPosition'
 import {ICanvasComponent} from '../../types/ICanvasComponent'
+import {IExtendedCSSProperties} from '../../types/IExtendedCSSProperties'
 import {findComponentById} from '../../utils/getComponentByID'
 import {getElementMinDimensions} from '../../utils/getElementMinDimensions'
 import {getIsBlockComponentByType} from '../../utils/getIsBlockComponentByType'
@@ -65,7 +66,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 	const isCanvasEmpty = canvasComponents.length === 0
 	const parent = editingComponent?.parent || null
 	const componentStyle = editingComponent?.style || {}
-	const {width: minWidth, height: minHeight} = getElementMinDimensions(parent)
+	const {width: minWidth, height: minHeight} = getElementMinDimensions(
+		parent,
+		editingComponent?.type
+	)
 	const isBlock = editingComponent
 		? getIsBlockComponentByType(editingComponent?.type)
 		: false
@@ -564,7 +568,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 	const renderHeadingSection = () => {
 		if (
 			editingComponent?.type === EHTMLTag.HEADING ||
-			editingComponent?.type === EHTMLTag.BUTTON
+			editingComponent?.type === EHTMLTag.BUTTON ||
+			editingComponent?.type === EHTMLTag.INPUT
 		) {
 			const isHeading = editingComponent?.type === EHTMLTag.HEADING
 			const componentName = isHeading ? 'Heading' : 'Button'
@@ -598,26 +603,28 @@ const Sidebar: React.FC<SidebarProps> = ({
 					)}
 
 					{/* Heading Text */}
-					<div className='group'>
-						<div className='flex justify-between cursor-pointer'>
-							<span className='text-white'>{componentName} Text</span>
+					{editingComponent?.type !== EHTMLTag.INPUT && (
+						<div className='group'>
+							<div className='flex justify-between cursor-pointer'>
+								<span className='text-white'>{componentName} Text</span>
+							</div>
+							<div className='mt-2'>
+								<input
+									type='text'
+									name='text'
+									value={componentStyle.text || ''}
+									onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+										const updatedStyle = {
+											...componentStyle,
+											text: e.target.value,
+										}
+										onUpdateStyle(editingComponentId as string, updatedStyle)
+									}}
+									className='w-full p-2 mb-4 text-white rounded bg-stone-700'
+								/>
+							</div>
 						</div>
-						<div className='mt-2'>
-							<input
-								type='text'
-								name='text'
-								value={componentStyle.text || ''}
-								onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-									const updatedStyle = {
-										...componentStyle,
-										text: e.target.value,
-									}
-									onUpdateStyle(editingComponentId as string, updatedStyle)
-								}}
-								className='w-full p-2 mb-4 text-white rounded bg-stone-700'
-							/>
-						</div>
-					</div>
+					)}
 
 					{/* Text Color */}
 					<div className='group'>
@@ -737,32 +744,6 @@ const Sidebar: React.FC<SidebarProps> = ({
 		if (editingComponent?.type === EHTMLTag.INPUT) {
 			return (
 				<>
-					{/* Input Type */}
-					<div className='group'>
-						<div className='flex justify-between cursor-pointer'>
-							<span className='text-white'>Input Type</span>
-						</div>
-						<div className='mt-2'>
-							<select
-								name='inputType'
-								value={componentStyle.inputType || 'text'}
-								onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-									const updatedStyle = {
-										...componentStyle,
-										inputType: e.target.value,
-									}
-									onUpdateStyle(editingComponentId as string, updatedStyle)
-								}}
-								className='w-full p-2 mb-4 text-white rounded bg-stone-700'
-							>
-								{/* Додайте всі типи інпутів тут */}
-								<option value='text'>Text</option>
-								<option value='number'>Number</option>
-								{/* Додайте інші варіанти */}
-							</select>
-						</div>
-					</div>
-
 					{/* Input Placeholder */}
 					<div className='group'>
 						<div className='flex justify-between cursor-pointer'>
@@ -805,7 +786,14 @@ const Sidebar: React.FC<SidebarProps> = ({
 					<input
 						type={type}
 						name={name}
-						value={componentStyle[name as keyof IExtendedCSSProperties] || ''}
+						value={
+							typeof componentStyle[name as keyof IExtendedCSSProperties] ===
+								'string' ||
+							typeof componentStyle[name as keyof IExtendedCSSProperties] ===
+								'number'
+								? componentStyle[name as keyof IExtendedCSSProperties]
+								: ''
+						}
 						onChange={handleInputChange}
 						className='w-full p-2 mb-4 text-white rounded bg-stone-700'
 						placeholder={placeholder}
@@ -889,7 +877,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 						<span>{activeSections.includes('constraints') ? '▲' : '▼'}</span>
 					</div>
 					{activeSections.includes('constraints') && (
-						<div className='mt-2'>{constraints}</div>
+						<div className='mt-2' key='constraints'>
+							{constraints}
+						</div>
 					)}
 				</div>
 			)
@@ -898,7 +888,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 	}
 
 	return (
-		<aside className='w-1/4 max-h-full px-5 overflow-y-auto py-7 bg-stone-900 min-w-72'>
+		<aside className='w-1/4 max-h-full px-5 overflow-y-auto select-none py-7 bg-stone-900 min-w-72'>
 			<div className='flex justify-between mb-4'>
 				{!editingComponentId ? (
 					<h2 className='text-xl'>Components</h2>
@@ -938,7 +928,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 										!isDisabled && onDragStart(type, position, event)
 									}
 									onDragEnd={onDragEnd}
-									className={`flex flex-col items-center justify-center gap-2 p-2 mb-2 text-white bg-white border-2 border-purple-800 cursor-pointer aspect-square rounded-xl bg-opacity-10 ${
+									className={`flex flex-col items-center justify-center gap-2 p-2 mb-2 text-white bg-white border-2 border-purple-800 cursor-pointer aspect-square rounded-xl bg-opacity-10 hover:brightness-125 transition-all ${
 										isDisabled ? 'opacity-50 cursor-not-allowed' : ''
 									}`}
 								>
