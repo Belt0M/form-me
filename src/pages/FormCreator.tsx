@@ -1,8 +1,10 @@
+import {html} from 'js-beautify'
 import React, {useRef, useState} from 'react'
 import Canvas from '../components/creator/Canvas'
 import RenderCanvasComponent from '../components/creator/CanvasRenderer'
 import InputTypeModal from '../components/creator/InputTypeModal'
 import Sidebar from '../components/creator/Sidebar'
+import ExportModal from '../components/ExportModal'
 import Header from '../components/Header'
 import {useClickOutside} from '../hooks/useClickOutside'
 import {EHTMLTag} from '../types/EHTMLTag'
@@ -35,6 +37,8 @@ const FormCreator: React.FC = () => {
 	const [isResizing, setIsResizing] = useState<boolean>(false)
 
 	const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+	const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false)
+	const [exportedCode, setExportedCode] = useState<string>('')
 
 	const canvasRef = useRef<HTMLDivElement>(null)
 
@@ -339,12 +343,16 @@ const FormCreator: React.FC = () => {
 	function generateJSX(component: ICanvasComponent): string {
 		const {type, style, children} = component
 
-		const styleString = style ? JSON.stringify(style, null, 2) : ''
+		const styleString = style
+			? Object.entries(style)
+					.map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
+					.join(', ')
+			: ''
 
 		let jsxTag = `<${type}`
 
 		if (styleString) {
-			jsxTag += ` style={${styleString}}`
+			jsxTag += ` style={{ ${styleString} }}`
 		}
 
 		jsxTag += `>`
@@ -363,8 +371,22 @@ const FormCreator: React.FC = () => {
 	}
 
 	const handleExport = () => {
-		const exportedCode = exportFormAsJSX(canvasComponents)
-		console.log(exportedCode)
+		let exportedCode = exportFormAsJSX(canvasComponents)
+
+		try {
+			exportedCode = html(exportedCode, {
+				indent_size: 2,
+				preserve_newlines: true,
+				max_preserve_newlines: 2,
+				end_with_newline: true,
+				indent_inner_html: true,
+			})
+
+			setExportedCode(exportedCode)
+			setIsExportModalOpen(true)
+		} catch (error) {
+			console.error('Error formatting code:', error)
+		}
 	}
 
 	return (
@@ -372,14 +394,16 @@ const FormCreator: React.FC = () => {
 			<Header
 				actions={
 					<button
-						className='px-4 pt-2 pb-[0.55rem] text-white bg-purple-800 rounded hover:brightness-110 transition-all'
+						className='px-4 pt-2 pb-[0.55rem] text-white bg-purple-800 rounded hover:enabled::brightness-110 transition-all disabled:bg-stone-500 disabled:cursor-not-allowed'
 						type='button'
 						onClick={handleExport}
+						disabled={!canvasComponents.length}
 					>
 						Export Form
 					</button>
 				}
 			/>
+
 			<main className='flex h-[calc(100vh-80.8px)] overflow-hidden'>
 				<Canvas
 					ref={canvasRef}
@@ -421,6 +445,13 @@ const FormCreator: React.FC = () => {
 					<InputTypeModal
 						onSelectType={handleDrop}
 						onClose={() => setIsModalOpen(false)}
+					/>
+				)}
+				{isExportModalOpen && (
+					<ExportModal
+						isOpen={isExportModalOpen}
+						onClose={() => setIsExportModalOpen(false)}
+						exportedCode={exportedCode}
 					/>
 				)}
 			</main>
