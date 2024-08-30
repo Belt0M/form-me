@@ -1,7 +1,7 @@
 import {FC, useState} from 'react'
 
 interface InputTypeModalProps {
-	onSelectType: (isInputWithType?: boolean) => void
+	onSelectType: (isInputWithType?: boolean, isButtonWithType?: boolean) => void
 	onClose: () => void
 }
 
@@ -15,10 +15,7 @@ const inputTypes = [
 	// 'color',
 	// 'date',
 	// 'file',
-	// 'radio',
 	// 'range',
-	// 'tel',
-	// 'time',
 ]
 
 const InputTypeModal: FC<InputTypeModalProps> = ({onSelectType, onClose}) => {

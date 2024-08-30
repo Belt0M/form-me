@@ -2,6 +2,7 @@ import {Export, Eye, File} from '@phosphor-icons/react'
 import {html} from 'js-beautify'
 import React, {useRef, useState} from 'react'
 import {Tooltip} from 'react-tooltip'
+import ButtonTypeModal from '../components/creator/ButtonTypeModal'
 import Canvas from '../components/creator/Canvas'
 import RenderCanvasComponent from '../components/creator/CanvasRenderer'
 import InputTypeModal from '../components/creator/InputTypeModal'
@@ -41,9 +42,10 @@ const FormCreator: React.FC = () => {
 
 	const [isModalOpen, setIsModalOpen] = useState<{
 		input: boolean
+		button: boolean
 		preview: boolean
 		export: boolean
-	}>({export: false, input: false, preview: false})
+	}>({export: false, input: false, button: false, preview: false})
 	const [exportedCode, setExportedCode] = useState<string>('')
 
 	const canvasRef = useRef<HTMLDivElement>(null)
@@ -52,7 +54,7 @@ const FormCreator: React.FC = () => {
 
 	const defaultStyles: React.CSSProperties = {
 		position: 'relative',
-		padding: '.5rem',
+		padding: '8px',
 	}
 
 	const handleDragStart = (type: EHTMLTag, position: EPosition) => {
@@ -62,7 +64,9 @@ const FormCreator: React.FC = () => {
 	}
 
 	const handleDragEnd = () => {
-		draggingType !== EHTMLTag.INPUT && setDraggingType(null)
+		draggingType !== EHTMLTag.INPUT &&
+			draggingType !== EHTMLTag.BUTTON &&
+			setDraggingType(null)
 	}
 
 	const addComponent = (
@@ -98,11 +102,29 @@ const FormCreator: React.FC = () => {
 		})
 	}
 
-	const handleDrop = (isInputWithType?: boolean) => {
+	const handleDrop = (
+		isInputWithType?: boolean,
+		isButtonWithType?: boolean
+	) => {
 		handleDeleteComponent()
 
 		if (draggedComponentType === EHTMLTag.INPUT && !isInputWithType) {
-			setIsModalOpen({export: false, input: true, preview: false})
+			setIsModalOpen({
+				export: false,
+				input: true,
+				button: false,
+				preview: false,
+			})
+			return
+		}
+
+		if (draggedComponentType === EHTMLTag.BUTTON && !isButtonWithType) {
+			setIsModalOpen({
+				export: false,
+				input: false,
+				button: true,
+				preview: false,
+			})
 			return
 		}
 
@@ -255,8 +277,13 @@ const FormCreator: React.FC = () => {
 		setDraggedComponentType(null)
 		setHoveredComponentId(null)
 
-		if (isInputWithType) {
-			setIsModalOpen({export: false, input: false, preview: false})
+		if (isInputWithType || isButtonWithType) {
+			setIsModalOpen({
+				export: false,
+				input: false,
+				preview: false,
+				button: false,
+			})
 		}
 	}
 
@@ -389,7 +416,12 @@ const FormCreator: React.FC = () => {
 			})
 
 			setExportedCode(exportedCode)
-			setIsModalOpen({export: true, input: false, preview: false})
+			setIsModalOpen({
+				export: true,
+				input: false,
+				preview: false,
+				button: false,
+			})
 		} catch (error) {
 			console.error('Error formatting code:', error)
 		}
@@ -399,11 +431,11 @@ const FormCreator: React.FC = () => {
 		const exportedCode = exportFormAsJSX(canvasComponents)
 
 		setExportedCode(exportedCode)
-		setIsModalOpen({export: false, input: false, preview: true})
+		setIsModalOpen({export: false, input: false, preview: true, button: false})
 	}
 
 	const handleCloseModal = () => {
-		setIsModalOpen({export: false, input: false, preview: false})
+		setIsModalOpen({export: false, input: false, preview: false, button: false})
 	}
 
 	const buttonsStyle =
@@ -513,6 +545,12 @@ const FormCreator: React.FC = () => {
 					<PreviewModal
 						onClose={handleCloseModal}
 						exportedCode={exportedCode}
+					/>
+				)}
+				{isModalOpen.button && (
+					<ButtonTypeModal
+						onSelectType={handleDrop}
+						onClose={handleCloseModal}
 					/>
 				)}
 			</main>

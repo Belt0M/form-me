@@ -342,6 +342,7 @@ const RenderCanvasComponent: React.FC<Props> = ({
 				renderedComponent = (
 					<Button
 						id={id}
+						type={style?.buttonType || 'button'}
 						style={computedStyle}
 						onDragEnter={handleDragEnter}
 						onDragLeave={handleDragLeave}

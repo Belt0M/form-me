@@ -11,6 +11,7 @@ interface Props {
 	isHint?: boolean
 	isResizing?: boolean
 	editingComponentId?: string | null
+	type?: 'button' | 'submit'
 	onDragEnter?: (
 		event: React.DragEvent<HTMLDivElement | HTMLButtonElement>
 	) => void
@@ -35,6 +36,7 @@ const Button: FC<Props> = ({
 	isHint,
 	isResizing,
 	editingComponentId,
+	type,
 	onDragEnter,
 	onDragLeave,
 	onMouseEnter,
@@ -63,6 +65,7 @@ const Button: FC<Props> = ({
 					'before:absolute before:inset-0 before:left-0 before:top-0',
 				'cursor-pointer border-2'
 			)}
+			type={type}
 			id={id}
 			style={{
 				...style,
