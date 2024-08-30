@@ -12,6 +12,7 @@ interface Props {
 	isResizing?: boolean
 	editingComponentId?: string | null
 	type?: 'button' | 'submit'
+	content?: string | undefined
 	onDragEnter?: (
 		event: React.DragEvent<HTMLDivElement | HTMLButtonElement>
 	) => void
@@ -37,6 +38,7 @@ const Button: FC<Props> = ({
 	isResizing,
 	editingComponentId,
 	type,
+	content,
 	onDragEnter,
 	onDragLeave,
 	onMouseEnter,
@@ -83,7 +85,7 @@ const Button: FC<Props> = ({
 			onMouseLeave={onMouseLeave}
 			aria-atomic={true}
 		>
-			{style?.text || 'Button'}
+			{content ? content : type === 'button' ? 'Button' : 'Submit'}
 			{children}
 			{!isResizing && onHoverGUI}
 		</button>

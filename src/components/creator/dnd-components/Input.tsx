@@ -82,11 +82,7 @@ const Input: FC<InputProps> = ({
 			{!isResizing && onHoverGUI}
 		</div>
 	) : (
-		<input
-			type={type}
-			className='border-2 rounded-lg bg-hint border-hintBorder px-[25px] pt-[9px] pb-[11px] bg-opacity-30'
-			disabled
-		/>
+		<div className='w-[205px] h-[40px] border-2 rounded-lg bg-hint border-hintBorder bg-opacity-30 inline-block' />
 	)
 }
 

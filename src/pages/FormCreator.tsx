@@ -173,8 +173,7 @@ const FormCreator: React.FC = () => {
 
 					if (buttonType) {
 						newComponent.style!.buttonType = buttonType
-						newComponent.style!.text =
-							buttonType === 'button' ? 'Button' : 'Submit'
+						newComponent.content = buttonType === 'button' ? 'Button' : 'Submit'
 					}
 				} else {
 					if (inputType) {
@@ -195,11 +194,7 @@ const FormCreator: React.FC = () => {
 			draggingType === EHTMLTag.INPUT ||
 			draggingType === EHTMLTag.HEADING
 		) {
-			newComponent.style!.fontSize = '16px'
-		}
-
-		if (draggingType === EHTMLTag.HEADING) {
-			newComponent.style!.text = 'Heading'
+			newComponent.style!.fontSize = '12.8px'
 		}
 
 		const hasContent = getIsContainContent(draggedComponentType)
@@ -207,6 +202,7 @@ const FormCreator: React.FC = () => {
 		if (hasContent) {
 			if (draggingType === EHTMLTag.HEADING) {
 				newComponent.content = 'Heading'
+				newComponent.level = 6
 			} else if (draggingType === EHTMLTag.BUTTON) {
 				newComponent.content = buttonType === 'button' ? 'Button' : 'Submit'
 			}
@@ -302,6 +298,35 @@ const FormCreator: React.FC = () => {
 
 	const handleEditComponent = (id: string) => {
 		setEditingComponentId(id)
+	}
+
+	const handleUpdateComponentProperty = (
+		id: string,
+		name: string,
+		value: string | number
+	) => {
+		if (name) {
+			const updateComponentProperty = (
+				components: ICanvasComponent[]
+			): ICanvasComponent[] => {
+				return components.map(component => {
+					if (component.id === id) {
+						return {...component, [name]: value}
+					}
+					if (component.children) {
+						return {
+							...component,
+							children: updateComponentProperty(component.children),
+						}
+					}
+					return component
+				})
+			}
+
+			setCanvasComponents(prevComponents =>
+				updateComponentProperty(prevComponents)
+			)
+		}
 	}
 
 	const handleUpdateStyle = (id: string, updatedStyle: React.CSSProperties) => {
@@ -484,6 +509,7 @@ const FormCreator: React.FC = () => {
 					editingComponentId={editingComponentId}
 					canvasComponents={canvasComponents}
 					onUpdateStyle={handleUpdateStyle}
+					onUpdateProperty={handleUpdateComponentProperty}
 				/>
 				{isModalOpen.input && (
 					<InputTypeModal

@@ -45,7 +45,7 @@ const RenderCanvasComponent: React.FC<Props> = ({
 	setIsHintShowing,
 	setIsResizing,
 }) => {
-	const {id, type, style, children, isHint} = component
+	const {id, type, style, children, isHint, content, level} = component
 	const containerRef = useRef<HTMLDivElement | null>(null)
 	const [isHovering, setIsHovering] = useState<boolean>(false)
 
@@ -313,13 +313,14 @@ const RenderCanvasComponent: React.FC<Props> = ({
 		case EHTMLTag.HEADING:
 			if (isHint) {
 				renderedComponent = (
-					<Heading level={style?.level || 6} id={id} isHint={!!isHint} />
+					<Heading level={level || 6} id={id} isHint={!!isHint} />
 				)
 			} else {
 				renderedComponent = (
 					<Heading
 						id={id}
-						level={style?.level || 6}
+						level={level || 6}
+						content={content}
 						style={computedStyle}
 						editingComponentId={editingComponentId}
 						isCurrentInFocus={isCurrentInFocus}
@@ -344,6 +345,7 @@ const RenderCanvasComponent: React.FC<Props> = ({
 						id={id}
 						type={style?.buttonType || 'button'}
 						style={computedStyle}
+						content={content}
 						onDragEnter={handleDragEnter}
 						onDragLeave={handleDragLeave}
 						onMouseEnter={handleMouseEnter}

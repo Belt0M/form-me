@@ -9,6 +9,7 @@ import {ICanvasComponent} from '../../types/ICanvasComponent'
 import {IExtendedCSSProperties} from '../../types/IExtendedCSSProperties'
 import {findComponentById} from '../../utils/getComponentByID'
 import {getElementMinDimensions} from '../../utils/getElementMinDimensions'
+import {getFontSizeByHeadingLevel} from '../../utils/getFontSizeByHeadingLevel'
 import {getIsBlockComponentByType} from '../../utils/getIsBlockComponentByType'
 
 interface SidebarProps {
@@ -21,6 +22,7 @@ interface SidebarProps {
 	) => void
 	onDragEnd: () => void
 	onUpdateStyle: (id: string, updatedStyle: React.CSSProperties) => void
+	onUpdateProperty: (id: string, name: string, value: string | number) => void
 }
 
 enum ESpacing {
@@ -52,6 +54,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 	onDragStart,
 	onDragEnd,
 	onUpdateStyle,
+	onUpdateProperty,
 }) => {
 	const [position, setPosition] = useState<EPosition>(EPosition.RELATIVE)
 	const [activeSections, setActiveSections] = useState<string[]>([])
@@ -596,13 +599,20 @@ const Sidebar: React.FC<SidebarProps> = ({
 							<div className='mt-2'>
 								<select
 									name='level'
-									value={componentStyle.level || 6}
+									value={editingComponent?.level || 6}
 									onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-										const updatedStyle = {
-											...componentStyle,
-											level: +e.target.value,
+										if (editingComponentId) {
+											const updatedStyle = {
+												...componentStyle,
+												fontSize: getFontSizeByHeadingLevel(+e.target.value),
+											}
+											onUpdateStyle(editingComponentId as string, updatedStyle)
+											onUpdateProperty(
+												editingComponentId,
+												e.target.name,
+												+e.target.value
+											)
 										}
-										onUpdateStyle(editingComponentId as string, updatedStyle)
 									}}
 									className='w-full p-2 mb-4 text-white rounded bg-stone-700'
 								>
@@ -623,14 +633,14 @@ const Sidebar: React.FC<SidebarProps> = ({
 							<div className='mt-2'>
 								<input
 									type='text'
-									name='text'
-									value={componentStyle.text || ''}
+									name='content'
+									value={editingComponent.content || ''}
 									onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-										const updatedStyle = {
-											...componentStyle,
-											text: e.target.value,
-										}
-										onUpdateStyle(editingComponentId as string, updatedStyle)
+										onUpdateProperty(
+											editingComponentId as string,
+											e.target.name,
+											e.target.value
+										)
 									}}
 									className='w-full p-2 mb-4 text-white rounded bg-stone-700'
 								/>
@@ -666,7 +676,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 								value={
 									fontSize.isEditing
 										? parseFloat(fontSize.fontSize as string)
-										: Math.round(parseFloat(componentStyle.fontSize as string))
+										: parseFloat(componentStyle.fontSize as string)
 								}
 								onChange={e => handleInputChange(e, 'px')}
 								onBlur={e => handleBlur(e.target as HTMLElement, 'fontSize')}

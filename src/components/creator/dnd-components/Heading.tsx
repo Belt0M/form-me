@@ -11,6 +11,7 @@ interface HeadingProps {
 	editingComponentId?: string | null
 	isResizing?: boolean
 	onHoverGUI?: JSX.Element
+	content?: string | undefined
 	setIsResizing?: React.Dispatch<React.SetStateAction<boolean>>
 	onDragEnter?: (event: React.DragEvent<HTMLDivElement>) => void
 	onDragLeave?: (event: React.DragEvent<HTMLDivElement>) => void
@@ -29,6 +30,7 @@ const Heading: FC<HeadingProps> = ({
 	level,
 	isResizing,
 	onHoverGUI,
+	content,
 	onDragEnter,
 	onDragLeave,
 	onMouseEnter,
@@ -66,7 +68,7 @@ const Heading: FC<HeadingProps> = ({
 				isCurrentInFocus && !isEditing && 'border-dashed',
 				isCurrentInFocus &&
 					'before:absolute before:inset-0 before:left-0 before:top-0',
-				'cursor-pointer border-2'
+				'cursor-pointer border-2 min-h-8'
 			)}
 			id={id}
 			style={{
@@ -80,12 +82,12 @@ const Heading: FC<HeadingProps> = ({
 			onMouseLeave={onMouseLeave}
 			aria-atomic={true}
 		>
-			{style?.text || 'Heading'}
+			{content != undefined ? content : 'Heading'}
 			{!isResizing && onHoverGUI}
 		</Tag>
 	) : (
-		<Tag className='w-full p-2 text-white border-2 bg-hint bg-opacity-20 border-hintBorder'>
-			{style?.text || 'Heading'}
+		<Tag className='w-full p-2 text-[12.8px] text-white border-2 bg-hint bg-opacity-20 border-hintBorder'>
+			{content || 'Heading'}
 		</Tag>
 	)
 }
