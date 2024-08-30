@@ -15,10 +15,12 @@ import {EHTMLTag} from '../types/EHTMLTag'
 import {EPosition} from '../types/EPosition'
 import {ICanvasComponent} from '../types/ICanvasComponent'
 import {generateColor} from '../utils/generateColor'
+import {generateJSX} from '../utils/generateJSX'
 import {getComponentsQuantity} from '../utils/getComponentsQuantity'
-import {getElementHeightWithoutBorderAndPadding} from '../utils/getElementHeightWithoutBorderAndPadding'
-import {getElementWidthWithoutBorderAndPadding} from '../utils/getElementWidthWithoutBorderAndPadding'
+import {getDefaultComponentHeight} from '../utils/getDefaultComponentHeight'
+import {getDefaultComponentWidth} from '../utils/getDefaultComponentWidth'
 import {getIsBlockComponentByType} from '../utils/getIsBlockComponentByType'
+import {getIsContainContent} from '../utils/getIsContainContent'
 
 const FormCreator: React.FC = () => {
 	const [canvasComponents, setCanvasComponents] = useState<ICanvasComponent[]>(
@@ -103,12 +105,12 @@ const FormCreator: React.FC = () => {
 	}
 
 	const handleDrop = (
-		isInputWithType?: boolean,
-		isButtonWithType?: boolean
+		inputType?: string | null,
+		buttonType?: 'button' | 'submit' | null
 	) => {
 		handleDeleteComponent()
 
-		if (draggedComponentType === EHTMLTag.INPUT && !isInputWithType) {
+		if (draggedComponentType === EHTMLTag.INPUT && !inputType) {
 			setIsModalOpen({
 				export: false,
 				input: true,
@@ -118,7 +120,7 @@ const FormCreator: React.FC = () => {
 			return
 		}
 
-		if (draggedComponentType === EHTMLTag.BUTTON && !isButtonWithType) {
+		if (draggedComponentType === EHTMLTag.BUTTON && !buttonType) {
 			setIsModalOpen({
 				export: false,
 				input: false,
@@ -129,83 +131,7 @@ const FormCreator: React.FC = () => {
 		}
 
 		if (draggedComponentType === null) return
-
 		if (canvasComponents.length && !hoveredComponentId) return
-
-		const getHeightByComponentType = (
-			type: EHTMLTag,
-			parentID: string | null
-		) => {
-			let parentHeight = null
-
-			if (parentID) {
-				const parent = document.getElementById(parentID)
-
-				if (parent) {
-					parentHeight = getElementHeightWithoutBorderAndPadding(parent)
-				}
-			}
-
-			let result = '100%'
-
-			switch (type) {
-				case EHTMLTag.DIV:
-					result = parentHeight
-						? Math.round((100 / parentHeight) * 100) + '%'
-						: '100px'
-					break
-				case EHTMLTag.HEADING:
-					result = 'auto'
-					break
-				case EHTMLTag.BUTTON:
-					result = '40px'
-					break
-				case EHTMLTag.INPUT:
-					result = parentHeight
-						? Math.round((40 / parentHeight) * 100) + '%'
-						: '40px'
-					break
-				default:
-					break
-			}
-
-			return result
-		}
-
-		const getWidthByComponentType = (
-			type: EHTMLTag,
-			parentID: string | null
-		) => {
-			let parentWidth = null
-
-			if (parentID) {
-				const parent = document.getElementById(parentID)
-
-				if (parent) {
-					parentWidth = getElementWidthWithoutBorderAndPadding(parent)
-				}
-			}
-
-			let result = '100%'
-
-			switch (type) {
-				case EHTMLTag.HEADING:
-					result = 'auto'
-					break
-				case EHTMLTag.BUTTON:
-					result = '100px'
-					break
-				case EHTMLTag.INPUT:
-					result = parentWidth
-						? Math.round((200 / parentWidth) * 100) + '%'
-						: '200px'
-					break
-				default:
-					break
-			}
-
-			return result
-		}
 
 		const isBlock = getIsBlockComponentByType(draggedComponentType)
 
@@ -227,11 +153,11 @@ const FormCreator: React.FC = () => {
 			)
 
 			if (draggingType !== EHTMLTag.BUTTON) {
-				const width = getWidthByComponentType(
+				const width = getDefaultComponentWidth(
 					draggedComponentType,
 					hoveredComponentId
 				)
-				const height = getHeightByComponentType(
+				const height = getDefaultComponentHeight(
 					draggedComponentType,
 					hoveredComponentId
 				)
@@ -244,6 +170,16 @@ const FormCreator: React.FC = () => {
 			if (draggingType === EHTMLTag.BUTTON || draggingType === EHTMLTag.INPUT) {
 				if (draggingType === EHTMLTag.BUTTON) {
 					newComponent.style!.padding = '9px 25px 11px 25px'
+
+					if (buttonType) {
+						newComponent.style!.buttonType = buttonType
+						newComponent.style!.text =
+							buttonType === 'button' ? 'Button' : 'Submit'
+					}
+				} else {
+					if (inputType) {
+						newComponent.style!.inputType = inputType
+					}
 				}
 
 				newComponent.style!.borderRadius = '6px'
@@ -252,12 +188,28 @@ const FormCreator: React.FC = () => {
 
 			newComponent.style!.backgroundColor = backgroundColor
 			newComponent.style!.borderWidth = '2px'
-		} else {
+		}
+
+		if (
+			draggingType === EHTMLTag.BUTTON ||
+			draggingType === EHTMLTag.INPUT ||
+			draggingType === EHTMLTag.HEADING
+		) {
 			newComponent.style!.fontSize = '16px'
 		}
 
-		if (draggingType === EHTMLTag.BUTTON || draggingType === EHTMLTag.INPUT) {
-			newComponent.style!.fontSize = '16px'
+		if (draggingType === EHTMLTag.HEADING) {
+			newComponent.style!.text = 'Heading'
+		}
+
+		const hasContent = getIsContainContent(draggedComponentType)
+
+		if (hasContent) {
+			if (draggingType === EHTMLTag.HEADING) {
+				newComponent.content = 'Heading'
+			} else if (draggingType === EHTMLTag.BUTTON) {
+				newComponent.content = buttonType === 'button' ? 'Button' : 'Submit'
+			}
 		}
 
 		if (hoveredComponentId) {
@@ -277,7 +229,7 @@ const FormCreator: React.FC = () => {
 		setDraggedComponentType(null)
 		setHoveredComponentId(null)
 
-		if (isInputWithType || isButtonWithType) {
+		if (inputType || buttonType) {
 			setIsModalOpen({
 				export: false,
 				input: false,
@@ -373,32 +325,6 @@ const FormCreator: React.FC = () => {
 		setCanvasComponents(prevComponents => updateComponentStyle(prevComponents))
 	}
 
-	function generateJSX(component: ICanvasComponent): string {
-		const {type, style, children} = component
-
-		const styleString = style
-			? Object.entries(style)
-					.map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
-					.join(', ')
-			: ''
-
-		let jsxTag = `<${type}`
-
-		if (styleString) {
-			jsxTag += ` style={{ ${styleString} }}`
-		}
-
-		jsxTag += `>`
-
-		if (children && children.length > 0) {
-			jsxTag += children.map(child => generateJSX(child)).join('')
-		}
-
-		jsxTag += `</${type}>`
-
-		return jsxTag
-	}
-
 	function exportFormAsJSX(components: ICanvasComponent[]): string {
 		return components.map(component => generateJSX(component)).join('\n')
 	}
@@ -438,12 +364,39 @@ const FormCreator: React.FC = () => {
 		setIsModalOpen({export: false, input: false, preview: false, button: false})
 	}
 
+	const hasInput = (components: ICanvasComponent[]): boolean => {
+		return components.some(
+			component =>
+				(!component.isHint && component.type === EHTMLTag.INPUT) ||
+				(component.children && hasInput(component.children))
+		)
+	}
+
+	const hasSubmitButton = (components: ICanvasComponent[]): boolean => {
+		return components.some(
+			component =>
+				(!component.isHint &&
+					component.type === EHTMLTag.BUTTON &&
+					component.style?.buttonType === 'submit') ||
+				(component.children && hasSubmitButton(component.children))
+		)
+	}
+
+	console.log(canvasComponents)
+
 	const buttonsStyle =
 		'px-4 pt-2.5 pb-[0.525rem] border-2 transition-all disabled:border-stone-500 disabled:cursor-not-allowed rounded-lg disabled:text-stone-400 hover:enabled:bg-opacity-20'
+
+	const hasInputElement = hasInput(canvasComponents)
+	const hasSubmitButtonElement = hasSubmitButton(canvasComponents)
+
+	const allRequirementsMet = hasInputElement && hasSubmitButtonElement
 
 	return (
 		<>
 			<Header
+				hasInput={hasInputElement}
+				hasSubmitButton={hasSubmitButtonElement}
 				actions={
 					<>
 						<button
@@ -453,7 +406,7 @@ const FormCreator: React.FC = () => {
 							}
 							type='button'
 							onClick={handlePreview}
-							disabled={!canvasComponents.length}
+							disabled={!allRequirementsMet}
 							id='preview'
 						>
 							<Eye weight='bold' size={16} />
@@ -464,8 +417,8 @@ const FormCreator: React.FC = () => {
 								' border-purple-800 text-purple-800 hover:enabled:bg-purple-800'
 							}
 							type='button'
-							// onClick={handleSave
-							disabled={!canvasComponents.length}
+							// onClick={handleSave}
+							disabled={!allRequirementsMet}
 							id='save'
 						>
 							<File weight='bold' className='mb-[0.1rem]' size={16} />
@@ -477,7 +430,7 @@ const FormCreator: React.FC = () => {
 							}
 							type='button'
 							onClick={handleExport}
-							disabled={!canvasComponents.length}
+							disabled={!allRequirementsMet}
 							id='export'
 						>
 							<Export weight='bold' className='mb-[0.1rem]' size={16} />

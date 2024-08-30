@@ -1,7 +1,10 @@
 import {FC, useState} from 'react'
 
 interface ButtonTypeModalProps {
-	onSelectType: (isInputWithType?: boolean, isButtonWithType?: boolean) => void
+	onSelectType: (
+		inputType?: string | null,
+		buttonType?: 'button' | 'submit' | null
+	) => void
 	onClose: () => void
 }
 
@@ -27,7 +30,9 @@ const ButtonTypeModal: FC<ButtonTypeModalProps> = ({onSelectType, onClose}) => {
 						>
 							<button
 								className='w-full h-full p-2 py-4 text-white transition-all border-2 rounded-lg bg-stone-800 border-primary hover:brightness-110'
-								onClick={() => onSelectType(false, true)}
+								onClick={() =>
+									onSelectType(null, type as 'button' | 'submit' | null)
+								}
 							>
 								{type}
 							</button>

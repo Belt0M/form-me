@@ -1,7 +1,7 @@
 import {FC, useState} from 'react'
 
 interface InputTypeModalProps {
-	onSelectType: (isInputWithType?: boolean, isButtonWithType?: boolean) => void
+	onSelectType: (inputType?: string, buttonType?: 'button' | 'submit') => void
 	onClose: () => void
 }
 
@@ -39,7 +39,7 @@ const InputTypeModal: FC<InputTypeModalProps> = ({onSelectType, onClose}) => {
 						>
 							<button
 								className='w-full h-full p-2 text-white transition-all border-2 rounded-lg bg-stone-800 border-primary hover:brightness-110'
-								onClick={() => onSelectType(true)}
+								onClick={() => onSelectType(type)}
 							>
 								{type}
 							</button>

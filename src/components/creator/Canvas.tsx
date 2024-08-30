@@ -6,7 +6,7 @@ interface CanvasProps {
 	isDragging: boolean
 	children?: React.ReactNode
 	editingComponentId: string | null
-	onDrop: (isInputWithType?: boolean) => void
+	onDrop: (inputType?: string, buttonType?: 'button' | 'submit') => void
 	onDragOver: (event: React.DragEvent<HTMLDivElement>) => void
 	onDeleteComponent: (id?: string) => void
 }
