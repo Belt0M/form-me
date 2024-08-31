@@ -23,6 +23,7 @@ export interface RegisterRequest {
 export const authApi = createApi({
 	reducerPath: 'authApi',
 	baseQuery: fetchBaseQuery({baseUrl: 'http://localhost:3000/'}),
+	tagTypes: ['Forms'],
 	endpoints: builder => ({
 		login: builder.mutation<AuthResponse, LoginRequest>({
 			query: credentials => ({
@@ -30,6 +31,7 @@ export const authApi = createApi({
 				method: 'POST',
 				body: credentials,
 			}),
+			invalidatesTags: ['Forms'],
 		}),
 		register: builder.mutation<AuthResponse, RegisterRequest>({
 			query: userData => ({
@@ -37,6 +39,7 @@ export const authApi = createApi({
 				method: 'POST',
 				body: userData,
 			}),
+			invalidatesTags: ['Forms'],
 		}),
 		verifyToken: builder.mutation<{username: string}, string>({
 			query: token => ({
@@ -45,6 +48,7 @@ export const authApi = createApi({
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},
+				invalidatesTags: ['Forms'],
 			}),
 		}),
 	}),

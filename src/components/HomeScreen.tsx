@@ -1,54 +1,67 @@
+/* eslint-disable no-mixed-spaces-and-tabs */
 import {StackPlus} from '@phosphor-icons/react'
-import React, {useState} from 'react'
-import {useDispatch, useSelector} from 'react-redux'
+import React, {useEffect, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
-import {addForm, deleteForm} from '../store/formSlice'
-import {RootState} from '../store/store'
+import {useAppSelector} from '../hooks/storeHook'
+import {
+	useAddFormMutation,
+	useDeleteFormMutation,
+	useGetFormsQuery,
+} from '../store/forms.api'
 import {ICreateForm} from '../types/ICreateForm'
+import {IForm} from '../types/IForm'
 import CreateFormPopup from './CreateFormPopup'
 import FormCard from './FormCard'
 
-const defaultFormData: ICreateForm = {name: '', desc: ''}
+const defaultFormData: ICreateForm = {title: '', description: ''}
 
 const HomeScreen: React.FC = () => {
+	const {data: forms, refetch} = useGetFormsQuery()
+	const [addForm] = useAddFormMutation()
+	const [deleteForm] = useDeleteFormMutation()
 	const [isPopupOpen, setIsPopupOpen] = useState<boolean>(false)
 	const [formData, setFormData] = useState<ICreateForm>(defaultFormData)
-	const dispatch = useDispatch()
 	const navigate = useNavigate()
-	const forms = useSelector((state: RootState) => state.forms.forms)
+	const user = useAppSelector(state => state.auth.user)
 
-	const openPopup = () => {
-		setIsPopupOpen(true)
-	}
+	useEffect(() => {
+		if (user?.length) {
+			refetch()
+		}
+	}, [user, refetch])
 
+	const openPopup = () => setIsPopupOpen(true)
 	const closePopup = () => {
 		setIsPopupOpen(false)
 		setFormData(defaultFormData)
 	}
 
-	const handleFormCreate = () => {
-		const formId = crypto.randomUUID()
-		dispatch(
-			addForm({
-				id: formId,
-				name: formData.name,
-				description: formData.desc,
-				components: [],
-			})
-		)
-		navigate(`/form/${formId}`)
+	const handleFormCreate = async () => {
+		const newForm = await addForm({...formData, content: ''}).unwrap()
 		closePopup()
+		navigate(`/form/${newForm.id}`, {state: {content: newForm.content}})
 	}
 
-	const handleFormDelete = (id: string) => {
-		dispatch(deleteForm(id))
+	const handleFormDelete = async (id: string) => {
+		await deleteForm(id).unwrap()
 	}
+
+	const formattedForms: IForm[] | null = forms
+		? forms.map(form => {
+				const {content, ...formWithoutContent} = form
+				const newForm = {
+					...formWithoutContent,
+					components: content.length ? JSON.parse(content) : [],
+				}
+
+				return newForm
+		  })
+		: null
 
 	return (
-		<main className='py-12 px-24 flex flex-col'>
-			<h1 className='font-bold text-4xl'>All Your Forms</h1>
+		<main className='flex flex-col px-24 py-12'>
+			<h1 className='text-4xl font-bold'>All Your Forms</h1>
 			<div className='my-6 w-full h-[0.05rem] bg-purple-800' />
-
 			<section className='grid grid-cols-3 gap-6'>
 				<button
 					onClick={openPopup}
@@ -56,12 +69,10 @@ const HomeScreen: React.FC = () => {
 				>
 					<StackPlus size={45} className='mb-1.5' />
 				</button>
-
-				{forms.map(form => (
+				{formattedForms?.map(form => (
 					<FormCard data={form} onDelete={handleFormDelete} key={form.id} />
 				))}
 			</section>
-
 			{isPopupOpen && (
 				<CreateFormPopup
 					data={formData}

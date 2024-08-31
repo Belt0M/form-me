@@ -1,6 +1,8 @@
 import {Export, Eye, File} from '@phosphor-icons/react'
 import {html} from 'js-beautify'
-import React, {useRef, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
+import {useLocation} from 'react-router-dom'
+import {Bounce, toast, ToastContainer} from 'react-toastify'
 import {Tooltip} from 'react-tooltip'
 import ButtonTypeModal from '../components/creator/ButtonTypeModal'
 import Canvas from '../components/creator/Canvas'
@@ -11,6 +13,7 @@ import ExportModal from '../components/ExportModal'
 import Header from '../components/Header'
 import PreviewModal from '../components/PreviewModal'
 import {useClickOutside} from '../hooks/useClickOutside'
+import {useUpdateFormMutation} from '../store/forms.api'
 import {EHTMLTag} from '../types/EHTMLTag'
 import {EPosition} from '../types/EPosition'
 import {ICanvasComponent} from '../types/ICanvasComponent'
@@ -21,13 +24,10 @@ import {getDefaultComponentHeight} from '../utils/getDefaultComponentHeight'
 import {getDefaultComponentWidth} from '../utils/getDefaultComponentWidth'
 import {getIsBlockComponentByType} from '../utils/getIsBlockComponentByType'
 import {getIsContainContent} from '../utils/getIsContainContent'
-// import {
-//   useAddFormMutation,
-//   useGetFormByIdQuery,
-//   useUpdateFormMutation,
-// } from '../store/forms.api';
 
 const FormCreator: React.FC = () => {
+	const [updateForm, {isSuccess: isUpdateSuccess, isError: isUpdateError}] =
+		useUpdateFormMutation()
 	const [canvasComponents, setCanvasComponents] = useState<ICanvasComponent[]>(
 		[]
 	)
@@ -52,6 +52,12 @@ const FormCreator: React.FC = () => {
 		export: boolean
 	}>({export: false, input: false, button: false, preview: false})
 	const [exportedCode, setExportedCode] = useState<string>('')
+	const [initialCanvasComponents, setInitialCanvasComponents] = useState<
+		ICanvasComponent[]
+	>([])
+
+	const location = useLocation()
+	const formId = location.pathname.split('/').pop() as string
 
 	const canvasRef = useRef<HTMLDivElement>(null)
 
@@ -61,6 +67,42 @@ const FormCreator: React.FC = () => {
 		position: 'relative',
 		padding: '8px',
 	}
+
+	useEffect(() => {
+		const initialContent = location.state?.content
+
+		if (initialContent) {
+			setCanvasComponents(initialContent)
+			setInitialCanvasComponents(initialContent)
+		}
+	}, [location.state])
+
+	useEffect(() => {
+		if (isUpdateSuccess || isUpdateError) {
+			if (isUpdateSuccess) {
+				setInitialCanvasComponents(canvasComponents)
+			}
+
+			const text = isUpdateSuccess
+				? 'The form was successfully updated'
+				: 'The form could not be updated'
+
+			toast(text, {
+				position: 'top-center',
+				autoClose: 2000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				type: isUpdateSuccess ? 'success' : 'error',
+				style: {padding: '0.5rem'},
+				draggable: true,
+				progress: undefined,
+				theme: 'dark',
+				transition: Bounce,
+			})
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [isUpdateSuccess, isUpdateError])
 
 	const handleDragStart = (type: EHTMLTag, position: EPosition) => {
 		setDraggingType(type)
@@ -208,14 +250,6 @@ const FormCreator: React.FC = () => {
 				newComponent.level = 6
 			} else if (draggingType === EHTMLTag.BUTTON) {
 				newComponent.content = buttonType === 'button' ? 'Button' : 'Submit'
-			}
-		}
-
-		if (hoveredComponentId) {
-			const parent = document.getElementById(hoveredComponentId)
-
-			if (parent) {
-				newComponent.parent = parent
 			}
 		}
 
@@ -381,6 +415,12 @@ const FormCreator: React.FC = () => {
 		}
 	}
 
+	const handleSave = async () => {
+		const content = JSON.stringify(canvasComponents)
+
+		await updateForm({id: formId, content}).unwrap()
+	}
+
 	const handlePreview = () => {
 		const exportedCode = exportFormAsJSX(canvasComponents)
 
@@ -420,6 +460,44 @@ const FormCreator: React.FC = () => {
 		)
 	}
 
+	console.log(
+		canvasComponents?.[0]?.style?.width,
+		canvasComponents?.[0]?.style?.height
+	)
+
+	const isContentChanged = (
+		initialComponents: ICanvasComponent[],
+		currentComponents: ICanvasComponent[]
+	): boolean => {
+		if (initialComponents.length !== currentComponents.length) return true
+
+		for (let i = 0; i < initialComponents.length; i++) {
+			const initialComponent = initialComponents[i]
+			const currentComponent = currentComponents[i]
+
+			if (
+				initialComponent.type !== currentComponent.type ||
+				JSON.stringify(initialComponent.style) !==
+					JSON.stringify(currentComponent.style) ||
+				initialComponent.content !== currentComponent.content
+			) {
+				return true
+			}
+
+			if (initialComponent.children && currentComponent.children) {
+				const areChildrenChanged = isContentChanged(
+					initialComponent.children,
+					currentComponent.children
+				)
+				if (areChildrenChanged) return true
+			} else if (initialComponent.children || currentComponent.children) {
+				return true
+			}
+		}
+
+		return false
+	}
+
 	const buttonsStyle =
 		'px-4 pt-2.5 pb-[0.525rem] border-2 transition-all disabled:border-stone-500 disabled:cursor-not-allowed rounded-lg disabled:text-stone-400 hover:enabled:bg-opacity-20'
 
@@ -427,6 +505,10 @@ const FormCreator: React.FC = () => {
 	const hasSubmitButtonElement = hasSubmitButton(canvasComponents)
 
 	const allRequirementsMet = hasInputElement && hasSubmitButtonElement
+	const hasContentChanged = isContentChanged(
+		initialCanvasComponents,
+		canvasComponents
+	)
 
 	return (
 		<>
@@ -442,7 +524,7 @@ const FormCreator: React.FC = () => {
 							}
 							type='button'
 							onClick={handlePreview}
-							disabled={!allRequirementsMet}
+							disabled={!canvasComponents.length}
 							id='preview'
 						>
 							<Eye weight='bold' size={16} />
@@ -453,8 +535,8 @@ const FormCreator: React.FC = () => {
 								' border-purple-800 text-purple-800 hover:enabled:bg-purple-800'
 							}
 							type='button'
-							// onClick={handleSave}
-							disabled={!allRequirementsMet}
+							onClick={handleSave}
+							disabled={!hasContentChanged}
 							id='save'
 						>
 							<File weight='bold' className='mb-[0.1rem]' size={16} />
@@ -543,6 +625,19 @@ const FormCreator: React.FC = () => {
 						onClose={handleCloseModal}
 					/>
 				)}
+				<ToastContainer
+					position='top-center'
+					autoClose={2000}
+					hideProgressBar={false}
+					newestOnTop={false}
+					closeOnClick
+					rtl={false}
+					pauseOnFocusLoss
+					draggable
+					pauseOnHover
+					theme='dark'
+					transition={Bounce}
+				/>
 			</main>
 		</>
 	)

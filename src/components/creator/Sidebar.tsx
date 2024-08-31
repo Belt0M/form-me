@@ -11,6 +11,7 @@ import {findComponentById} from '../../utils/getComponentByID'
 import {getElementMinDimensions} from '../../utils/getElementMinDimensions'
 import {getFontSizeByHeadingLevel} from '../../utils/getFontSizeByHeadingLevel'
 import {getIsBlockComponentByType} from '../../utils/getIsBlockComponentByType'
+import {roundTo} from '../../utils/roundTo'
 
 interface SidebarProps {
 	editingComponentId: string | null
@@ -67,7 +68,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 	)
 	const isFirstComponent = canvasComponents?.[0]?.id === editingComponentId
 	const isCanvasEmpty = canvasComponents.length === 0
-	const parent = editingComponent?.parent || null
+	const currentElement = (
+		editingComponent ? document.getElementById(editingComponent.id) : null
+	) as HTMLElement | null
+	const parent = currentElement ? currentElement.parentElement : null
 	const componentStyle = editingComponent?.style || {}
 	const {width: minWidth, height: minHeight} = getElementMinDimensions(
 		parent,
@@ -813,7 +817,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 								'string' ||
 							typeof componentStyle[name as keyof IExtendedCSSProperties] ===
 								'number'
-								? componentStyle[name as keyof IExtendedCSSProperties]
+								? String(componentStyle[name as keyof IExtendedCSSProperties])
 								: ''
 						}
 						onChange={handleInputChange}
@@ -1344,9 +1348,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 													? dimensions.width.length
 														? dimensions.width
 														: 0
-													: Math.round(
-															parseFloat(componentStyle.width as string)
-													  )
+													: roundTo(parseFloat(componentStyle.width as string))
 											}
 											onChange={handleRangePercentageChange}
 											className='w-full'
@@ -1357,9 +1359,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 											value={
 												dimensions.isEditing
 													? dimensions.width
-													: Math.round(
-															parseFloat(componentStyle.width as string)
-													  )
+													: roundTo(parseFloat(componentStyle.width as string))
 											}
 											onChange={e => handleDimensionInputChange(e, 'width')}
 											onBlur={e => handleBlur(e.target as HTMLElement, 'width')}
@@ -1384,9 +1384,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 													? dimensions.height.length
 														? dimensions.height
 														: 0
-													: Math.round(
-															parseFloat(componentStyle.height as string)
-													  )
+													: roundTo(parseFloat(componentStyle.height as string))
 											}
 											onChange={handleRangePercentageChange}
 											className='w-full'
@@ -1397,9 +1395,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 											value={
 												dimensions.isEditing
 													? dimensions.height
-													: Math.round(
-															parseFloat(componentStyle.height as string)
-													  )
+													: roundTo(parseFloat(componentStyle.height as string))
 											}
 											onChange={e => handleDimensionInputChange(e, 'height')}
 											onBlur={e =>

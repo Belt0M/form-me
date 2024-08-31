@@ -17,7 +17,10 @@ const PreviewModal: FC<Props> = ({onClose, exportedCode}) => {
 			</header>
 
 			<div className='flex justify-center flex-1 w-2/3 h-full p-4 m-8 rounded-xl bg-stone-700'>
-				<JsxParser jsx={exportedCode} className='w-full h-full' />
+				<JsxParser
+					jsx={exportedCode}
+					className='flex items-center justify-center w-full h-full'
+				/>
 			</div>
 
 			<button

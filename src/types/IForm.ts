@@ -1,6 +1,8 @@
+import {ICanvasComponent} from './ICanvasComponent'
+
 export interface IForm {
 	id: string
-	name: string
+	title: string
 	description: string
-	components: any[]
+	components: ICanvasComponent[]
 }

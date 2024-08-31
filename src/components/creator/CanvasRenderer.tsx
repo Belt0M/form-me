@@ -273,6 +273,7 @@ const RenderCanvasComponent: React.FC<Props> = ({
 						isCurrentInFocus={isCurrentInFocus}
 						isResizing={isResizing}
 						setIsResizing={setIsResizing}
+						onUpdateStyle={onUpdateStyle}
 					>
 						{renderChildren()}
 					</Section>

@@ -1,6 +1,6 @@
 import {PencilLine, Trash} from '@phosphor-icons/react'
 import {FC} from 'react'
-import {Link} from 'react-router-dom'
+import {useNavigate} from 'react-router-dom'
 import {IForm} from '../types/IForm'
 
 interface Props {
@@ -9,23 +9,29 @@ interface Props {
 }
 
 const FormCard: FC<Props> = ({data, onDelete}) => {
-	return (
-		<div className='border bg-stone-900 border-stone-600 text-white px-6 pb-1 rounded self-end transition-all hover:bg-purple-800 hover:bg-opacity-10 hover:border-purple-800 h-[19rem] text-xl duration-200 font-semibold relative flex justify-center items-center flex-col'>
-			<h2>{data.name}</h2>
-			<p className='mt-2 text-stone-400 text-sm'>{data.description}</p>
+	const navigate = useNavigate()
 
-			<div className='absolute bottom-4 right-4 flex items-center gap-2'>
-				<Link to={`/form/${data.id}`}>
+	const handleClick = () => {
+		navigate(`/form/${data.id}`, {state: {content: data.components}})
+	}
+
+	return (
+		<div className='border bg-stone-900 border-stone-600 text-white px-6 pb-1 rounded self-end transition-all hover:bg-purple-800 hover:bg-opacity-10 hover:border-purple-800 h-[19rem] text-xl duration-200 font-semibold relative flex justify-center items-center flex-col select-none'>
+			<h2>{data.title}</h2>
+			<p className='mt-2 text-sm text-stone-400'>{data.description}</p>
+
+			<div className='absolute flex items-center gap-2 bottom-4 right-4'>
+				<button type='button' onClick={handleClick}>
 					<PencilLine
 						size={40}
 						color='#3b82f6'
-						className='p-2 bg-blue-500 bg-opacity-15 rounded-full cursor-pointer hover:bg-opacity-25 transition-all'
+						className='p-2 transition-all bg-blue-500 rounded-full cursor-pointer bg-opacity-15 hover:bg-opacity-25'
 					/>
-				</Link>
+				</button>
 				<Trash
 					size={40}
 					color='#ef4444 '
-					className='p-2 bg-red-500 bg-opacity-15 rounded-full cursor-pointer hover:bg-opacity-25 transition-all'
+					className='p-2 transition-all bg-red-500 rounded-full cursor-pointer bg-opacity-15 hover:bg-opacity-25'
 					onClick={() => onDelete(data.id)}
 				/>
 			</div>

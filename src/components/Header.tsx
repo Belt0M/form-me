@@ -15,7 +15,7 @@ const RequirementIndicator: React.FC<RequirementIndicatorProps> = ({
 	label,
 	isCompleted,
 }) => (
-	<div className='flex items-center gap-2'>
+	<div className='flex items-center gap-2 select-none'>
 		<div
 			className={clsx(
 				isCompleted ? 'bg-green-500' : 'bg-red-500',
@@ -48,8 +48,12 @@ const Header: FC<Props> = ({actions, hasInput, hasSubmitButton}) => {
 
 	return (
 		<header className='flex items-center justify-between px-5 py-2 font-bold border-b border-b-purple-800 bg-stone-900'>
-			<Link to='/' className='flex items-center w-1/5 text-lg text-white'>
-				<img src={Logo} alt='Logo' className='h-16' />
+			<Link
+				to='/'
+				className='flex items-center w-1/5 text-lg text-white'
+				draggable={false}
+			>
+				<img src={Logo} alt='Logo' className='h-16' draggable={false} />
 				Form...me
 			</Link>
 			{hasInput != undefined && (

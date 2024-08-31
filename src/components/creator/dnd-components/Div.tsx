@@ -11,6 +11,7 @@ import React, {
 import {resizeHandlers} from '../../../data/resizeHandles'
 import useResizable from '../../../hooks/useResizable'
 import {getParentDimensions} from '../../../utils/getParentDimensions'
+import {roundTo} from '../../../utils/roundTo'
 
 interface Props {
 	id: string
@@ -107,8 +108,12 @@ const Div: FC<Props> = ({
 	useEffect(() => {
 		if (!isResizing && parentDimension && onUpdateStyle && isUpdating) {
 			const updatedStyle = {
-				width: `${(localDimensions.width / parentDimension.width) * 100}%`,
-				height: `${(localDimensions.height / parentDimension.height) * 100}%`,
+				width: `${roundTo(
+					(localDimensions.width / parentDimension.width) * 100
+				)}%`,
+				height: `${roundTo(
+					(localDimensions.height / parentDimension.height) * 100
+				)}%`,
 			}
 
 			onUpdateStyle(id, updatedStyle)
@@ -138,6 +143,7 @@ const Div: FC<Props> = ({
 	const onMouseUp = () => {
 		setIsResizing && setIsResizing(false)
 		setIsUpdating(true)
+
 		document.removeEventListener('mouseup', onMouseUp)
 	}
 

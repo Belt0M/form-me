@@ -23,7 +23,7 @@ const UserMenu: FC<Props> = ({onLogout}) => {
 		<div className='relative' ref={menuRef}>
 			<button
 				onClick={handleToggleMenu}
-				className='flex items-center justify-center w-10 h-10 text-white bg-gray-800 rounded-full pb-0.5 px-[1px]'
+				className='flex items-center justify-center w-11 h-11 text-white bg-gray-800 rounded-full px-[1px] font-normal hover:brightness-110 transition-all'
 			>
 				{firstLetter}
 			</button>

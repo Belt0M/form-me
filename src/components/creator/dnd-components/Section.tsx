@@ -1,9 +1,17 @@
 import {Resize} from '@phosphor-icons/react'
 import clsx from 'clsx'
-import React, {CSSProperties, FC, ReactElement, useRef} from 'react'
+import React, {
+	CSSProperties,
+	FC,
+	ReactElement,
+	useEffect,
+	useRef,
+	useState,
+} from 'react'
 import {resizeHandlers} from '../../../data/resizeHandles'
 import useResizable from '../../../hooks/useResizable'
 import {getParentDimensions} from '../../../utils/getParentDimensions'
+import {roundTo} from '../../../utils/roundTo'
 
 interface Props {
 	id: string
@@ -22,6 +30,7 @@ interface Props {
 	onMouseLeave?: (event: React.MouseEvent<HTMLDivElement>) => void
 	onEditComponent?: (editID: string) => void
 	setIsResizing?: React.Dispatch<React.SetStateAction<boolean>>
+	onUpdateStyle?: (id: string, updatedStyle: React.CSSProperties) => void
 }
 
 const Section: FC<Props> = ({
@@ -39,6 +48,7 @@ const Section: FC<Props> = ({
 	onMouseLeave,
 	onEditComponent,
 	setIsResizing,
+	onUpdateStyle,
 }) => {
 	const resizableRef = useRef<HTMLDivElement>(null)
 	const parentElement = resizableRef.current
@@ -67,15 +77,58 @@ const Section: FC<Props> = ({
 				computedStyles.placeItems === 'center'))
 	)
 
+	const resizeInitWidth =
+		parentDimension?.width && style?.width
+			? (parentDimension.width / 100) * parseInt(style.width as string)
+			: 0
+	const resizeInitHeight =
+		parentDimension?.height && style?.height
+			? (parentDimension.height / 100) * parseInt(style.height as string)
+			: 0
+
 	const {dimensions, startResize} = useResizable(
-		parentDimension?.width || 0,
-		parentDimension?.height || 0,
+		resizeInitWidth,
+		resizeInitHeight,
 		resizableRef,
 		isCenteredX,
 		isCenteredY,
 		384,
 		384
 	)
+
+	const [localDimensions, setLocalDimensions] = useState({
+		width: dimensions.width,
+		height: dimensions.height,
+	})
+
+	const [isUpdating, setIsUpdating] = useState(false)
+
+	useEffect(() => {
+		setLocalDimensions(dimensions)
+	}, [dimensions])
+
+	useEffect(() => {
+		if (!isResizing && parentDimension && onUpdateStyle && isUpdating) {
+			const updatedStyle = {
+				width: `${roundTo(
+					(localDimensions.width / parentDimension.width) * 100
+				)}%`,
+				height: `${roundTo(
+					(localDimensions.height / parentDimension.height) * 100
+				)}%`,
+			}
+
+			onUpdateStyle(id, updatedStyle)
+			setIsUpdating(false)
+		}
+	}, [
+		isResizing,
+		localDimensions,
+		parentDimension,
+		onUpdateStyle,
+		id,
+		isUpdating,
+	])
 
 	let width: number | string = dimensions
 		? dimensions.width
@@ -116,6 +169,7 @@ const Section: FC<Props> = ({
 
 	const onMouseUp = () => {
 		setIsResizing && setIsResizing(false)
+		setIsUpdating(true)
 
 		document.removeEventListener('mouseup', onMouseUp)
 	}
