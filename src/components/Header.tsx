@@ -1,3 +1,4 @@
+import {Check, X} from '@phosphor-icons/react'
 import clsx from 'clsx'
 import {FC} from 'react'
 import {Link, useNavigate} from 'react-router-dom'
@@ -16,14 +17,18 @@ const RequirementIndicator: React.FC<RequirementIndicatorProps> = ({
 	isCompleted,
 }) => (
 	<div className='flex items-center gap-2 select-none'>
-		<div
-			className={clsx(
-				isCompleted ? 'bg-green-500' : 'bg-red-500',
-				'w-4 h-4 rounded-full border-2 border-stone-700'
+		<div className={isCompleted ? 'text-green-500' : 'text-red-500'}>
+			{isCompleted ? (
+				<Check weight='bold' size={22} />
+			) : (
+				<X weight='bold' size={20} />
 			)}
-		></div>
+		</div>
 		<span
-			className={clsx(isCompleted && 'line-through', 'text-xs text-stone-300')}
+			className={clsx(
+				isCompleted && 'line-through',
+				'text-sm text-stone-300 mt-1'
+			)}
 		>
 			{label}
 		</span>
@@ -47,7 +52,14 @@ const Header: FC<Props> = ({actions, hasInput, hasSubmitButton}) => {
 	}
 
 	return (
-		<header className='flex items-center justify-between px-5 py-2 font-bold border-b border-b-purple-800 bg-stone-900'>
+		<header
+			className={clsx(
+				actions
+					? 'border-lightGray border-b-2'
+					: 'border-b-purple-800 border-b',
+				'flex items-center justify-between px-5 py-2 font-bold bg-stone-900'
+			)}
+		>
 			<Link
 				to='/'
 				className='flex items-center w-1/5 text-lg text-white'

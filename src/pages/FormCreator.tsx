@@ -276,6 +276,10 @@ const FormCreator: React.FC = () => {
 		event.preventDefault()
 	}
 
+	const handleExitEditMode = () => {
+		setEditingComponentId(null)
+	}
+
 	const handleDeleteComponent = (id?: string) => {
 		const isHint = !id
 
@@ -566,7 +570,7 @@ const FormCreator: React.FC = () => {
 				}
 			/>
 
-			<main className='flex h-[calc(100vh-80.8px)] overflow-hidden'>
+			<main className='flex h-[calc(100vh-81.6px)] overflow-hidden'>
 				<Canvas
 					ref={canvasRef}
 					onDrop={handleDrop}
@@ -603,6 +607,7 @@ const FormCreator: React.FC = () => {
 					canvasComponents={canvasComponents}
 					onUpdateStyle={handleUpdateStyle}
 					onUpdateProperty={handleUpdateComponentProperty}
+					onExitEditMode={handleExitEditMode}
 				/>
 				{isModalOpen.input && (
 					<InputTypeModal

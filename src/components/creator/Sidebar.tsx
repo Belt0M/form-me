@@ -1,5 +1,5 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
-import {CaretLeft} from '@phosphor-icons/react'
+import clsx from 'clsx'
 import _ from 'lodash'
 import React, {CSSProperties, useEffect, useState} from 'react'
 import {sidebarComponents} from '../../data/sidebar-components'
@@ -12,6 +12,7 @@ import {getElementMinDimensions} from '../../utils/getElementMinDimensions'
 import {getFontSizeByHeadingLevel} from '../../utils/getFontSizeByHeadingLevel'
 import {getIsBlockComponentByType} from '../../utils/getIsBlockComponentByType'
 import {roundTo} from '../../utils/roundTo'
+import SectionHeading from './SectionHeading'
 
 interface SidebarProps {
 	editingComponentId: string | null
@@ -24,6 +25,7 @@ interface SidebarProps {
 	onDragEnd: () => void
 	onUpdateStyle: (id: string, updatedStyle: React.CSSProperties) => void
 	onUpdateProperty: (id: string, name: string, value: string | number) => void
+	onExitEditMode: () => void
 }
 
 enum ESpacing {
@@ -49,6 +51,8 @@ const defaultGradient = {
 	endColor: '#000000',
 }
 
+const defaultOpenedSections = ['background', 'border', 'spacing', 'display']
+
 const Sidebar: React.FC<SidebarProps> = ({
 	editingComponentId,
 	canvasComponents,
@@ -56,9 +60,12 @@ const Sidebar: React.FC<SidebarProps> = ({
 	onDragEnd,
 	onUpdateStyle,
 	onUpdateProperty,
+	onExitEditMode,
 }) => {
 	const [position, setPosition] = useState<EPosition>(EPosition.RELATIVE)
-	const [activeSections, setActiveSections] = useState<string[]>([])
+	const [activeSections, setActiveSections] = useState<string[]>(
+		defaultOpenedSections
+	)
 	const [backgroundGradient, setBackgroundGradient] = useState(defaultGradient)
 	const [spacingMode, setSpacingMode] = useState<ESpacing>(ESpacing.ALL)
 
@@ -124,7 +131,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 		if (editingComponentId) {
 			setSpacingMode(ESpacing.ALL)
 			setBackgroundGradient(defaultGradient)
-			setActiveSections([])
+			setActiveSections(defaultOpenedSections)
 		}
 	}, [editingComponentId])
 
@@ -895,13 +902,11 @@ const Sidebar: React.FC<SidebarProps> = ({
 
 			return (
 				<div className='group'>
-					<div
-						className='flex justify-between cursor-pointer'
-						onClick={() => toggleSection('constraints')}
-					>
-						<span className='text-white'>Constraints</span>
-						<span>{activeSections.includes('constraints') ? '▲' : '▼'}</span>
-					</div>
+					<SectionHeading
+						name='constraints'
+						isOpen={activeSections.includes('constraints')}
+						onSwitch={toggleSection}
+					/>
 					{activeSections.includes('constraints') && (
 						<div className='mt-2' key='constraints'>
 							{constraints}
@@ -914,16 +919,27 @@ const Sidebar: React.FC<SidebarProps> = ({
 	}
 
 	return (
-		<aside className='w-1/4 max-h-full px-5 overflow-y-auto select-none py-7 bg-stone-900 min-w-72'>
-			<div className='flex justify-between mb-4'>
-				{!editingComponentId ? (
-					<h2 className='text-xl'>Components</h2>
-				) : (
-					<div className='flex items-center'>
-						<CaretLeft className='text-white cursor-pointer' size={24} />
-						<h2 className='ml-2 text-xl'>Properties</h2>
-					</div>
-				)}
+		<aside className='w-[22.5%] max-h-full px-6 overflow-y-auto select-none py-5 bg-stone-900 min-w-72 border-l-2 border-lightGray'>
+			<div className='flex gap-6 mb-4 text-base'>
+				<button
+					className={clsx(
+						editingComponentId
+							? 'text-stone-400 hover:text-white transition-all'
+							: 'text-white'
+					)}
+					onClick={onExitEditMode}
+				>
+					Components
+				</button>
+				<button
+					className={clsx(
+						!editingComponentId
+							? 'text-stone-400 cursor-not-allowed'
+							: 'text-white'
+					)}
+				>
+					Properties
+				</button>
 			</div>
 
 			{!editingComponentId && (
@@ -972,13 +988,11 @@ const Sidebar: React.FC<SidebarProps> = ({
 					{/* Background Section */}
 					{isBlock && (
 						<div className='group'>
-							<div
-								className='flex justify-between cursor-pointer'
-								onClick={() => toggleSection('background')}
-							>
-								<span className='text-white'>Background</span>
-								<span>{activeSections.includes('background') ? '▲' : '▼'}</span>
-							</div>
+							<SectionHeading
+								name='background'
+								isOpen={activeSections.includes('background')}
+								onSwitch={toggleSection}
+							/>
 							{activeSections.includes('background') && (
 								<div className='mt-2'>
 									<label className='block mb-2 text-white'>
@@ -1040,13 +1054,11 @@ const Sidebar: React.FC<SidebarProps> = ({
 					{/* Border Section */}
 					{isBlock && (
 						<div className='group'>
-							<div
-								className='flex justify-between cursor-pointer'
-								onClick={() => toggleSection('border')}
-							>
-								<span className='text-white'>Border</span>
-								<span>{activeSections.includes('border') ? '▲' : '▼'}</span>
-							</div>
+							<SectionHeading
+								name='border'
+								isOpen={activeSections.includes('border')}
+								onSwitch={toggleSection}
+							/>
 							{activeSections.includes('border') && (
 								<div className='mt-2'>
 									<label className='block mb-2 text-white'>Border Width</label>
@@ -1116,13 +1128,11 @@ const Sidebar: React.FC<SidebarProps> = ({
 
 					{/* Padding & Margin Section */}
 					<div className='group'>
-						<div
-							className='flex justify-between cursor-pointer'
-							onClick={() => toggleSection('spacing')}
-						>
-							<span className='text-white'>Spacing</span>
-							<span>{activeSections.includes('spacing') ? '▲' : '▼'}</span>
-						</div>
+						<SectionHeading
+							name='spacing'
+							isOpen={activeSections.includes('spacing')}
+							onSwitch={toggleSection}
+						/>
 						{activeSections.includes('spacing') && (
 							<div className='mt-2'>
 								<label className='block mb-2 text-white'>Spacing Mode</label>
@@ -1152,13 +1162,11 @@ const Sidebar: React.FC<SidebarProps> = ({
 					{/* Display Section */}
 					{isBlock && (
 						<div className='group'>
-							<div
-								className='flex justify-between cursor-pointer'
-								onClick={() => toggleSection('display')}
-							>
-								<span className='text-white'>Display</span>
-								<span>{activeSections.includes('display') ? '▲' : '▼'}</span>
-							</div>
+							<SectionHeading
+								name='display'
+								isOpen={activeSections.includes('display')}
+								onSwitch={toggleSection}
+							/>
 							{activeSections.includes('display') && (
 								<div className='mt-2'>
 									<label className='block mb-2 text-white'>Display Type</label>
@@ -1326,15 +1334,11 @@ const Sidebar: React.FC<SidebarProps> = ({
 						isBlock &&
 						editingComponent?.type !== EHTMLTag.BUTTON && (
 							<div className='group'>
-								<div
-									className='flex justify-between cursor-pointer'
-									onClick={() => toggleSection('dimensions')}
-								>
-									<span className='text-white'>Dimensions</span>
-									<span>
-										{activeSections.includes('dimensions') ? '▲' : '▼'}
-									</span>
-								</div>
+								<SectionHeading
+									name='dimensions'
+									isOpen={activeSections.includes('dimensions')}
+									onSwitch={toggleSection}
+								/>
 								{activeSections.includes('dimensions') && (
 									<div className='mt-2'>
 										<label className='block mb-2 text-white'>Width (%)</label>

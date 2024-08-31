@@ -164,9 +164,9 @@ const AuthPage = () => {
 	}
 
 	return (
-		<div className='relative flex items-center justify-center min-h-screen bg-[#575968]'>
+		<div className='relative flex items-center justify-center min-h-screen bg-lightGray'>
 			<form
-				className='relative w-1/3 min-w-[30rem] p-10 shadow-custom bg-dark-700 rounded-xl bg-gradient-to-tr from-[#2f313f] to-[#555665] from-[20%]'
+				className='relative w-1/3 min-w-[30rem] p-10 shadow-custom bg-dark-700 rounded-xl bg-gradient-to-tr from-darkGray to-middleGray from-[20%]'
 				onSubmit={handleSubmit}
 			>
 				<h2 className='mb-4 text-3xl font-semibold text-white'>
