@@ -9,7 +9,7 @@ const initialState: FormsState = {
 	forms: [],
 }
 
-const formSlice = createSlice({
+export const formSlice = createSlice({
 	name: 'forms',
 	initialState,
 	reducers: {

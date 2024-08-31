@@ -1,13 +1,19 @@
-import {configureStore} from '@reduxjs/toolkit'
-import authReducer from './authSlice'
-import formReducer from './formSlice'
+import {combineReducers, configureStore} from '@reduxjs/toolkit'
+import {authApi} from './auth.api'
+import {authSlice} from './authSlice'
+import {formSlice} from './formSlice'
 
-export const store = configureStore({
-	reducer: {
-		forms: formReducer,
-		auth: authReducer,
-	},
+const rootReducer = combineReducers({
+	[authApi.reducerPath]: authApi.reducer,
+	[authSlice.name]: authSlice.reducer,
+	[formSlice.name]: formSlice.reducer,
 })
 
-export type RootState = ReturnType<typeof store.getState>
+export const store = configureStore({
+	reducer: rootReducer,
+	middleware: getDefaultMiddleware =>
+		getDefaultMiddleware({serializableCheck: false}).concat(authApi.middleware),
+})
+
+export type RootState = ReturnType<typeof rootReducer>
 export type AppDispatch = typeof store.dispatch
