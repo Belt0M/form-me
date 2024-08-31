@@ -78,7 +78,78 @@ const AuthPage = () => {
 	}, [isLoginError, isRegisterError])
 
 	return (
-		<div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60'>
+		<div className='relative flex items-center justify-center min-h-screen bg-[#575968]'>
+			<div className='relative w-1/3 p-10 shadow-custom bg-dark-700 rounded-xl bg-gradient-to-tr from-[#2f313f] to-[#555665] from-[20%]'>
+				<h2 className='mb-4 text-3xl font-semibold text-white'>
+					{isRegister ? 'Create new account' : 'Log in'}
+				</h2>
+				<p className='mb-6 text-sm text-gray-400'>
+					{isRegister ? 'Already have an account? ' : "Don't have an account? "}
+					<span
+						className='text-blue-500 cursor-pointer'
+						onClick={handleSwitchMode}
+					>
+						{isRegister ? 'Log in' : 'Sign up'}
+					</span>
+				</p>
+				<div className='space-y-4'>
+					{isRegister && (
+						<div className='flex gap-4'>
+							<input
+								type='text'
+								placeholder='First Name'
+								name='firstName'
+								className='flex-1 px-3 pb-2.5 pt-[0.8rem] text-white placeholder-gray-500 bg-[#282a37] rounded focus:outline-none focus:border-blue-500 border-opacity-50 border-2 border-transparent'
+								onChange={handleChange}
+							/>
+							<input
+								type='text'
+								placeholder='Last Name'
+								name='lastName'
+								className='flex-1 px-3 pb-2.5 pt-[0.8rem] text-white placeholder-gray-500 bg-[#282a37] rounded focus:outline-none focus:border-blue-500 border-opacity-50 border-2 border-transparent'
+								onChange={handleChange}
+							/>
+						</div>
+					)}
+					<input
+						type='email'
+						placeholder='Email'
+						name='email'
+						value={formData.username}
+						onChange={handleChange}
+						className='w-full px-3 pb-2.5 pt-[0.8rem] text-white placeholder-gray-500 bg-[#282a37] rounded focus:outline-none focus:border-blue-500 border-opacity-50 border-2 border-transparent'
+					/>
+					<input
+						type='password'
+						placeholder='Password'
+						name='password'
+						value={formData.password}
+						onChange={handleChange}
+						className='w-full px-3 pb-2.5 pt-[0.8rem] text-white placeholder-gray-500 bg-[#282a37] rounded focus:outline-none focus:border-blue-500 border-opacity-50 border-2 border-transparent'
+					/>
+				</div>
+				{errors.length > 0 && (
+					<ul className='mt-4 mb-4 text-sm text-red-500'>
+						{errors.map((error, index) => (
+							<li key={index}>{error}</li>
+						))}
+					</ul>
+				)}
+				<div className='flex items-center justify-between mt-6'>
+					<button
+						className={clsx(
+							'px-6 py-3 pt-[0.9rem] rounded bg-blue-600 text-white font-semibold',
+							isLoginLoading || isRegisterLoading
+								? 'opacity-50 cursor-not-allowed'
+								: 'hover:bg-blue-700'
+						)}
+						onClick={handleSubmit}
+						disabled={isLoginLoading || isRegisterLoading}
+					>
+						{isRegister ? 'Create account' : 'Log in'}
+					</button>
+				</div>
+			</div>
 			<ToastContainer
 				position='top-center'
 				autoClose={1500}
@@ -92,51 +163,6 @@ const AuthPage = () => {
 				theme='dark'
 				transition={Bounce}
 			/>
-			<div className='relative py-8 border-2 border-gray-400 rounded shadow-lg px-7 bg-dark'>
-				<h3 className='mb-4 text-lg font-bold uppercase'>
-					{isRegister ? 'Register' : 'Login'}
-				</h3>
-				<input
-					type='text'
-					placeholder='Username'
-					name='username'
-					value={formData.username}
-					onChange={handleChange}
-					className='w-full p-2 mb-2 text-white rounded bg-stone-700'
-				/>
-				<input
-					type='password'
-					placeholder='Password'
-					name='password'
-					value={formData.password}
-					onChange={handleChange}
-					className='w-full p-2 mb-4 text-white rounded bg-stone-700'
-				/>
-				{errors.length > 0 && (
-					<ul className='mb-4 text-sm text-red-500'>
-						{errors.map((error, index) => (
-							<li key={index}>{error}</li>
-						))}
-					</ul>
-				)}
-				<button
-					className={clsx(
-						'mb-2 w-full p-2 rounded text-white',
-						isRegister ? 'bg-green-500' : 'bg-blue-500',
-						(isLoginLoading || isRegisterLoading) && 'cursor-not-allowed'
-					)}
-					onClick={handleSubmit}
-					disabled={isLoginLoading || isRegisterLoading}
-				>
-					{isRegister ? 'Register' : 'Login'}
-				</button>
-				<button
-					className='w-full p-2 mb-2 text-white bg-gray-500 rounded'
-					onClick={handleSwitchMode}
-				>
-					{isRegister ? 'Switch to Login' : 'Switch to Register'}
-				</button>
-			</div>
 		</div>
 	)
 }

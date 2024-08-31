@@ -10,6 +10,9 @@ export default {
 				hint: '#60a5fa ',
 				hintBorder: '#1e3a8a ',
 			},
+			boxShadow: {
+				custom: '0px 6px 32px -11px rgba(55, 56, 66, 1)',
+			},
 		},
 	},
 	plugins: [],
