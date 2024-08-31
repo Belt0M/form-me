@@ -22,13 +22,13 @@ const HomeScreen: React.FC = () => {
 	const [isPopupOpen, setIsPopupOpen] = useState<boolean>(false)
 	const [formData, setFormData] = useState<ICreateForm>(defaultFormData)
 	const navigate = useNavigate()
-	const user = useAppSelector(state => state.auth.user)
+	const email = useAppSelector(state => state.auth.email)
 
 	useEffect(() => {
-		if (user?.length) {
+		if (email?.length) {
 			refetch()
 		}
-	}, [user, refetch])
+	}, [email, refetch])
 
 	const openPopup = () => setIsPopupOpen(true)
 	const closePopup = () => {

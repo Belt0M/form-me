@@ -24,7 +24,7 @@ const App: React.FC = () => {
 		if (token && !isAuthenticated) {
 			verifyToken(token).then(response => {
 				if ('data' in response && response.data) {
-					dispatch(login({token, username: response.data.username}))
+					dispatch(login({token, email: response.data.email}))
 
 					navigate('/', {replace: true})
 				} else {

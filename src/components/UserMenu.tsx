@@ -7,7 +7,7 @@ interface Props {
 }
 
 const UserMenu: FC<Props> = ({onLogout}) => {
-	const user = useAppSelector(state => state.auth.user)
+	const user = useAppSelector(state => state.auth.email)
 	const [isMenuOpen, setIsMenuOpen] = useState(false)
 	const menuRef = useRef<HTMLDivElement>(null)
 
@@ -23,7 +23,7 @@ const UserMenu: FC<Props> = ({onLogout}) => {
 		<div className='relative' ref={menuRef}>
 			<button
 				onClick={handleToggleMenu}
-				className='flex items-center justify-center w-11 h-11 text-white bg-gray-800 rounded-full px-[1px] font-normal hover:brightness-110 transition-all'
+				className='flex items-center justify-center pt-1 font-normal text-white transition-all bg-gray-800 rounded-full w-11 h-11 hover:brightness-110'
 			>
 				{firstLetter}
 			</button>

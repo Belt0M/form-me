@@ -32,7 +32,7 @@ const CreateFormPopup: FC<Props> = ({onCreate, onClose, setData, data}) => {
 					placeholder='Name of your form...'
 					className={clsx(
 						data.title ? 'border-purple-600' : 'border-stone-500',
-						'w-full mt-2 pt-2 px-3 pb-2.5 border-2 focus:border-purple-600 focus:outline-none rounded-lg'
+						'w-full mt-2 pt-[0.675rem] px-3 pb-2 border-2 focus:border-purple-600 focus:outline-none rounded-lg'
 					)}
 				/>
 				<label htmlFor='desc' className='block mt-3 font-semibold'>
@@ -47,12 +47,12 @@ const CreateFormPopup: FC<Props> = ({onCreate, onClose, setData, data}) => {
 					placeholder='Description of your form...'
 					className={clsx(
 						data.description ? 'border-purple-600' : 'border-stone-500',
-						'w-full mt-2 pt-2 px-3 pb-2.5 border-2 focus:border-purple-600 focus:outline-none rounded-lg'
+						'w-full mt-2 pt-3 px-3 pb-2.5 border-2 focus:border-purple-600 focus:outline-none rounded-lg'
 					)}
 				/>
 				<button
 					onClick={onCreate}
-					className='bg-purple-800 text-white pt-2.5 pb-[0.7rem] rounded-xl w-full mt-6 disabled:cursor-not-allowed disabled:bg-stone-600 text-base font-semibold enabled:hover:brightness-110 transition-all'
+					className='w-full pt-3.5	 pb-2.5 mt-6 text-base font-semibold text-white transition-all bg-purple-800 rounded-xl disabled:cursor-not-allowed disabled:bg-stone-600 enabled:hover:brightness-110'
 					disabled={!data.title || !data.description}
 				>
 					Create Form

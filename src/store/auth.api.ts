@@ -1,8 +1,10 @@
-import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react'
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 export interface User {
 	id: number
-	username: string
+	firstName: string
+	lastName: string
+	email: string
 }
 
 export interface AuthResponse {
@@ -11,12 +13,14 @@ export interface AuthResponse {
 }
 
 export interface LoginRequest {
-	username: string
+	email: string
 	password: string
 }
 
 export interface RegisterRequest {
-	username: string
+	firstName: string
+	lastName: string
+	email: string
 	password: string
 }
 
@@ -41,18 +45,29 @@ export const authApi = createApi({
 			}),
 			invalidatesTags: ['Forms'],
 		}),
-		verifyToken: builder.mutation<{username: string}, string>({
+		verifyToken: builder.mutation<{email: string}, string>({
 			query: token => ({
 				url: '/verify-token',
 				method: 'POST',
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},
-				invalidatesTags: ['Forms'],
+			}),
+			invalidatesTags: ['Forms'],
+		}),
+		checkEmail: builder.mutation<{message: string}, {email: string}>({
+			query: emailData => ({
+				url: '/check-email',
+				method: 'POST',
+				body: emailData,
 			}),
 		}),
 	}),
 })
 
-export const {useLoginMutation, useRegisterMutation, useVerifyTokenMutation} =
-	authApi
+export const {
+	useLoginMutation,
+	useRegisterMutation,
+	useVerifyTokenMutation,
+	useCheckEmailMutation,
+} = authApi
