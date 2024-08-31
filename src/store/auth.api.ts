@@ -22,18 +22,18 @@ export interface RegisterRequest {
 
 export const authApi = createApi({
 	reducerPath: 'authApi',
-	baseQuery: fetchBaseQuery({baseUrl: '/api'}),
+	baseQuery: fetchBaseQuery({baseUrl: 'http://localhost:3000/'}),
 	endpoints: builder => ({
 		login: builder.mutation<AuthResponse, LoginRequest>({
 			query: credentials => ({
-				url: '/auth/login',
+				url: '/login',
 				method: 'POST',
 				body: credentials,
 			}),
 		}),
 		register: builder.mutation<AuthResponse, RegisterRequest>({
 			query: userData => ({
-				url: '/auth/register',
+				url: '/register',
 				method: 'POST',
 				body: userData,
 			}),

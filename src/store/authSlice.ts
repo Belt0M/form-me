@@ -1,28 +1,32 @@
-// src/store/authSlice.ts
 import {createSlice, PayloadAction} from '@reduxjs/toolkit'
 
 export interface AuthState {
-	// Явний експорт типу AuthState
 	isAuthenticated: boolean
 	user: string | null
+	token: string | null
 }
 
 const initialState: AuthState = {
 	isAuthenticated: false,
 	user: null,
+	token: localStorage.getItem('token') || null,
 }
 
 export const authSlice = createSlice({
 	name: 'auth',
 	initialState,
 	reducers: {
-		login(state, action: PayloadAction<string>) {
+		login(state, action: PayloadAction<{username: string; token: string}>) {
 			state.isAuthenticated = true
-			state.user = action.payload
+			state.user = action.payload.username
+			state.token = action.payload.token
+			localStorage.setItem('token', action.payload.token)
 		},
 		logout(state) {
 			state.isAuthenticated = false
 			state.user = null
+			state.token = null
+			localStorage.removeItem('token')
 		},
 	},
 })

@@ -11,7 +11,7 @@ export function getComponentsQuantity(tree: ICanvasComponent[]): number {
 }
 
 function countComponentsInSubtree(node: ICanvasComponent): number {
-	let count = 1 // Рахуємо поточний вузол
+	let count = 1
 
 	if (node.children) {
 		for (const child of node.children) {

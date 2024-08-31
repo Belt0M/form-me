@@ -21,6 +21,11 @@ import {getDefaultComponentHeight} from '../utils/getDefaultComponentHeight'
 import {getDefaultComponentWidth} from '../utils/getDefaultComponentWidth'
 import {getIsBlockComponentByType} from '../utils/getIsBlockComponentByType'
 import {getIsContainContent} from '../utils/getIsContainContent'
+// import {
+//   useAddFormMutation,
+//   useGetFormByIdQuery,
+//   useUpdateFormMutation,
+// } from '../store/forms.api';
 
 const FormCreator: React.FC = () => {
 	const [canvasComponents, setCanvasComponents] = useState<ICanvasComponent[]>(
@@ -39,9 +44,7 @@ const FormCreator: React.FC = () => {
 	)
 	const [draggingType, setDraggingType] = useState<EHTMLTag | null>(null)
 	const [isHintShowing, setIsHintShowing] = useState<boolean>(false)
-
 	const [isResizing, setIsResizing] = useState<boolean>(false)
-
 	const [isModalOpen, setIsModalOpen] = useState<{
 		input: boolean
 		button: boolean
@@ -382,11 +385,21 @@ const FormCreator: React.FC = () => {
 		const exportedCode = exportFormAsJSX(canvasComponents)
 
 		setExportedCode(exportedCode)
-		setIsModalOpen({export: false, input: false, preview: true, button: false})
+		setIsModalOpen({
+			export: false,
+			input: false,
+			preview: true,
+			button: false,
+		})
 	}
 
 	const handleCloseModal = () => {
-		setIsModalOpen({export: false, input: false, preview: false, button: false})
+		setIsModalOpen({
+			export: false,
+			input: false,
+			preview: false,
+			button: false,
+		})
 	}
 
 	const hasInput = (components: ICanvasComponent[]): boolean => {
@@ -406,8 +419,6 @@ const FormCreator: React.FC = () => {
 				(component.children && hasSubmitButton(component.children))
 		)
 	}
-
-	console.log(canvasComponents)
 
 	const buttonsStyle =
 		'px-4 pt-2.5 pb-[0.525rem] border-2 transition-all disabled:border-stone-500 disabled:cursor-not-allowed rounded-lg disabled:text-stone-400 hover:enabled:bg-opacity-20'

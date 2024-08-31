@@ -1,34 +1,15 @@
 import React, {useState} from 'react'
-import {useDispatch, useSelector} from 'react-redux'
 import {Route, BrowserRouter as Router, Routes} from 'react-router-dom'
 import AuthModal from './components/AuthModal'
+import {useAppSelector} from './hooks/storeHook'
 import FormCreator from './pages/FormCreator'
 import HomePage from './pages/HomePage'
-import {login} from './store/authSlice'
-import {RootState} from './store/store'
 
 const App: React.FC = () => {
-	const dispatch = useDispatch()
-	const isAuthenticated = useSelector(
-		(state: RootState) => state.auth.isAuthenticated
-	)
+	const isAuthenticated = useAppSelector(state => state.auth.isAuthenticated)
 	const [isModalOpen, setIsModalOpen] = useState<boolean>(!isAuthenticated)
 
-	const handleLogin = (username: string) => {
-		dispatch(login(username))
-		setIsModalOpen(false)
-	}
-
-	const handleRegister = (username: string) => {
-		dispatch(login(username))
-
-		setIsModalOpen(false)
-	}
-
-	// const handleLogout = () => {
-	// 	dispatch(logout())
-	// 	setIsModalOpen(true)
-	// }
+	const handleCloseModal = () => setIsModalOpen(false)
 
 	return (
 		<Router>
@@ -39,9 +20,7 @@ const App: React.FC = () => {
 					element={isAuthenticated ? <FormCreator /> : null}
 				/>
 			</Routes>
-			{isModalOpen && (
-				<AuthModal onLogin={handleLogin} onRegister={handleRegister} />
-			)}
+			{isModalOpen && <AuthModal onClose={handleCloseModal} />}
 		</Router>
 	)
 }

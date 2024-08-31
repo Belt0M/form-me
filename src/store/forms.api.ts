@@ -16,7 +16,7 @@ export interface NewFormRequest {
 
 export const formsApi = createApi({
 	reducerPath: 'formsApi',
-	baseQuery: fetchBaseQuery({baseUrl: '/api'}),
+	baseQuery: fetchBaseQuery({baseUrl: 'http://localhost:3000/'}),
 	endpoints: builder => ({
 		getForms: builder.query<Form[], void>({
 			query: () => '/forms',

@@ -89,7 +89,7 @@ const ExportModal: React.FC<ExportModalProps> = ({onClose, exportedCode}) => {
 				draggable
 				pauseOnHover
 				theme='dark'
-				// transition={Bounce}
+				transition={Bounce}
 			/>
 		</section>
 	)
