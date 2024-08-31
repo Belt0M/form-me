@@ -1,6 +1,10 @@
 import clsx from 'clsx'
-import {Link} from 'react-router-dom'
+import {FC} from 'react'
+import {Link, useNavigate} from 'react-router-dom'
 import Logo from '../assets/img/logo.png'
+import {useAppDispatch, useAppSelector} from '../hooks/storeHook'
+import {logout} from '../store/authSlice'
+import UserMenu from './UserMenu'
 
 interface RequirementIndicatorProps {
 	label: string
@@ -26,17 +30,22 @@ const RequirementIndicator: React.FC<RequirementIndicatorProps> = ({
 	</div>
 )
 
-interface HeaderProps {
+interface Props {
 	actions?: React.ReactNode
 	hasInput?: boolean
 	hasSubmitButton?: boolean
 }
 
-const Header: React.FC<HeaderProps> = ({
-	actions,
-	hasInput,
-	hasSubmitButton,
-}) => {
+const Header: FC<Props> = ({actions, hasInput, hasSubmitButton}) => {
+	const isAuthenticated = useAppSelector(state => state.auth.isAuthenticated)
+	const dispatch = useAppDispatch()
+	const navigate = useNavigate()
+
+	const handleLogout = () => {
+		dispatch(logout())
+		navigate('/auth')
+	}
+
 	return (
 		<header className='flex items-center justify-between px-5 py-2 font-bold border-b border-b-purple-800 bg-stone-900'>
 			<Link to='/' className='flex items-center w-1/5 text-lg text-white'>
@@ -55,7 +64,10 @@ const Header: React.FC<HeaderProps> = ({
 					/>
 				</div>
 			)}
-			<div className='flex justify-end w-1/5 gap-4 pr-4'>{actions}</div>
+			<div className='flex items-center justify-end w-1/5 gap-8 pr-4'>
+				<div className='flex gap-3'>{actions}</div>
+				{isAuthenticated && <UserMenu onLogout={handleLogout} />}
+			</div>
 		</header>
 	)
 }

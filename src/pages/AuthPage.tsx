@@ -1,16 +1,11 @@
 import clsx from 'clsx'
-import React, {useEffect, useState} from 'react'
-import {Bounce, ToastContainer, toast} from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+import {useEffect, useState} from 'react'
+import {Bounce, toast, ToastContainer} from 'react-toastify'
 import {useAppDispatch} from '../hooks/storeHook'
 import {useLoginMutation, useRegisterMutation} from '../store/auth.api'
 import {login as loginAction} from '../store/authSlice'
 
-interface AuthModalProps {
-	onClose: () => void
-}
-
-const AuthModal: React.FC<AuthModalProps> = ({onClose}) => {
+const AuthPage = () => {
 	const [isRegister, setIsRegister] = useState(false)
 	const [formData, setFormData] = useState({username: '', password: ''})
 	const [errors, setErrors] = useState<string[]>([])
@@ -71,7 +66,6 @@ const AuthModal: React.FC<AuthModalProps> = ({onClose}) => {
 			)
 
 			setTimeout(() => {
-				onClose()
 				dispatch(loginAction({token, username}))
 			}, 1500)
 		}
@@ -147,4 +141,4 @@ const AuthModal: React.FC<AuthModalProps> = ({onClose}) => {
 	)
 }
 
-export default AuthModal
+export default AuthPage
