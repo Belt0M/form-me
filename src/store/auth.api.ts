@@ -38,7 +38,17 @@ export const authApi = createApi({
 				body: userData,
 			}),
 		}),
+		verifyToken: builder.mutation<{username: string}, string>({
+			query: token => ({
+				url: '/verify-token',
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			}),
+		}),
 	}),
 })
 
-export const {useLoginMutation, useRegisterMutation} = authApi
+export const {useLoginMutation, useRegisterMutation, useVerifyTokenMutation} =
+	authApi
