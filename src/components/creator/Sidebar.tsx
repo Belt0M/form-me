@@ -103,6 +103,14 @@ const Sidebar: React.FC<SidebarProps> = ({
 		isEditing: false,
 	})
 
+	const [padding, setPadding] = useState<{
+		padding: string
+		isEditing?: boolean
+	}>({
+		padding: '',
+		isEditing: false,
+	})
+
 	useEffect(() => {
 		if (isEditing) {
 			setDimensions({
@@ -114,12 +122,14 @@ const Sidebar: React.FC<SidebarProps> = ({
 					'',
 			})
 
-			if (!isBlock) {
-				setFontSize(prev => ({
-					...prev,
-					fontSize: componentStyle.fontSize as string,
-				}))
-			}
+			setFontSize(prev => ({
+				...prev,
+				fontSize: componentStyle.fontSize as string,
+			}))
+			setPadding(prev => ({
+				...prev,
+				padding: componentStyle.padding as string,
+			}))
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [componentStyle.height, componentStyle.width, editingComponentId])
@@ -197,17 +207,17 @@ const Sidebar: React.FC<SidebarProps> = ({
 	function getStyleArrFromEnum(position: string, value: number): number[] {
 		switch (position) {
 			case 'Top':
-				return [value, 0, 0, 0]
+				return [value, -1, -1, -1]
 			case 'Right':
-				return [0, value, 0, 0]
+				return [-1, value, -1, -1]
 			case 'Bottom':
-				return [0, 0, value, 0]
+				return [-1, -1, value, -1]
 			case 'Left':
-				return [0, 0, 0, value]
+				return [-1, -1, -1, value]
 			case 'Vertical':
-				return [value, 0, value, 0]
+				return [value, -1, value, -1]
 			case 'Horizontal':
-				return [0, value, 0, value]
+				return [-1, value, -1, value]
 			case 'All':
 				return [value, value, value, value]
 			default:
@@ -270,61 +280,114 @@ const Sidebar: React.FC<SidebarProps> = ({
 		}))
 	}
 
-	const handleBlur = (
-		target: HTMLElement,
-		name: 'width' | 'height' | 'fontSize'
-	) => {
-		if (name !== 'fontSize') {
-			const value = dimensions[name]
+	const handleBlur = (target: HTMLElement, name: string) => {
+		let updatedName = name
 
-			setDimensions(prev => ({...prev, isEditing: false}))
+		if (name.includes('padding')) {
+			updatedName = 'padding'
+		} else if (name.includes('margin')) {
+			updatedName = 'margin'
+		}
 
-			target.blur()
+		switch (updatedName) {
+			case 'width':
+			case 'height': {
+				const value = dimensions[updatedName]
 
-			if (value) {
-				const minValue = name === 'width' ? minWidth : minHeight
-				const newValue =
-					!value || value === '0' || +value < minValue
-						? minValue
-						: +value > 100
-						? 100
-						: value
-				const updatedStyle = {...componentStyle, [name]: newValue + '%'}
+				setDimensions(prev => ({...prev, isEditing: false}))
 
-				onUpdateStyle(editingComponentId as string, updatedStyle)
+				target.blur()
+
+				if (value) {
+					const minValue = name === 'width' ? minWidth : minHeight
+					const newValue =
+						!value || value === '0' || +value < minValue
+							? minValue
+							: +value > 100
+							? 100
+							: value
+					const updatedStyle = {...componentStyle, [name]: newValue + '%'}
+
+					onUpdateStyle(editingComponentId as string, updatedStyle)
+				}
+				break
 			}
-		} else {
-			const value = fontSize[name]
+			case 'fontSize': {
+				const value = fontSize[updatedName]
 
-			setFontSize(prev => ({...prev, isEditing: false}))
+				setFontSize(prev => ({...prev, isEditing: false}))
 
-			target.blur()
+				target.blur()
 
-			if (value) {
-				const minValue = 8
-				const maxValue = 100
-				const newValue =
-					!value || value === '0' || parseInt(value) < minValue
-						? minValue
-						: parseInt(value) > maxValue
-						? maxValue
-						: value
-				const updatedStyle = {...componentStyle, [name]: newValue}
+				if (value) {
+					const minValue = 8
+					const maxValue = 100
+					const numericValue = parseInt(value, 10)
+					const newValue =
+						!value || value === '0' || numericValue < minValue
+							? minValue
+							: numericValue > maxValue
+							? maxValue
+							: value
+					const updatedStyle = {...componentStyle, [name]: newValue}
 
-				if (parseInt(value) > maxValue) {
-					setFontSize(prev => ({...prev, fontSize: maxValue + 'px'}))
-				} else if (parseInt(value) < minValue) {
-					setFontSize(prev => ({...prev, fontSize: minValue + 'px'}))
+					if (numericValue > maxValue) {
+						setFontSize(prev => ({...prev, fontSize: maxValue + 'px'}))
+					} else if (numericValue < minValue) {
+						setFontSize(prev => ({...prev, fontSize: minValue + 'px'}))
+					}
+
+					onUpdateStyle(editingComponentId as string, updatedStyle)
+				}
+				break
+			}
+			case 'padding': {
+				const value = padding[updatedName]
+
+				target.blur()
+
+				const getCorrectedPaddingValue = (value: string): string => {
+					if (!value || value === 'empty') return '0px'
+
+					const minValue = 0
+					const maxValue = 100
+
+					const result = value
+						.trim()
+						.split(' ')
+						.map(el => {
+							if (!el) return '0px'
+
+							const parsedEl = parseInt(el)
+
+							const correctedEl =
+								Math.min(Math.max(minValue, parsedEl), maxValue) + 'px'
+
+							return correctedEl
+						})
+						.join(' ')
+						.trim()
+
+					return result
 				}
 
+				const correctedValue = getCorrectedPaddingValue(value)
+
+				const updatedStyle = {...componentStyle, padding: correctedValue}
+
 				onUpdateStyle(editingComponentId as string, updatedStyle)
+				setPadding({isEditing: false, padding: correctedValue})
+
+				break
 			}
+			default:
+				break
 		}
 	}
 
 	const handleKeyDown = (
 		e: React.KeyboardEvent<HTMLInputElement>,
-		name: 'width' | 'height' | 'fontSize'
+		name: string
 	) => {
 		if (e.key === 'Enter') {
 			handleBlur(e.target as HTMLElement, name)
@@ -358,46 +421,77 @@ const Sidebar: React.FC<SidebarProps> = ({
 		onUpdateStyle(editingComponentId as string, updatedStyle)
 	}
 
-	const handleRangeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const {name, value} = e.target
-		const newValue = !value || value === '0' ? '-1' : value
-		const baseName = name.replace(
-			/Top|Right|Bottom|Left|Vertical|Horizontal/g,
-			''
-		)
-		let directionName = name
-			.replace(/([a-z])([A-Z])/g, '$1 $2')
-			.split(' ')
-			.pop()
+	const updateSpacingStyles = (name: string, value: string, type: string) => {
+		if (name) {
+			const isEmpty = !value
 
-		if (directionName) {
-			directionName = isEnumValue(directionName)
-				? directionName
-				: EDirection.ALL
-		}
+			const baseName = name.replace(
+				/Top|Right|Bottom|Left|Vertical|Horizontal/g,
+				''
+			)
+			const isMargin = baseName === 'margin'
+			const isPadding = baseName === 'padding'
 
-		if (directionName) {
-			const curStyle = componentStyle[baseName as keyof CSSProperties]
-			const nextStyleArr = getStyleArrFromEnum(directionName, +newValue)
-			let resultArr
+			if (isEmpty) {
+				const setState = isMargin ? setPadding : setPadding
 
-			if (curStyle) {
-				const curStyleArr = styleToArray(curStyle as string)
+				setState(prev => ({...prev, [baseName]: isEmpty ? 'empty' : value}))
 
-				resultArr = curStyleArr.map((value, index) => {
-					const nextValue = nextStyleArr[index]
-					return nextValue !== 0 ? (nextValue < 0 ? 0 : nextValue) : value
-				})
-			} else {
-				resultArr = getStyleArrFromEnum(directionName, +newValue)
+				return
 			}
 
-			const resultStyle = arrayToStyles(resultArr)
+			let directionName = name
+				.replace(/([a-z])([A-Z])/g, '$1 $2')
+				.split(' ')
+				.pop()
 
-			const updatedStyle = {...componentStyle, [baseName]: resultStyle}
+			if (directionName) {
+				directionName = isEnumValue(directionName)
+					? directionName
+					: EDirection.ALL
+			}
 
-			onUpdateStyle(editingComponentId as string, updatedStyle)
+			if (directionName) {
+				const curStyle = componentStyle[baseName as keyof CSSProperties]
+				const nextStyleArr = getStyleArrFromEnum(directionName, +value)
+				let resultArr
+
+				if (curStyle) {
+					const curStyleArr = styleToArray(curStyle as string)
+
+					resultArr = curStyleArr.map((value, index) => {
+						const nextValue = nextStyleArr[index]
+						return nextValue !== -1 ? (nextValue < 0 ? 0 : nextValue) : value
+					})
+				} else {
+					resultArr = getStyleArrFromEnum(directionName, +value)
+				}
+
+				const resultStyle = arrayToStyles(resultArr)
+
+				if (type !== 'range' && (isMargin || isPadding)) {
+					const setState = isMargin ? setPadding : setPadding
+
+					setState(prev => ({...prev, padding: resultStyle}))
+				} else {
+					const updatedStyle = {...componentStyle, [baseName]: resultStyle}
+
+					onUpdateStyle(editingComponentId as string, updatedStyle)
+
+					if (isMargin || isPadding) {
+						const setState = isMargin ? setPadding : setPadding
+
+						setState(prev => ({...prev, padding: resultStyle}))
+					}
+				}
+			}
 		}
+	}
+
+	const handleRangeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const {name, value, type} = e.target
+
+		updateSpacingStyles(name, value, type)
 	}
 
 	const handleGradientChange = _.debounce(gradient => {
@@ -468,46 +562,60 @@ const Sidebar: React.FC<SidebarProps> = ({
 		onUpdateStyle(editingComponentId as string, updatedStyle)
 	}
 
+	console.log(padding)
+
 	const renderSpacingInput = (
 		label: string,
 		name: keyof React.CSSProperties,
 		value: string | number,
 		disabled = false
-	) => (
-		<div className='items-center mb-2 text-sm'>
-			<label className='block text-white'>{label}</label>
-			<input
-				type='range'
-				name={name}
-				min='0'
-				max='100'
-				value={parseInt(value as string) || 0}
-				onChange={handleRangeChange}
-				className='w-full pt-3 pb-2'
-				disabled={disabled}
-			/>
-			<input
-				type='number'
-				name={name}
-				value={parseInt(value as string) || 0}
-				onChange={handleRangeChange}
-				className='w-16 px-2 pt-2.5 pb-1.5 text-white rounded bg-stone-700'
-				style={{appearance: 'textfield'}}
-				disabled={disabled}
-			/>
-		</div>
-	)
+	) => {
+		const setState = name.includes('margin') ? setPadding : setPadding
+
+		return (
+			<div className='items-center mb-2 text-sm'>
+				<label className='block text-white'>{label}</label>
+				<input
+					type='range'
+					name={name}
+					min='0'
+					max='100'
+					value={parseInt(value as string) || 0}
+					className='w-full pt-3 pb-2'
+					disabled={disabled}
+					onChange={handleRangeChange}
+				/>
+				<input
+					type='number'
+					name={name}
+					value={value === '' ? '' : parseInt(value as string)}
+					className='w-16 px-2 pt-2.5 pb-1.5 text-white rounded bg-stone-700'
+					style={{appearance: 'textfield'}}
+					disabled={disabled}
+					onChange={handleRangeChange}
+					onBlur={e => handleBlur(e.target as HTMLElement, name as string)}
+					onKeyDown={e => handleKeyDown(e, name as string)}
+					onFocus={() => setState(prev => ({...prev, isEditing: true}))}
+				/>
+			</div>
+		)
+	}
 
 	const renderSpacingSection = (label: string, baseName: string) => {
-		const style = componentStyle[baseName as keyof CSSProperties] as string
+		const state = baseName === 'margin' ? padding : padding
+		let style = componentStyle[baseName as keyof CSSProperties] as string
+
+		if (state.isEditing) {
+			style = state[baseName as 'padding'] as string
+		}
 
 		if (spacingMode === ESpacing.ALL) {
 			return renderSpacingInput(
 				label,
 				baseName as keyof React.CSSProperties,
-				style
-					? getSeparateStyleFromGeneral(style, EDirection.ALL) || '0px'
-					: '0px',
+				style && style !== 'empty'
+					? getSeparateStyleFromGeneral(style, EDirection.ALL) || ''
+					: '',
 				isFirstComponent && baseName === 'margin'
 			)
 		} else if (spacingMode === ESpacing.AXIS) {
@@ -516,18 +624,17 @@ const Sidebar: React.FC<SidebarProps> = ({
 					{renderSpacingInput(
 						`${label} Vertical`,
 						`${baseName}Vertical` as keyof React.CSSProperties,
-						style
-							? getSeparateStyleFromGeneral(style, EDirection.VERTICAL) || '0px'
-							: '0px',
+						style && style !== 'empty'
+							? getSeparateStyleFromGeneral(style, EDirection.VERTICAL) || ''
+							: '',
 						isFirstComponent && baseName === 'margin'
 					)}
 					{renderSpacingInput(
 						`${label} Horizontal`,
 						`${baseName}Horizontal` as keyof React.CSSProperties,
-						style
-							? getSeparateStyleFromGeneral(style, EDirection.HORIZONTAL) ||
-									'0px'
-							: '0px',
+						style && style !== 'empty'
+							? getSeparateStyleFromGeneral(style, EDirection.HORIZONTAL) || ''
+							: '',
 						isFirstComponent && baseName === 'margin'
 					)}
 				</>
@@ -538,33 +645,33 @@ const Sidebar: React.FC<SidebarProps> = ({
 					{renderSpacingInput(
 						`${label} Top`,
 						`${baseName}Top` as keyof React.CSSProperties,
-						style
-							? getSeparateStyleFromGeneral(style, EDirection.TOP) || '0px'
-							: '0px',
+						style && style !== 'empty'
+							? getSeparateStyleFromGeneral(style, EDirection.TOP) || ''
+							: '',
 						isFirstComponent && baseName === 'margin'
 					)}
 					{renderSpacingInput(
 						`${label} Right`,
 						`${baseName}Right` as keyof React.CSSProperties,
-						style
-							? getSeparateStyleFromGeneral(style, EDirection.RIGHT) || '0px'
-							: '0px',
+						style && style !== 'empty'
+							? getSeparateStyleFromGeneral(style, EDirection.RIGHT) || ''
+							: '',
 						isFirstComponent && baseName === 'margin'
 					)}
 					{renderSpacingInput(
 						`${label} Bottom`,
 						`${baseName}Bottom` as keyof React.CSSProperties,
-						style
-							? getSeparateStyleFromGeneral(style, EDirection.BOTTOM) || '0px'
-							: '0px',
+						style && style !== 'empty'
+							? getSeparateStyleFromGeneral(style, EDirection.BOTTOM) || ''
+							: '',
 						isFirstComponent && baseName === 'margin'
 					)}
 					{renderSpacingInput(
 						`${label} Left`,
 						`${baseName}Left` as keyof React.CSSProperties,
-						style
-							? getSeparateStyleFromGeneral(style, EDirection.LEFT) || '0px'
-							: '0px',
+						style && style !== 'empty'
+							? getSeparateStyleFromGeneral(style, EDirection.LEFT) || ''
+							: '',
 						isFirstComponent && baseName === 'margin'
 					)}
 				</>
