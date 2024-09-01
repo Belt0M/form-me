@@ -12,6 +12,7 @@ interface Props {
 	isResizing?: boolean
 	editingComponentId?: string | null
 	type?: 'button' | 'submit'
+	isErrorHint?: boolean
 	content?: string | undefined
 	onDragEnter?: (
 		event: React.DragEvent<HTMLDivElement | HTMLButtonElement>
@@ -39,6 +40,7 @@ const Button: FC<Props> = ({
 	editingComponentId,
 	type,
 	content,
+	isErrorHint,
 	onDragEnter,
 	onDragLeave,
 	onMouseEnter,
@@ -83,7 +85,12 @@ const Button: FC<Props> = ({
 			{!isResizing && onHoverGUI}
 		</button>
 	) : (
-		<button className='border-2 rounded-lg bg-hint border-hintBorder px-[25px] pt-[12px] pb-[9px] bg-opacity-30'>
+		<button
+			className={clsx(
+				isErrorHint ? 'bg-red-500 border-red-700' : 'bg-hint border-hintBorder',
+				'border-2 rounded-lg px-[25px] pt-[12px] pb-[9px] bg-opacity-30'
+			)}
+		>
 			Button
 		</button>
 	)

@@ -16,6 +16,7 @@ interface InputProps {
 	editingComponentId?: string | null
 	isResizing?: boolean
 	onHoverGUI?: JSX.Element
+	isErrorHint?: boolean
 	onDragEnter?: (event: React.DragEvent<HTMLDivElement>) => void
 	onDragLeave?: (event: React.DragEvent<HTMLDivElement>) => void
 	onMouseEnter?: (event: React.MouseEvent<HTMLDivElement>) => void
@@ -34,6 +35,7 @@ const Input: FC<InputProps> = ({
 	editingComponentId,
 	isResizing,
 	onHoverGUI,
+	isErrorHint,
 	onDragEnter,
 	onDragLeave,
 	onMouseEnter,
@@ -265,7 +267,12 @@ const Input: FC<InputProps> = ({
 			)}
 		</div>
 	) : (
-		<div className='block w-[205px] h-[40px] border-2 rounded-lg bg-hint border-hintBorder bg-opacity-30' />
+		<div
+			className={clsx(
+				isErrorHint ? 'bg-red-500 border-red-700' : 'bg-hint border-hintBorder',
+				'block w-[205px] h-[40px] border-2 rounded-lg bg-opacity-30'
+			)}
+		/>
 	)
 }
 

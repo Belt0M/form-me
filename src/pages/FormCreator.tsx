@@ -23,6 +23,7 @@ import {getComponentById} from '../utils/getComponentByID'
 import {getComponentsQuantity} from '../utils/getComponentsQuantity'
 import {getDefaultComponentHeight} from '../utils/getDefaultComponentHeight'
 import {getDefaultComponentWidth} from '../utils/getDefaultComponentWidth'
+import {getHintComponent} from '../utils/getHintComponent'
 import {getIsBlockComponentByType} from '../utils/getIsBlockComponentByType'
 import {getIsComponentWithChildren} from '../utils/getIsComponentWithChildren'
 import {getIsContainContent} from '../utils/getIsContainContent'
@@ -155,7 +156,34 @@ const FormCreator: React.FC = () => {
 		inputType?: string | null,
 		buttonType?: 'button' | 'submit' | null
 	) => {
+		const hintComponent = getHintComponent(canvasComponents)
+		const isError = hintComponent?.isErrorHint
+
 		handleDeleteComponent()
+
+		if (isError) {
+			toast('The component cannot be placed here', {
+				position: 'top-center',
+				autoClose: 2000,
+				type: 'error',
+				style: {padding: '0.5rem'},
+				theme: 'dark',
+				transition: Bounce,
+			})
+			toast(
+				'P.S. For absolute positioning, select "position: absolute" from the side menu above components',
+				{
+					position: 'top-center',
+					delay: 1000,
+					autoClose: 2500,
+					type: 'warning',
+					style: {padding: '0.5rem'},
+					theme: 'dark',
+					transition: Bounce,
+				}
+			)
+			return
+		}
 
 		if (!hoveredComponentId && canvasComponents.length) {
 			toast('When dropping a new component, the parent should be highlighted', {
@@ -179,13 +207,14 @@ const FormCreator: React.FC = () => {
 		}
 
 		if (hoveredComponentId) {
-			const hoveredComponentType = getComponentById(
+			const hoveredComponent = getComponentById(
 				canvasComponents,
 				hoveredComponentId
-			)?.type
+			)
+
+			const type = hoveredComponent?.type
 			const isComponentWithoutChildren =
-				hoveredComponentType &&
-				!getIsComponentWithChildren(hoveredComponentType)
+				type && !getIsComponentWithChildren(type)
 
 			if (isComponentWithoutChildren) {
 				toast('The existing component does not support nesting', {

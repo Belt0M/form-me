@@ -10,6 +10,7 @@ interface HeadingProps {
 	isHint?: boolean
 	editingComponentId?: string | null
 	isResizing?: boolean
+	isErrorHint?: boolean
 	onHoverGUI?: JSX.Element
 	content?: string | undefined
 	setIsResizing?: React.Dispatch<React.SetStateAction<boolean>>
@@ -31,6 +32,7 @@ const Heading: FC<HeadingProps> = ({
 	isResizing,
 	onHoverGUI,
 	content,
+	isErrorHint,
 	onDragEnter,
 	onDragLeave,
 	onMouseEnter,
@@ -85,7 +87,12 @@ const Heading: FC<HeadingProps> = ({
 			{!isResizing && onHoverGUI}
 		</Tag>
 	) : (
-		<Tag className='w-full p-2 text-[12.8px] text-white border-2 bg-hint bg-opacity-20 border-hintBorder'>
+		<Tag
+			className={clsx(
+				isErrorHint ? 'bg-red-500 border-red-700' : 'bg-hint border-hintBorder',
+				'w-full p-2 text-[12.8px] text-white border-2 bg-opacity-30'
+			)}
+		>
 			{content || 'Heading'}
 		</Tag>
 	)
