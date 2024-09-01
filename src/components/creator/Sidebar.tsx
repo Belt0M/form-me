@@ -111,6 +111,14 @@ const Sidebar: React.FC<SidebarProps> = ({
 		isEditing: false,
 	})
 
+	const [margin, setMargin] = useState<{
+		margin: string
+		isEditing?: boolean
+	}>({
+		margin: '',
+		isEditing: false,
+	})
+
 	useEffect(() => {
 		if (isEditing) {
 			setDimensions({
@@ -129,6 +137,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 			setPadding(prev => ({
 				...prev,
 				padding: componentStyle.padding as string,
+			}))
+			setMargin(prev => ({
+				...prev,
+				margin: componentStyle.margin as string,
 			}))
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -204,22 +216,33 @@ const Sidebar: React.FC<SidebarProps> = ({
 		})
 	}
 
-	function getStyleArrFromEnum(position: string, value: number): number[] {
+	function getStyleArrFromEnum(
+		position: string,
+		value: number | string
+	): number[] {
+		let updatedValue = null
+
+		if (value === '') {
+			updatedValue = -2
+		} else {
+			updatedValue = value as number
+		}
+
 		switch (position) {
 			case 'Top':
-				return [value, -1, -1, -1]
+				return [updatedValue, -1, -1, -1]
 			case 'Right':
-				return [-1, value, -1, -1]
+				return [-1, updatedValue, -1, -1]
 			case 'Bottom':
-				return [-1, -1, value, -1]
+				return [-1, -1, updatedValue, -1]
 			case 'Left':
-				return [-1, -1, -1, value]
+				return [-1, -1, -1, updatedValue]
 			case 'Vertical':
-				return [value, -1, value, -1]
+				return [updatedValue, -1, updatedValue, -1]
 			case 'Horizontal':
-				return [-1, value, -1, value]
+				return [-1, updatedValue, -1, updatedValue]
 			case 'All':
-				return [value, value, value, value]
+				return [updatedValue, updatedValue, updatedValue, updatedValue]
 			default:
 				throw new Error('Invalid position')
 		}
@@ -228,40 +251,41 @@ const Sidebar: React.FC<SidebarProps> = ({
 	const getSeparateStyleFromGeneral = (
 		style: string,
 		direction: EDirection
-	): string | null => {
+	): string => {
 		const styleArr = styleToArray(style)
 		let result = null
 
 		if (styleArr) {
 			switch (direction) {
-				case EDirection.TOP:
-					result = styleArr[0]?.toString() || null
-					break
 				case EDirection.BOTTOM:
-					result = styleArr[2]?.toString() || null
+					result = styleArr[2]?.toString() || ''
 					break
 				case EDirection.LEFT:
-					result = styleArr[3]?.toString() || null
+					result = styleArr[3]?.toString() || ''
 					break
 				case EDirection.RIGHT:
-					result = styleArr[1]?.toString() || null
+					result = styleArr[1]?.toString() || ''
 					break
 				case EDirection.HORIZONTAL:
-					result = Math.max(styleArr[1], styleArr[3])?.toString() || null
+					result = Math.max(styleArr[1], styleArr[3])?.toString() || ''
 					break
 				case EDirection.VERTICAL:
-					result = Math.max(styleArr[0], styleArr[2])?.toString() || null
+					result = Math.max(styleArr[0], styleArr[2])?.toString() || ''
 					break
 				default:
-					result = styleArr.join(' ')
+					result = styleArr[0]?.toString() || ''
 					break
 			}
+
+			result = result === '-2' ? '' : result
 
 			return result
 		}
 
-		return null
+		return ''
 	}
+
+	console.log(padding, margin)
 
 	type EDirectionType = (typeof EDirection)[keyof typeof EDirection]
 
@@ -341,8 +365,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 				}
 				break
 			}
-			case 'padding': {
-				const value = padding[updatedName]
+			case 'padding':
+			case 'margin': {
+				const isMargin = updatedName === 'margin'
+				const value = isMargin ? margin.margin : padding.padding
 
 				target.blur()
 
@@ -373,10 +399,15 @@ const Sidebar: React.FC<SidebarProps> = ({
 
 				const correctedValue = getCorrectedPaddingValue(value)
 
-				const updatedStyle = {...componentStyle, padding: correctedValue}
+				const updatedStyle = {...componentStyle, [updatedName]: correctedValue}
 
 				onUpdateStyle(editingComponentId as string, updatedStyle)
-				setPadding({isEditing: false, padding: correctedValue})
+
+				if (isMargin) {
+					setMargin({isEditing: false, margin: correctedValue})
+				} else {
+					setPadding({isEditing: false, padding: correctedValue})
+				}
 
 				break
 			}
@@ -423,22 +454,12 @@ const Sidebar: React.FC<SidebarProps> = ({
 
 	const updateSpacingStyles = (name: string, value: string, type: string) => {
 		if (name) {
-			const isEmpty = !value
-
 			const baseName = name.replace(
 				/Top|Right|Bottom|Left|Vertical|Horizontal/g,
 				''
 			)
 			const isMargin = baseName === 'margin'
 			const isPadding = baseName === 'padding'
-
-			if (isEmpty) {
-				const setState = isMargin ? setPadding : setPadding
-
-				setState(prev => ({...prev, [baseName]: isEmpty ? 'empty' : value}))
-
-				return
-			}
 
 			let directionName = name
 				.replace(/([a-z])([A-Z])/g, '$1 $2')
@@ -453,7 +474,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
 			if (directionName) {
 				const curStyle = componentStyle[baseName as keyof CSSProperties]
-				const nextStyleArr = getStyleArrFromEnum(directionName, +value)
+				const nextStyleArr = getStyleArrFromEnum(directionName, value)
 				let resultArr
 
 				if (curStyle) {
@@ -461,7 +482,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
 					resultArr = curStyleArr.map((value, index) => {
 						const nextValue = nextStyleArr[index]
-						return nextValue !== -1 ? (nextValue < 0 ? 0 : nextValue) : value
+						return nextValue !== -1 ? nextValue : value
 					})
 				} else {
 					resultArr = getStyleArrFromEnum(directionName, +value)
@@ -470,18 +491,20 @@ const Sidebar: React.FC<SidebarProps> = ({
 				const resultStyle = arrayToStyles(resultArr)
 
 				if (type !== 'range' && (isMargin || isPadding)) {
-					const setState = isMargin ? setPadding : setPadding
-
-					setState(prev => ({...prev, padding: resultStyle}))
+					if (isMargin) {
+						setMargin(prev => ({...prev, margin: resultStyle}))
+					} else if (isPadding) {
+						setPadding(prev => ({...prev, padding: resultStyle}))
+					}
 				} else {
 					const updatedStyle = {...componentStyle, [baseName]: resultStyle}
 
 					onUpdateStyle(editingComponentId as string, updatedStyle)
 
-					if (isMargin || isPadding) {
-						const setState = isMargin ? setPadding : setPadding
-
-						setState(prev => ({...prev, padding: resultStyle}))
+					if (isMargin) {
+						setMargin(prev => ({...prev, margin: resultStyle}))
+					} else if (isPadding) {
+						setPadding(prev => ({...prev, padding: resultStyle}))
 					}
 				}
 			}
@@ -562,16 +585,12 @@ const Sidebar: React.FC<SidebarProps> = ({
 		onUpdateStyle(editingComponentId as string, updatedStyle)
 	}
 
-	console.log(padding)
-
 	const renderSpacingInput = (
 		label: string,
 		name: keyof React.CSSProperties,
 		value: string | number,
 		disabled = false
 	) => {
-		const setState = name.includes('margin') ? setPadding : setPadding
-
 		return (
 			<div className='items-center mb-2 text-sm'>
 				<label className='block text-white'>{label}</label>
@@ -595,27 +614,32 @@ const Sidebar: React.FC<SidebarProps> = ({
 					onChange={handleRangeChange}
 					onBlur={e => handleBlur(e.target as HTMLElement, name as string)}
 					onKeyDown={e => handleKeyDown(e, name as string)}
-					onFocus={() => setState(prev => ({...prev, isEditing: true}))}
+					onFocus={() =>
+						name.includes('margin')
+							? setMargin(prev => ({...prev, isEditing: true}))
+							: setPadding(prev => ({...prev, isEditing: true}))
+					}
 				/>
 			</div>
 		)
 	}
 
 	const renderSpacingSection = (label: string, baseName: string) => {
-		const state = baseName === 'margin' ? padding : padding
-		let style = componentStyle[baseName as keyof CSSProperties] as string
+		const isMargin = baseName === 'margin'
+		const state = isMargin ? margin : padding
+		let style = (
+			isMargin ? componentStyle.margin : componentStyle.padding
+		) as string
 
 		if (state.isEditing) {
-			style = state[baseName as 'padding'] as string
+			style = isMargin ? margin.margin : padding.padding
 		}
 
 		if (spacingMode === ESpacing.ALL) {
 			return renderSpacingInput(
 				label,
 				baseName as keyof React.CSSProperties,
-				style && style !== 'empty'
-					? getSeparateStyleFromGeneral(style, EDirection.ALL) || ''
-					: '',
+				style ? getSeparateStyleFromGeneral(style, EDirection.ALL) : 0,
 				isFirstComponent && baseName === 'margin'
 			)
 		} else if (spacingMode === ESpacing.AXIS) {
@@ -624,17 +648,15 @@ const Sidebar: React.FC<SidebarProps> = ({
 					{renderSpacingInput(
 						`${label} Vertical`,
 						`${baseName}Vertical` as keyof React.CSSProperties,
-						style && style !== 'empty'
-							? getSeparateStyleFromGeneral(style, EDirection.VERTICAL) || ''
-							: '',
+						style ? getSeparateStyleFromGeneral(style, EDirection.VERTICAL) : 0,
 						isFirstComponent && baseName === 'margin'
 					)}
 					{renderSpacingInput(
 						`${label} Horizontal`,
 						`${baseName}Horizontal` as keyof React.CSSProperties,
-						style && style !== 'empty'
-							? getSeparateStyleFromGeneral(style, EDirection.HORIZONTAL) || ''
-							: '',
+						style
+							? getSeparateStyleFromGeneral(style, EDirection.HORIZONTAL)
+							: 0,
 						isFirstComponent && baseName === 'margin'
 					)}
 				</>
@@ -645,33 +667,25 @@ const Sidebar: React.FC<SidebarProps> = ({
 					{renderSpacingInput(
 						`${label} Top`,
 						`${baseName}Top` as keyof React.CSSProperties,
-						style && style !== 'empty'
-							? getSeparateStyleFromGeneral(style, EDirection.TOP) || ''
-							: '',
+						style ? getSeparateStyleFromGeneral(style, EDirection.TOP) : 0,
 						isFirstComponent && baseName === 'margin'
 					)}
 					{renderSpacingInput(
 						`${label} Right`,
 						`${baseName}Right` as keyof React.CSSProperties,
-						style && style !== 'empty'
-							? getSeparateStyleFromGeneral(style, EDirection.RIGHT) || ''
-							: '',
+						style ? getSeparateStyleFromGeneral(style, EDirection.RIGHT) : 0,
 						isFirstComponent && baseName === 'margin'
 					)}
 					{renderSpacingInput(
 						`${label} Bottom`,
 						`${baseName}Bottom` as keyof React.CSSProperties,
-						style && style !== 'empty'
-							? getSeparateStyleFromGeneral(style, EDirection.BOTTOM) || ''
-							: '',
+						style ? getSeparateStyleFromGeneral(style, EDirection.BOTTOM) : 0,
 						isFirstComponent && baseName === 'margin'
 					)}
 					{renderSpacingInput(
 						`${label} Left`,
 						`${baseName}Left` as keyof React.CSSProperties,
-						style && style !== 'empty'
-							? getSeparateStyleFromGeneral(style, EDirection.LEFT) || ''
-							: '',
+						style ? getSeparateStyleFromGeneral(style, EDirection.LEFT) : 0,
 						isFirstComponent && baseName === 'margin'
 					)}
 				</>
