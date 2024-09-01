@@ -1,6 +1,5 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 import clsx from 'clsx'
-import _ from 'lodash'
 import React, {CSSProperties, useEffect, useState} from 'react'
 import {sidebarComponents} from '../../data/sidebar-components'
 import {EDirection} from '../../types/EDirection'
@@ -9,10 +8,12 @@ import {EPosition} from '../../types/EPosition'
 import {ESpacing} from '../../types/ESpacing'
 import {ICanvasComponent} from '../../types/ICanvasComponent'
 import {IExtendedCSSProperties} from '../../types/IExtendedCSSProperties'
+import {IGradient} from '../../types/IGradient'
 import {findComponentById} from '../../utils/getComponentByID'
 import {getElementMinDimensions} from '../../utils/getElementMinDimensions'
 import {getFontSizeByHeadingLevel} from '../../utils/getFontSizeByHeadingLevel'
 import {getIsBlockComponentByType} from '../../utils/getIsBlockComponentByType'
+import {parseGradientSelector} from '../../utils/parseGradientSelector'
 import {roundTo} from '../../utils/roundTo'
 import InputStyleSelector from './InputStyleSelector'
 import SectionHeading from './SectionHeading'
@@ -32,7 +33,7 @@ interface SidebarProps {
 	onExitEditMode: () => void
 }
 
-const defaultGradient = {
+const defaultGradient: IGradient = {
 	enabled: false,
 	direction: 'to right',
 	startColor: '#ffffff',
@@ -60,7 +61,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 	const [activeSections, setActiveSections] = useState<string[]>(
 		defaultOpenedSections
 	)
-	const [backgroundGradient, setBackgroundGradient] = useState(defaultGradient)
+	const [backgroundGradient, setBackgroundGradient] =
+		useState<IGradient>(defaultGradient)
 	const [spacingMode, setSpacingMode] = useState<ESpacing>(ESpacing.ALL)
 
 	const editingComponent = findComponentById(
@@ -148,10 +150,19 @@ const Sidebar: React.FC<SidebarProps> = ({
 
 	useEffect(() => {
 		if (editingComponentId) {
+			const parsedGradient = componentStyle.backgroundImage
+				? parseGradientSelector(componentStyle.backgroundImage)
+				: null
+			const gradientToApply =
+				parsedGradient && parsedGradient.enabled
+					? parsedGradient
+					: defaultGradient
+
 			setSpacingMode(ESpacing.ALL)
-			setBackgroundGradient(defaultGradient)
+			setBackgroundGradient(gradientToApply)
 			setActiveSections(defaultOpenedSections)
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [editingComponentId])
 
 	const toggleSection = (section: string) => {
@@ -160,6 +171,17 @@ const Sidebar: React.FC<SidebarProps> = ({
 				? prev.filter(s => s !== section)
 				: [...prev, section]
 		)
+	}
+
+	const handleUpdateSelector = (
+		e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
+	) => {
+		const {name, value} = e.target
+		const updatedStyle = {
+			...componentStyle,
+			[name]: value,
+		}
+		onUpdateStyle(editingComponentId as string, updatedStyle)
 	}
 
 	const handleInputChange = (
@@ -173,7 +195,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
 			setFontSize(prev => ({
 				...prev,
-				[name]: value + 'px',
+				[name]: !value ? '-2' : value + 'px',
 			}))
 		} else {
 			const newValue = value.length ? value : 16
@@ -285,8 +307,6 @@ const Sidebar: React.FC<SidebarProps> = ({
 		return ''
 	}
 
-	console.log(padding, margin)
-
 	type EDirectionType = (typeof EDirection)[keyof typeof EDirection]
 
 	function isEnumValue(value: string): value is EDirectionType {
@@ -346,20 +366,11 @@ const Sidebar: React.FC<SidebarProps> = ({
 				if (value) {
 					const minValue = 8
 					const maxValue = 100
-					const numericValue = parseInt(value, 10)
-					const newValue =
-						!value || value === '0' || numericValue < minValue
-							? minValue
-							: numericValue > maxValue
-							? maxValue
-							: value
+					const floatValue = parseFloat(value)
+					const newValue = Math.min(maxValue, Math.max(floatValue, minValue))
 					const updatedStyle = {...componentStyle, [name]: newValue}
 
-					if (numericValue > maxValue) {
-						setFontSize(prev => ({...prev, fontSize: maxValue + 'px'}))
-					} else if (numericValue < minValue) {
-						setFontSize(prev => ({...prev, fontSize: minValue + 'px'}))
-					}
+					setFontSize(prev => ({...prev, fontSize: newValue + 'px'}))
 
 					onUpdateStyle(editingComponentId as string, updatedStyle)
 				}
@@ -517,7 +528,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 		updateSpacingStyles(name, value, type)
 	}
 
-	const handleGradientChange = _.debounce(gradient => {
+	const handleGradientChange = (gradient: IGradient) => {
 		if (gradient.enabled) {
 			const updatedStyle = {
 				backgroundImage: `linear-gradient(${gradient.direction}, ${gradient.startColor}, ${gradient.endColor})`,
@@ -526,7 +537,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 		} else {
 			onUpdateStyle(editingComponentId as string, {backgroundImage: ''})
 		}
-	}, 5)
+	}
 
 	const handleGradientColorChange = (
 		e: React.ChangeEvent<HTMLInputElement>
@@ -592,9 +603,32 @@ const Sidebar: React.FC<SidebarProps> = ({
 		disabled = false
 	) => {
 		return (
-			<div className='items-center mb-2 text-sm'>
+			<div>
 				<label className='block text-white'>{label}</label>
-				<input
+				<InputStyleSelector
+					name={name}
+					value={parseInt(value as string) || 0}
+					type='range'
+					onChange={handleRangeChange}
+					min={0}
+					max={100}
+				/>
+				<InputStyleSelector
+					name={name}
+					value={value === '' ? '' : parseInt(value as string)}
+					type='number'
+					disabled={disabled}
+					onChange={handleRangeChange}
+					onBlur={e => handleBlur(e.target as HTMLElement, name as string)}
+					onKeyDown={e => handleKeyDown(e, name as string)}
+					onFocus={() =>
+						name.includes('margin')
+							? setMargin(prev => ({...prev, isEditing: true}))
+							: setPadding(prev => ({...prev, isEditing: true}))
+					}
+					useAdvancedHandlers
+				/>
+				{/* <input
 					type='range'
 					name={name}
 					min='0'
@@ -603,8 +637,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 					className='w-full pt-3 pb-2'
 					disabled={disabled}
 					onChange={handleRangeChange}
-				/>
-				<input
+				/> */}
+				{/* <input
 					type='number'
 					name={name}
 					value={value === '' ? '' : parseInt(value as string)}
@@ -619,7 +653,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 							? setMargin(prev => ({...prev, isEditing: true}))
 							: setPadding(prev => ({...prev, isEditing: true}))
 					}
-				/>
+				/> */}
 			</div>
 		)
 	}
@@ -772,7 +806,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 								name='fontSize'
 								value={
 									fontSize.isEditing
-										? parseFloat(fontSize.fontSize as string).toString()
+										? fontSize.fontSize === '-2'
+											? ''
+											: parseFloat(fontSize.fontSize as string).toString()
 										: parseFloat(componentStyle.fontSize as string).toString()
 								}
 								type='number'
@@ -825,26 +861,27 @@ const Sidebar: React.FC<SidebarProps> = ({
 			return (
 				<>
 					{/* Input Placeholder */}
-					<div className='group'>
-						<div className='flex justify-between cursor-pointer'>
-							<span className='text-white'>Placeholder</span>
-						</div>
-						<div className='mt-2'>
-							<input
-								type='text'
-								name='placeholder'
-								value={componentStyle.placeholder || ''}
-								onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-									const updatedStyle = {
-										...componentStyle,
-										placeholder: e.target.value,
-									}
-									onUpdateStyle(editingComponentId as string, updatedStyle)
-								}}
-								className='w-full p-2 mb-4 text-white rounded bg-stone-700'
-							/>
-						</div>
-					</div>
+					<InputStyleSelector
+						label={`Placeholder Text`}
+						name='placeholder'
+						value={componentStyle.placeholder || ''}
+						type='text'
+						onChange={handleUpdateSelector}
+					/>
+
+					<InputStyleSelector
+						label={`Content`}
+						name='content'
+						value={editingComponent.content || ''}
+						type='text'
+						onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+							onUpdateProperty(
+								editingComponentId as string,
+								e.target.name,
+								e.target.value
+							)
+						}}
+					/>
 				</>
 			)
 		}
@@ -858,27 +895,24 @@ const Sidebar: React.FC<SidebarProps> = ({
 			const renderConstraint = (
 				label: string,
 				name: string,
-				type = 'text',
+				type: 'text' | 'number' | 'pattern' = 'text',
 				placeholder = ''
 			) => (
-				<div className='group'>
-					<label className='block mb-2 text-white'>{label}</label>
-					<input
-						type={type}
-						name={name}
-						value={
-							typeof componentStyle[name as keyof IExtendedCSSProperties] ===
-								'string' ||
-							typeof componentStyle[name as keyof IExtendedCSSProperties] ===
-								'number'
-								? String(componentStyle[name as keyof IExtendedCSSProperties])
-								: ''
-						}
-						onChange={handleInputChange}
-						className='w-full p-2 mb-4 text-white rounded bg-stone-700'
-						placeholder={placeholder}
-					/>
-				</div>
+				<InputStyleSelector
+					label={label}
+					name={name}
+					value={
+						typeof componentStyle[name as keyof IExtendedCSSProperties] ===
+							'string' ||
+						typeof componentStyle[name as keyof IExtendedCSSProperties] ===
+							'number'
+							? String(componentStyle[name as keyof IExtendedCSSProperties])
+							: ''
+					}
+					type={type}
+					onChange={handleInputChange}
+					placeholder={placeholder}
+				/>
 			)
 
 			const renderCheckboxConstraint = (label: string, name: string) => (
@@ -906,43 +940,16 @@ const Sidebar: React.FC<SidebarProps> = ({
 				case 'text':
 				case 'email':
 				case 'password':
-				case 'search':
-				case 'tel':
-				case 'url':
-					constraints.push(
-						renderConstraint('Max Length', 'maxLength', 'number')
-					)
-					constraints.push(renderConstraint('Pattern (Regex)', 'pattern'))
 					constraints.push(renderCheckboxConstraint('Required', 'required'))
 					break
-
 				case 'number':
 				case 'range':
 					constraints.push(renderConstraint('Min Value', 'min', 'number'))
 					constraints.push(renderConstraint('Max Value', 'max', 'number'))
 					constraints.push(renderConstraint('Step', 'step', 'number'))
 					constraints.push(renderCheckboxConstraint('Required', 'required'))
-					break
 
-				case 'date':
-				case 'time':
-				case 'month':
-				case 'week':
-				case 'datetime-local':
-					constraints.push(renderConstraint('Min Value', 'min', 'date'))
-					constraints.push(renderConstraint('Max Value', 'max', 'date'))
-					constraints.push(renderCheckboxConstraint('Required', 'required'))
 					break
-
-				case 'checkbox':
-				case 'radio':
-					constraints.push(renderCheckboxConstraint('Required', 'required'))
-					break
-
-				case 'file':
-					constraints.push(renderCheckboxConstraint('Required', 'required'))
-					break
-
 				default:
 					break
 			}
@@ -1032,68 +1039,68 @@ const Sidebar: React.FC<SidebarProps> = ({
 				<div className='flex flex-col gap-4'>
 					{/* Background Section */}
 					{isBlock && (
-						<div className='group'>
+						<>
 							<SectionHeading
 								name='background'
 								isOpen={activeSections.includes('background')}
 								onSwitch={toggleSection}
 							/>
 							{activeSections.includes('background') && (
-								<div className='mt-2'>
-									<label className='block mb-2 text-white'>
-										Background Color
-									</label>
-									<input
-										type='color'
+								<>
+									<InputStyleSelector
+										label='Background Color'
 										name='backgroundColor'
 										value={componentStyle.backgroundColor || '#ffffff'}
+										type='color'
 										onChange={handleInputChange}
-										className='w-full h-10 px-2 py-1 border rounded'
+										debounce
 									/>
-									<div className='mt-4'>
-										<label className='flex items-center mb-2 text-white'>
-											<input
-												type='checkbox'
-												name='enableGradient'
-												checked={backgroundGradient.enabled}
-												onChange={handleToggleGradient}
-												className='mr-2'
+
+									<label className='flex items-center mb-2 text-white'>
+										<input
+											type='checkbox'
+											name='enableGradient'
+											checked={backgroundGradient.enabled}
+											onChange={handleToggleGradient}
+											className='mr-2'
+										/>
+										Enable Gradient
+									</label>
+									{backgroundGradient.enabled && (
+										<>
+											<SelectStyleSelector
+												label='Direction'
+												name='direction'
+												value={backgroundGradient.direction}
+												options={[
+													{value: 'to right', label: 'To Right'},
+													{value: 'to left', label: 'To Left'},
+													{value: 'to bottom', label: 'To Bottom'},
+													{value: 'to top', label: 'To Top'},
+												]}
+												onChange={handleGradientDirectionChange}
 											/>
-											Enable Gradient
-										</label>
-										{backgroundGradient.enabled && (
-											<>
-												<select
-													name='direction'
-													value={backgroundGradient.direction}
-													onChange={handleGradientDirectionChange}
-													className='w-full p-2 mb-2 text-white rounded bg-stone-700'
-												>
-													<option value='to right'>To Right</option>
-													<option value='to left'>To Left</option>
-													<option value='to bottom'>To Bottom</option>
-													<option value='to top'>To Top</option>
-												</select>
-												<input
-													type='color'
+											<div className='flex items-center justify-center gap-4 p-2 rounded bg-stone-700'>
+												<InputStyleSelector
 													name='startColor'
 													value={backgroundGradient.startColor}
-													onChange={handleGradientColorChange}
-													className='w-full h-10 px-2 py-1 mb-2 border rounded'
-												/>
-												<input
 													type='color'
+													onChange={handleGradientColorChange}
+													debounce
+												/>
+												<InputStyleSelector
 													name='endColor'
 													value={backgroundGradient.endColor}
+													type='color'
 													onChange={handleGradientColorChange}
-													className='w-full h-10 px-2 py-1 border rounded'
+													debounce
 												/>
-											</>
-										)}
-									</div>
-								</div>
+											</div>
+										</>
+									)}
+								</>
 							)}
-						</div>
+						</>
 					)}
 
 					{/* Border Section */}
@@ -1105,68 +1112,58 @@ const Sidebar: React.FC<SidebarProps> = ({
 								onSwitch={toggleSection}
 							/>
 							{activeSections.includes('border') && (
-								<div className='mt-2'>
-									<label className='block mb-2 text-white'>Border Width</label>
-									<input
-										type='range'
+								<>
+									<InputStyleSelector
+										label='Border Width'
 										name='borderWidth'
-										min='0'
-										max='20'
 										value={parseInt(componentStyle.borderWidth as string) || 0}
-										onChange={handleRangeChange}
-										className='w-full'
+										type='range'
+										onChange={handleSimpleRangeChange}
+										min={0}
+										max={30}
 									/>
 									<span className='text-white'>
 										{parseInt(componentStyle.borderWidth as string) || 0}px
 									</span>
-									<label className='block mt-4 mb-2 text-white'>
-										Border Color
-									</label>
-									<input
-										type='color'
+
+									<InputStyleSelector
+										label='Border Color'
 										name='borderColor'
 										value={
 											componentStyle.borderColor ||
 											componentStyle.backgroundColor ||
 											'#000000'
 										}
+										type='color'
 										onChange={handleInputChange}
-										className='w-full h-10 px-2 py-1 border rounded'
 									/>
-									<label className='block mt-4 mb-2 text-white'>
-										Border Style
-									</label>
-									<select
+
+									<SelectStyleSelector
+										label='Border Style'
 										name='borderStyle'
 										value={componentStyle.borderStyle || 'solid'}
-										onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-											const {name, value} = e.target
-											const updatedStyle = {...componentStyle, [name]: value}
-											onUpdateStyle(editingComponentId as string, updatedStyle)
-										}}
-										className='w-full p-2 mb-2 text-white rounded bg-stone-700'
-									>
-										<option value='solid'>Solid</option>
-										<option value='dashed'>Dashed</option>
-										<option value='dotted'>Dotted</option>
-										<option value='double'>Double</option>
-									</select>
-									<label className='block mt-4 mb-2 text-white'>
-										Border Radius
-									</label>
-									<input
-										type='range'
+										onChange={handleUpdateSelector}
+										options={[
+											{label: 'Solid', value: 'solid'},
+											{label: 'Dashed', value: 'dashed'},
+											{label: 'Dotted', value: 'dotted'},
+											{label: 'Double', value: 'double'},
+										]}
+									/>
+
+									<InputStyleSelector
+										label='Border Radius'
 										name='borderRadius'
-										min='0'
-										max='50'
 										value={parseInt(componentStyle.borderRadius as string) || 0}
-										onChange={handleRangeChange}
-										className='w-full'
+										type='range'
+										onChange={handleSimpleRangeChange}
+										min={0}
+										max={30}
 									/>
 									<span className='text-white'>
 										{parseInt(componentStyle.borderRadius as string) || 0}px
 									</span>
-								</div>
+								</>
 							)}
 						</div>
 					)}
@@ -1202,168 +1199,123 @@ const Sidebar: React.FC<SidebarProps> = ({
 
 					{/* Display Section */}
 					{isBlock && (
-						<div className='group'>
+						<>
 							<SectionHeading
 								name='display'
 								isOpen={activeSections.includes('display')}
 								onSwitch={toggleSection}
 							/>
 							{activeSections.includes('display') && (
-								<div className='mt-2'>
-									<label className='block mb-2 text-white'>Display Type</label>
-									<select
+								<>
+									<SelectStyleSelector
+										label='Display Type'
 										name='display'
 										value={componentStyle.display || 'block'}
 										onChange={handleDisplayChange}
-										className='w-full p-2 mb-2 text-white rounded bg-stone-700'
-									>
-										<option value='block'>Block</option>
-										<option value='flex'>Flex</option>
-										<option value='grid'>Grid</option>
-									</select>
+										options={[
+											{label: 'Block', value: 'block'},
+											{label: 'Flex', value: 'flex'},
+											{label: 'Grid', value: 'grid'},
+										]}
+									/>
 
 									{/* Flex options */}
 									{componentStyle.display === 'flex' && (
-										<div className='mt-2'>
-											<label className='block mb-2 text-white'>
-												Flex Direction
-											</label>
-											<select
+										<>
+											<SelectStyleSelector
+												label='Flex Direction'
 												name='flexDirection'
 												value={componentStyle.flexDirection || 'row'}
-												onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-													const {name, value} = e.target
-													const updatedStyle = {
-														...componentStyle,
-														[name]: value,
-													}
-													onUpdateStyle(
-														editingComponentId as string,
-														updatedStyle
-													)
-												}}
-												className='w-full p-2 mb-2 text-white rounded bg-stone-700'
-											>
-												<option value='row'>Row</option>
-												<option value='row-reverse'>Row Reverse</option>
-												<option value='column'>Column</option>
-												<option value='column-reverse'>Column Reverse</option>
-											</select>
+												onChange={handleUpdateSelector}
+												options={[
+													{label: 'Row', value: 'row'},
+													{label: 'Row Reverse', value: 'row-reverse'},
+													{label: 'Column', value: 'column'},
+													{label: 'Column Reverse', value: 'column-reverse'},
+												]}
+											/>
 
-											<label className='block mb-2 text-white'>
-												Justify Content
-											</label>
-											<select
+											<SelectStyleSelector
+												label='Justify Content'
 												name='justifyContent'
 												value={componentStyle.justifyContent || 'flex-start'}
-												onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-													const {name, value} = e.target
-													const updatedStyle = {
-														...componentStyle,
-														[name]: value,
-													}
-													onUpdateStyle(
-														editingComponentId as string,
-														updatedStyle
-													)
-												}}
-												className='w-full p-2 mb-2 text-white rounded bg-stone-700'
-											>
-												<option value='flex-start'>Flex Start</option>
-												<option value='center'>Center</option>
-												<option value='flex-end'>Flex End</option>
-												<option value='space-between'>Space Between</option>
-												<option value='space-around'>Space Around</option>
-											</select>
+												onChange={handleUpdateSelector}
+												options={[
+													{label: 'Flex Start', value: 'flex-start'},
+													{label: 'Center', value: 'center'},
+													{label: 'Flex End', value: 'flex-end'},
+													{label: 'Space Between', value: 'space-between'},
+													{label: 'Space Around', value: 'space-around'},
+												]}
+											/>
 
-											<label className='block mb-2 text-white'>
-												Align Items
-											</label>
-											<select
+											<SelectStyleSelector
+												label='Align Items'
 												name='alignItems'
 												value={componentStyle.alignItems || 'stretch'}
-												onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-													const {name, value} = e.target
-													const updatedStyle = {
-														...componentStyle,
-														[name]: value,
-													}
-													onUpdateStyle(
-														editingComponentId as string,
-														updatedStyle
-													)
-												}}
-												className='w-full p-2 mb-2 text-white rounded bg-stone-700'
-											>
-												<option value='stretch'>Stretch</option>
-												<option value='flex-start'>Flex Start</option>
-												<option value='center'>Center</option>
-												<option value='flex-end'>Flex End</option>
-												<option value='baseline'>Baseline</option>
-											</select>
+												onChange={handleUpdateSelector}
+												options={[
+													{label: 'Stretch', value: 'stretch'},
+													{label: 'Flex Start', value: 'flex-start'},
+													{label: 'Center', value: 'center'},
+													{label: 'Flex End', value: 'flex-end'},
+													{label: 'Baseline', value: 'baseline'},
+												]}
+											/>
 
-											<label className='block mb-2 text-white'>Gap</label>
-											<input
-												type='range'
+											<InputStyleSelector
+												label='Gap'
 												name='gap'
-												step={0.1}
-												min='0'
-												max='10'
-												value={parseFloat(componentStyle.gap as string) || 0}
-												onChange={handleSimpleRangeChange}
-												className='w-full'
-											/>
-											<span className='text-white'>
-												{parseFloat(componentStyle.gap as string) || 0}rem
-											</span>
-										</div>
-									)}
-
-									{/* Grid options */}
-									{componentStyle.display === 'grid' && (
-										<div className='mt-2'>
-											<label className='block mb-2 text-white'>
-												Grid Template Columns
-											</label>
-											<input
-												type='text'
-												name='gridTemplateColumns'
-												value={componentStyle.gridTemplateColumns || ''}
-												onChange={handleInputChange}
-												className='w-full px-2 py-1 mb-2 border rounded'
-												placeholder='e.g., 1fr 1fr 1fr'
-											/>
-
-											<label className='block mb-2 text-white'>
-												Grid Template Rows
-											</label>
-											<input
-												type='text'
-												name='gridTemplateRows'
-												value={componentStyle.gridTemplateRows || ''}
-												onChange={handleInputChange}
-												className='w-full px-2 py-1 mb-2 border rounded'
-												placeholder='e.g., auto auto'
-											/>
-
-											<label className='block mb-2 text-white'>Gap</label>
-											<input
-												type='range'
-												name='gap'
-												min='0'
-												max='50'
 												value={parseInt(componentStyle.gap as string) || 0}
-												onChange={handleRangeChange}
-												className='w-full'
+												type='range'
+												onChange={handleSimpleRangeChange}
+												min={0}
+												max={50}
 											/>
 											<span className='text-white'>
 												{parseInt(componentStyle.gap as string) || 0}px
 											</span>
-										</div>
+										</>
 									)}
-								</div>
+
+									{/* Grid options */}
+									{componentStyle.display === 'grid' && (
+										<>
+											<InputStyleSelector
+												label='Grid Template Columns'
+												name='gridTemplateColumns'
+												value={componentStyle.gridTemplateColumns || ''}
+												type='text'
+												onChange={handleInputChange}
+												placeholder='e.g., 1fr 1fr 1fr'
+											/>
+
+											<InputStyleSelector
+												label='Grid Template Rows'
+												name='gridTemplateRows'
+												value={componentStyle.gridTemplateRows || ''}
+												type='text'
+												onChange={handleInputChange}
+												placeholder='e.g., auto auto'
+											/>
+
+											<InputStyleSelector
+												label='Gap'
+												name='gap'
+												value={parseInt(componentStyle.gap as string) || 0}
+												type='range'
+												onChange={handleSimpleRangeChange}
+												min={0}
+												max={50}
+											/>
+											<span className='text-white'>
+												{parseInt(componentStyle.gap as string) || 0}px
+											</span>
+										</>
+									)}
+								</>
 							)}
-						</div>
+						</>
 					)}
 
 					{renderHeadingSection()}
@@ -1381,13 +1333,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 									onSwitch={toggleSection}
 								/>
 								{activeSections.includes('dimensions') && (
-									<div className='mt-2'>
-										<label className='block mb-2 text-white'>Width (%)</label>
-										<input
-											type='range'
+									<>
+										<InputStyleSelector
+											label='Width (%)'
 											name='width'
-											min={minWidth}
-											max='100'
 											value={
 												dimensions.isEditing
 													? dimensions.width.length
@@ -1395,35 +1344,34 @@ const Sidebar: React.FC<SidebarProps> = ({
 														: 0
 													: roundTo(parseFloat(componentStyle.width as string))
 											}
+											type='range'
+											min={minWidth}
+											max={100}
 											onChange={handleRangePercentageChange}
-											className='w-full'
 										/>
-										<input
-											type='number'
+
+										<InputStyleSelector
 											name='width'
 											value={
 												dimensions.isEditing
 													? dimensions.width
 													: roundTo(parseFloat(componentStyle.width as string))
 											}
+											type='number'
+											min={minWidth}
+											max={100}
 											onChange={e => handleDimensionInputChange(e, 'width')}
 											onBlur={e => handleBlur(e.target as HTMLElement, 'width')}
 											onKeyDown={e => handleKeyDown(e, 'width')}
 											onFocus={() =>
 												setDimensions(prev => ({...prev, isEditing: true}))
 											}
-											className='w-16 p-1 ml-2 text-white rounded bg-stone-700'
-											style={{appearance: 'textfield'}}
+											useAdvancedHandlers
 										/>
 
-										<label className='block mt-4 mb-2 text-white'>
-											Height (%)
-										</label>
-										<input
-											type='range'
+										<InputStyleSelector
+											label='Height (%)'
 											name='height'
-											min={minHeight}
-											max='minWidth'
 											value={
 												dimensions.isEditing
 													? dimensions.height.length
@@ -1431,17 +1379,22 @@ const Sidebar: React.FC<SidebarProps> = ({
 														: 0
 													: roundTo(parseFloat(componentStyle.height as string))
 											}
+											type='range'
+											min={minHeight}
+											max={100}
 											onChange={handleRangePercentageChange}
-											className='w-full'
 										/>
-										<input
-											type='number'
+
+										<InputStyleSelector
 											name='height'
 											value={
 												dimensions.isEditing
 													? dimensions.height
 													: roundTo(parseFloat(componentStyle.height as string))
 											}
+											type='number'
+											min={minHeight}
+											max={100}
 											onChange={e => handleDimensionInputChange(e, 'height')}
 											onBlur={e =>
 												handleBlur(e.target as HTMLElement, 'height')
@@ -1450,10 +1403,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 											onFocus={() =>
 												setDimensions(prev => ({...prev, isEditing: true}))
 											}
-											className='w-16 p-1 ml-2 text-white rounded bg-stone-700'
-											style={{appearance: 'textfield'}}
+											useAdvancedHandlers
 										/>
-									</div>
+									</>
 								)}
 							</div>
 						)}

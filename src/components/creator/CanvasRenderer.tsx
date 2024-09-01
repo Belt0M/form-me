@@ -212,7 +212,7 @@ const RenderCanvasComponent: React.FC<Props> = ({
 		<>
 			{isCurrentInFocus && editingComponentId !== id && (
 				<div
-					className='absolute px-2 py-1 text-xs font-bold bg-white rounded select-none bottom-1 right-1 text-primary'
+					className='absolute px-2 pt-[0.3rem] pb-0.5 text-xs font-bold bg-white rounded select-none bottom-1 right-1 text-primary'
 					aria-disabled={true}
 				>
 					{type}
