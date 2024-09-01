@@ -1130,7 +1130,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 										type='range'
 										onChange={handleSimpleRangeChange}
 										min={0}
-										max={10}
+										max={2}
 										step={0.1}
 										infoBelow
 									/>

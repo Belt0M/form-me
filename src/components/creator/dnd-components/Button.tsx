@@ -88,7 +88,7 @@ const Button: FC<Props> = ({
 		<button
 			className={clsx(
 				isErrorHint ? 'bg-red-500 border-red-700' : 'bg-hint border-hintBorder',
-				'border-2 rounded-lg px-[25px] pt-[12px] pb-[9px] bg-opacity-30'
+				'border-2 rounded-lg px-[25px] pt-[11px] pb-[9px] bg-opacity-30 text-sm'
 			)}
 			data-hint={true}
 		>

@@ -173,12 +173,6 @@ const Input: FC<InputProps> = ({
 			? style.height
 			: '50%'
 
-	const borderSize = style?.borderWidth
-		? (style?.borderWidth as string).includes('px')
-			? parseFloat(style?.borderWidth as string) / 8
-			: parseFloat(style?.borderWidth as string)
-		: 0
-
 	if (
 		isResizing &&
 		parentDimension &&
@@ -193,11 +187,20 @@ const Input: FC<InputProps> = ({
 
 	return !isHint ? (
 		<div
-			className='relative block'
+			// className='relative block'
 			style={{
 				width,
 				height,
 			}}
+			className={clsx(
+				isCurrentInFocus &&
+					!isEditing &&
+					!isResizing &&
+					'before:absolute before:border-2 before:border-yellow-400 before:z-50 before:inset-0',
+				`outline-none cursor-pointer focus:outline-none relative block`
+			)}
+			onClick={handleClick}
+			aria-atomic={true}
 			ref={resizableRef}
 			onDragEnter={onDragEnter}
 			onDragLeave={onDragLeave}
@@ -206,17 +209,12 @@ const Input: FC<InputProps> = ({
 		>
 			<input
 				type={type}
-				className={clsx(
-					isCurrentInFocus && !isEditing && !isResizing && 'shadow-hoverGUI',
-					'border-2 outline-none cursor-pointer focus:outline-none'
-				)}
 				id={id}
 				style={{
 					...style,
 					width: '100%',
 					height: '100%',
 				}}
-				onClick={handleClick}
 				aria-atomic={true}
 				placeholder={style?.placeholder || ''}
 			/>
@@ -239,23 +237,23 @@ const Input: FC<InputProps> = ({
 								width:
 									handler === 'left' || handler === 'right'
 										? '4px'
-										: `calc(100% + ${borderSize * 2}rem)`,
+										: `calc(100%)`,
 								height:
 									handler === 'top' || handler === 'bottom'
 										? '4px'
-										: `calc(100% + ${borderSize * 2}rem)`,
-								top: handler !== 'bottom' ? -borderSize + 'rem' : undefined,
-								bottom: handler === 'bottom' ? -borderSize + 'rem' : undefined,
-								left: handler !== 'right' ? -borderSize + 'rem' : undefined,
-								right: handler === 'right' ? -borderSize + 'rem' : undefined,
+										: `calc(100%)`,
+								top: handler !== 'bottom' ? 0 : undefined,
+								bottom: handler === 'bottom' ? 0 : undefined,
+								left: handler !== 'right' ? 0 : undefined,
+								right: handler === 'right' ? 0 : undefined,
 							}}
 						/>
 					))}
 					<div
 						className='absolute grid w-6 h-6 bg-black rounded-tl place-items-center hover:brightness-110 cursor-se-resize'
 						style={{
-							bottom: -borderSize + 'rem',
-							right: -borderSize + 'rem',
+							bottom: 0,
+							right: 0,
 						}}
 						onMouseDown={e => handleResize(e, 'bottom-right', true)}
 						aria-expanded={true}

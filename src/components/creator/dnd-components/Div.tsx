@@ -105,9 +105,46 @@ const Div: FC<Props> = ({
 
 	const [isUpdating, setIsUpdating] = useState(false)
 
+	const borderSize = style?.borderWidth
+		? (style?.borderWidth as string).includes('px')
+			? parseFloat(style?.borderWidth as string) / 8
+			: parseFloat(style?.borderWidth as string)
+		: 0
+	const uniqueClassName = `hover-gui-${id}`
+
 	useEffect(() => {
 		setLocalDimensions(dimensions)
 	}, [dimensions])
+
+	useEffect(() => {
+		const insetValue = -borderSize + 'rem'
+
+		const styleSheets = document.styleSheets
+		let ruleFound = false
+
+		for (let i = 0; i < styleSheets.length; i++) {
+			const sheet = styleSheets[i]
+			const rules = sheet.cssRules || sheet.rules
+			for (let j = 0; j < rules.length; j++) {
+				const rule = rules[j] as CSSStyleRule
+
+				if (rule.selectorText === `.${uniqueClassName}::before`) {
+					rule.style.inset = insetValue
+					ruleFound = true
+					break
+				}
+			}
+
+			if (ruleFound) break
+		}
+
+		if (!ruleFound) {
+			styleSheets[0].insertRule(
+				`.${uniqueClassName}::before { inset: ${insetValue}; }`,
+				styleSheets[0].cssRules.length
+			)
+		}
+	}, [borderSize, uniqueClassName])
 
 	useEffect(() => {
 		if (!isResizing && parentDimension && onUpdateStyle && isUpdating) {
@@ -177,12 +214,6 @@ const Div: FC<Props> = ({
 			? style.height
 			: '50%'
 
-	const borderSize = style?.borderWidth
-		? (style?.borderWidth as string).includes('px')
-			? parseFloat(style?.borderWidth as string) / 8
-			: parseFloat(style?.borderWidth as string)
-		: 0
-
 	if (
 		isResizing &&
 		parentDimension &&
@@ -199,8 +230,11 @@ const Div: FC<Props> = ({
 		<div
 			ref={resizableRef}
 			className={clsx(
-				isCurrentInFocus && !isEditing && !isResizing && 'shadow-hoverGUI',
-				'h-full min-h-[100px] cursor-pointer border-2'
+				isCurrentInFocus &&
+					!isEditing &&
+					!isResizing &&
+					'before:absolute before:border-2 before:border-yellow-400 before:z-50',
+				`h-full min-h-[100px] cursor-pointer border-2 relative ${uniqueClassName}`
 			)}
 			id={id}
 			style={{
@@ -225,7 +259,7 @@ const Div: FC<Props> = ({
 								handler === 'top' || handler === 'bottom'
 									? 'cursor-n-resize'
 									: 'cursor-e-resize',
-								'absolute bg-teal-500'
+								'absolute bg-teal-500 z-[51]'
 							)}
 							onMouseDown={e => handleResize(e, handler, true)}
 							aria-expanded={true}
@@ -234,27 +268,23 @@ const Div: FC<Props> = ({
 								width:
 									handler === 'left' || handler === 'right'
 										? '4px'
-										: `calc(100% + ${borderSize * 2 + 0.1 * 2}rem)`,
+										: `calc(100% + ${borderSize * 2}rem)`,
 								height:
 									handler === 'top' || handler === 'bottom'
 										? '4px'
-										: `calc(100% + ${borderSize * 2 + 0.1 * 2}rem)`,
-								top:
-									handler !== 'bottom' ? -borderSize - 0.1 + 'rem' : undefined,
-								bottom:
-									handler === 'bottom' ? -borderSize - 0.1 + 'rem' : undefined,
-								left:
-									handler !== 'right' ? -borderSize - 0.1 + 'rem' : undefined,
-								right:
-									handler === 'right' ? -borderSize - 0.1 + 'rem' : undefined,
+										: `calc(100% + ${borderSize * 2}rem)`,
+								top: handler !== 'bottom' ? -borderSize + 'rem' : undefined,
+								bottom: handler === 'bottom' ? -borderSize + 'rem' : undefined,
+								left: handler !== 'right' ? -borderSize + 'rem' : undefined,
+								right: handler === 'right' ? -borderSize + 'rem' : undefined,
 							}}
 						/>
 					))}
 					<div
-						className='absolute grid w-8 h-8 bg-black rounded-tl place-items-center hover:brightness-110 cursor-se-resize'
+						className='absolute grid w-8 h-8 bg-black rounded-tl place-items-center hover:brightness-110 cursor-se-resize z-[52]'
 						style={{
-							bottom: -borderSize - 0.1 + 'rem',
-							right: -borderSize - 0.1 + 'rem',
+							bottom: -borderSize + 'rem',
+							right: -borderSize + 'rem',
 						}}
 						onMouseDown={e => handleResize(e, 'bottom-right', true)}
 						aria-expanded={true}

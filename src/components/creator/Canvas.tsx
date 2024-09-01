@@ -41,7 +41,7 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
 		return (
 			<section
 				ref={ref}
-				className='relative flex items-center justify-center flex-grow px-20 py-12 bg-stone-800 canvas-grid '
+				className='relative flex items-center justify-center flex-grow py-12 px-28 bg-stone-800 canvas-grid '
 				onDragOver={handleDragOver}
 				onDrop={handleDrop}
 			>
