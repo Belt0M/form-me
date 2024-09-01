@@ -62,21 +62,14 @@ const Button: FC<Props> = ({
 	return !isHint ? (
 		<button
 			className={clsx(
-				isCurrentInFocus && !isEditing && 'border-dashed',
-				isCurrentInFocus &&
-					'before:absolute before:inset-0 before:left-0 before:top-0',
+				isCurrentInFocus && !isEditing && 'shadow-hoverGUI',
+				isEditing && 'shadow-editGUI',
 				'cursor-pointer border-2'
 			)}
 			type={type}
 			id={id}
 			style={{
 				...style,
-				borderColor:
-					!isEditing && !isCurrentInFocus
-						? style?.borderColor || style?.backgroundColor
-						: isCurrentInFocus && !isEditing && !isResizing
-						? '#facc15'
-						: style?.borderColor || 'transparent',
 			}}
 			onClick={handleClick}
 			onDragEnter={onDragEnter}
@@ -90,7 +83,7 @@ const Button: FC<Props> = ({
 			{!isResizing && onHoverGUI}
 		</button>
 	) : (
-		<button className='border-2 rounded-lg bg-hint border-hintBorder px-[25px] pt-[9px] pb-[11px] bg-opacity-30'>
+		<button className='border-2 rounded-lg bg-hint border-hintBorder px-[25px] pt-[12px] pb-[9px] bg-opacity-30'>
 			Button
 		</button>
 	)

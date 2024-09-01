@@ -456,9 +456,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 		units: string = 'rem'
 	) => {
 		const {name, value} = e.target
-		const newValue = !value || value === '0' ? '-1' : value
 
-		const updatedStyle = {...componentStyle, [name]: newValue + units}
+		const updatedStyle = {...componentStyle, [name]: value + units}
 
 		onUpdateStyle(editingComponentId as string, updatedStyle)
 	}
@@ -604,56 +603,32 @@ const Sidebar: React.FC<SidebarProps> = ({
 	) => {
 		return (
 			<div>
-				<label className='block text-white'>{label}</label>
-				<InputStyleSelector
-					name={name}
-					value={parseInt(value as string) || 0}
-					type='range'
-					onChange={handleRangeChange}
-					min={0}
-					max={100}
-				/>
-				<InputStyleSelector
-					name={name}
-					value={value === '' ? '' : parseInt(value as string)}
-					type='number'
-					disabled={disabled}
-					onChange={handleRangeChange}
-					onBlur={e => handleBlur(e.target as HTMLElement, name as string)}
-					onKeyDown={e => handleKeyDown(e, name as string)}
-					onFocus={() =>
-						name.includes('margin')
-							? setMargin(prev => ({...prev, isEditing: true}))
-							: setPadding(prev => ({...prev, isEditing: true}))
-					}
-					useAdvancedHandlers
-				/>
-				{/* <input
-					type='range'
-					name={name}
-					min='0'
-					max='100'
-					value={parseInt(value as string) || 0}
-					className='w-full pt-3 pb-2'
-					disabled={disabled}
-					onChange={handleRangeChange}
-				/> */}
-				{/* <input
-					type='number'
-					name={name}
-					value={value === '' ? '' : parseInt(value as string)}
-					className='w-16 px-2 pt-2.5 pb-1.5 text-white rounded bg-stone-700'
-					style={{appearance: 'textfield'}}
-					disabled={disabled}
-					onChange={handleRangeChange}
-					onBlur={e => handleBlur(e.target as HTMLElement, name as string)}
-					onKeyDown={e => handleKeyDown(e, name as string)}
-					onFocus={() =>
-						name.includes('margin')
-							? setMargin(prev => ({...prev, isEditing: true}))
-							: setPadding(prev => ({...prev, isEditing: true}))
-					}
-				/> */}
+				<label className='block text-sm text-white'>{label}</label>
+				<div className='flex items-center gap-8'>
+					<InputStyleSelector
+						name={name}
+						value={parseInt(value as string) || 0}
+						type='range'
+						onChange={handleRangeChange}
+						min={0}
+						max={100}
+					/>
+					<InputStyleSelector
+						name={name}
+						value={value === '' ? '' : parseInt(value as string)}
+						type='number'
+						disabled={disabled}
+						onChange={handleRangeChange}
+						onBlur={e => handleBlur(e.target as HTMLElement, name as string)}
+						onKeyDown={e => handleKeyDown(e, name as string)}
+						onFocus={() =>
+							name.includes('margin')
+								? setMargin(prev => ({...prev, isEditing: true}))
+								: setPadding(prev => ({...prev, isEditing: true}))
+						}
+						useAdvancedHandlers
+					/>
+				</div>
 			</div>
 		)
 	}
@@ -976,7 +951,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
 	return (
 		<aside className='w-[22.5%] max-h-full px-6 overflow-y-auto select-none py-5 bg-stone-900 min-w-72 border-l-2 border-lightGray'>
-			<div className='flex gap-6 mb-4 text-base'>
+			<div className='flex gap-6 pb-3 mb-8 text-base border-b-2 border-stone-500'>
 				<button
 					className={clsx(
 						isEditing
@@ -1115,11 +1090,18 @@ const Sidebar: React.FC<SidebarProps> = ({
 									<InputStyleSelector
 										label='Border Width'
 										name='borderWidth'
-										value={parseInt(componentStyle.borderWidth as string) || 0}
+										value={
+											(componentStyle.borderWidth as string).includes('px')
+												? (
+														parseFloat(componentStyle.borderWidth as string) / 8
+												  ).toString()
+												: parseFloat(componentStyle.borderWidth as string) || 0
+										}
 										type='range'
 										onChange={handleSimpleRangeChange}
 										min={0}
-										max={30}
+										max={10}
+										step={0.1}
 										infoBelow
 									/>
 

@@ -65,9 +65,8 @@ const Heading: FC<HeadingProps> = ({
 	return !isHint ? (
 		<Tag
 			className={clsx(
-				isCurrentInFocus && !isEditing && 'border-dashed',
-				isCurrentInFocus &&
-					'before:absolute before:inset-0 before:left-0 before:top-0',
+				isCurrentInFocus && !isEditing && 'shadow-hoverGUI2',
+				isEditing && 'shadow-editGUI',
 				'cursor-pointer border-2 min-h-8'
 			)}
 			id={id}

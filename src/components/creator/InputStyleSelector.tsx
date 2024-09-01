@@ -13,6 +13,7 @@ interface Props {
 	placeholder?: string
 	infoBelow?: boolean
 	units?: string
+	step?: number
 	onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
 	onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void
 	onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void
@@ -27,6 +28,7 @@ const InputStyleSelector: React.FC<Props> = ({
 	useAdvancedHandlers = false,
 	max,
 	min,
+	step,
 	disabled = false,
 	placeholder,
 	infoBelow,
@@ -39,19 +41,25 @@ const InputStyleSelector: React.FC<Props> = ({
 	const isNotColorType = type !== 'color'
 
 	return (
-		<div className='text-sm text-white'>
-			{label && <p>{label}</p>}
+		<div
+			className={clsx(
+				type === 'range' ? 'flex-[2]' : 'flex-1',
+				'flex flex-col justify-center text-sm text-white'
+			)}
+		>
+			{label && <label className='block mb-2'>{label}</label>}
 			<input
 				type={type}
 				name={name}
 				value={value}
 				min={min != undefined ? min : undefined}
 				max={max != undefined ? max : undefined}
+				step={step}
 				disabled={disabled}
 				placeholder={placeholder || undefined}
 				className={clsx(
-					type === 'color' ? 'mt-1' : 'w-full px-2.5 pt-2.5 pb-2 mt-2',
-					'rounded bg-stone-700'
+					type === 'color' ? 'mt-1' : type !== 'range' && 'px-2.5 pt-2.5 pb-2',
+					'rounded bg-stone-700 w-full'
 				)}
 				onChange={onChange}
 				onKeyDown={
@@ -61,7 +69,7 @@ const InputStyleSelector: React.FC<Props> = ({
 				onBlur={isNotColorType && useAdvancedHandlers ? onBlur : undefined}
 			/>
 			{infoBelow && units && (
-				<span className='text-white'>{value + units}</span>
+				<span className='mt-2 text-white'>{value + units}</span>
 			)}
 		</div>
 	)

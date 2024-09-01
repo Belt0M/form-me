@@ -1,3 +1,4 @@
+import clsx from 'clsx'
 import React, {FC} from 'react'
 import {IExtendedCSSProperties} from '../../../types/IExtendedCSSProperties'
 
@@ -49,7 +50,7 @@ const Input: FC<InputProps> = ({
 
 	return !isHint ? (
 		<div
-			className='relative inline-block'
+			className='relative block'
 			style={{
 				width: style?.width || 'auto',
 				height: style?.height || 'auto',
@@ -61,17 +62,14 @@ const Input: FC<InputProps> = ({
 		>
 			<input
 				type={type}
-				className='border-2 outline-none cursor-pointer focus:outline-none'
-				// readOnly={true}
+				className={clsx(
+					isCurrentInFocus && !isEditing && !isResizing && 'shadow-hoverGUI',
+					isEditing && 'shadow-editGUI',
+					'border-2 outline-none cursor-pointer focus:outline-none'
+				)}
 				id={id}
 				style={{
 					...style,
-					borderColor:
-						!isEditing && !isCurrentInFocus
-							? style?.borderColor || style?.backgroundColor
-							: isCurrentInFocus && !isEditing && !isResizing
-							? '#facc15'
-							: style?.borderColor || 'transparent',
 					width: '100%',
 					height: '100%',
 				}}
@@ -82,7 +80,7 @@ const Input: FC<InputProps> = ({
 			{!isResizing && onHoverGUI}
 		</div>
 	) : (
-		<div className='w-[205px] h-[40px] border-2 rounded-lg bg-hint border-hintBorder bg-opacity-30 inline-block' />
+		<div className='block w-[205px] h-[40px] border-2 rounded-lg bg-hint border-hintBorder bg-opacity-30' />
 	)
 }
 

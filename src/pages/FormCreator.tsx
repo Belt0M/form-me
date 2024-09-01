@@ -214,7 +214,7 @@ const FormCreator: React.FC = () => {
 
 			if (draggingType === EHTMLTag.BUTTON || draggingType === EHTMLTag.INPUT) {
 				if (draggingType === EHTMLTag.BUTTON) {
-					newComponent.style!.padding = '9px 25px 11px 25px'
+					newComponent.style!.padding = '12px 25px 9px 25px'
 
 					if (buttonType) {
 						newComponent.style!.buttonType = buttonType
@@ -223,6 +223,7 @@ const FormCreator: React.FC = () => {
 				} else {
 					if (inputType) {
 						newComponent.style!.inputType = inputType
+						newComponent.style!.display = 'block'
 					}
 				}
 

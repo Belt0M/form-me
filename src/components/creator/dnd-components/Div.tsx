@@ -8,7 +8,6 @@ import React, {
 	useRef,
 	useState,
 } from 'react'
-import {resizeHandlers} from '../../../data/resizeHandles'
 import useResizable from '../../../hooks/useResizable'
 import {getParentDimensions} from '../../../utils/getParentDimensions'
 import {roundTo} from '../../../utils/roundTo'
@@ -173,6 +172,12 @@ const Div: FC<Props> = ({
 			? style.height
 			: '50%'
 
+	const borderSize = style?.borderWidth
+		? (style?.borderWidth as string).includes('px')
+			? parseFloat(style?.borderWidth as string) / 8
+			: parseFloat(style?.borderWidth as string)
+		: 0
+
 	if (
 		isResizing &&
 		parentDimension &&
@@ -189,20 +194,12 @@ const Div: FC<Props> = ({
 		<div
 			ref={resizableRef}
 			className={clsx(
-				isCurrentInFocus && !isEditing && 'border-dashed',
-				isCurrentInFocus &&
-					'before:absolute before:inset-0 before:left-0 before:top-0',
+				isCurrentInFocus && !isEditing && !isResizing && 'shadow-hoverGUI',
 				'h-full min-h-[100px] cursor-pointer border-2'
 			)}
 			id={id}
 			style={{
 				...style,
-				borderColor:
-					!isEditing && !isCurrentInFocus
-						? style?.borderColor || style?.backgroundColor
-						: isCurrentInFocus && !isEditing && !isResizing
-						? '#facc15'
-						: style?.borderColor || 'transparent',
 				width,
 				height,
 			}}
@@ -217,20 +214,43 @@ const Div: FC<Props> = ({
 			{!isResizing && onHoverGUI}
 			{isEditing && (
 				<>
-					{resizeHandlers?.map(handle => (
+					{['top', 'right', 'bottom', 'left'].map(handler => (
 						<div
-							className='bg-gray-500'
-							onMouseDown={e => handleResize(e, handle.direction, true)}
+							className={clsx(
+								handler === 'top' || handler === 'bottom'
+									? 'cursor-n-resize'
+									: 'cursor-e-resize',
+								'absolute bg-teal-500 cursor-n-resize'
+							)}
+							onMouseDown={e => handleResize(e, handler, true)}
 							aria-expanded={true}
-							key={handle.direction}
+							key={handler}
 							style={{
-								position: 'absolute',
-								...handle.styles,
+								width:
+									handler === 'left' || handler === 'right'
+										? '4px'
+										: `calc(100% + ${borderSize * 2 + 0.1 * 2}rem)`,
+								height:
+									handler === 'top' || handler === 'bottom'
+										? '4px'
+										: `calc(100% + ${borderSize * 2 + 0.1 * 2}rem)`,
+								top:
+									handler !== 'bottom' ? -borderSize - 0.1 + 'rem' : undefined,
+								bottom:
+									handler === 'bottom' ? -borderSize - 0.1 + 'rem' : undefined,
+								left:
+									handler !== 'right' ? -borderSize - 0.1 + 'rem' : undefined,
+								right:
+									handler === 'right' ? -borderSize - 0.1 + 'rem' : undefined,
 							}}
 						/>
 					))}
 					<div
-						className='absolute bottom-0 right-0 grid w-8 h-8 transition-all bg-black rounded place-items-center hover:brightness-110 cursor-se-resize'
+						className='absolute grid w-8 h-8 bg-black rounded-tl place-items-center hover:brightness-110 cursor-se-resize'
+						style={{
+							bottom: -borderSize - 0.1 + 'rem',
+							right: -borderSize - 0.1 + 'rem',
+						}}
 						onMouseDown={e => handleResize(e, 'bottom-right', true)}
 						aria-expanded={true}
 						key='bottom-right'
