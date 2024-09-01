@@ -1,3 +1,4 @@
+/* eslint-disable no-mixed-spaces-and-tabs */
 import {Resize} from '@phosphor-icons/react'
 import clsx from 'clsx'
 import React, {
@@ -78,11 +79,13 @@ const Div: FC<Props> = ({
 
 	const resizeInitWidth =
 		parentDimension?.width && style?.width
-			? (parentDimension.width / 100) * parseInt(style.width as string)
+			? (parentDimension.width / 100) *
+			  roundTo(parseFloat(style.width as string))
 			: 0
 	const resizeInitHeight =
 		parentDimension?.height && style?.height
-			? (parentDimension.height / 100) * parseInt(style.height as string)
+			? (parentDimension.height / 100) *
+			  roundTo(parseFloat(style.height as string))
 			: 0
 
 	const {dimensions, startResize} = useResizable(
@@ -190,6 +193,8 @@ const Div: FC<Props> = ({
 		height = (+height / parentDimension.height) * 100 + '%'
 	}
 
+	// console.log(dimensions, style?.width, style?.height)
+
 	return !isHint ? (
 		<div
 			ref={resizableRef}
@@ -220,7 +225,7 @@ const Div: FC<Props> = ({
 								handler === 'top' || handler === 'bottom'
 									? 'cursor-n-resize'
 									: 'cursor-e-resize',
-								'absolute bg-teal-500 cursor-n-resize'
+								'absolute bg-teal-500'
 							)}
 							onMouseDown={e => handleResize(e, handler, true)}
 							aria-expanded={true}

@@ -73,10 +73,15 @@ const Sidebar: React.FC<SidebarProps> = ({
 	const currentElement = (
 		editingComponent ? document.getElementById(editingComponent.id) : null
 	) as HTMLElement | null
-	const parent = currentElement ? currentElement.parentElement : null
+	const parent =
+		currentElement && editingComponent
+			? editingComponent.type === EHTMLTag.INPUT
+				? currentElement.parentElement?.parentElement
+				: currentElement.parentElement
+			: null
 	const componentStyle = editingComponent?.style || {}
 	const {width: minWidth, height: minHeight} = getElementMinDimensions(
-		parent,
+		parent as HTMLElement | null,
 		editingComponent?.type
 	)
 
@@ -705,7 +710,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 	const renderHeadingSection = () => {
 		if (editingComponent) {
 			const isHeading = editingComponent?.type === EHTMLTag.HEADING
-			const componentName = isHeading ? 'Heading' : 'Button'
+			const componentName =
+				editingComponent.type[0].toUpperCase() + editingComponent.type.slice(1)
 
 			return (
 				<>
@@ -812,6 +818,21 @@ const Sidebar: React.FC<SidebarProps> = ({
 								onChange={handleInputChange}
 							/>
 
+							{/* Font Weight */}
+							<SelectStyleSelector
+								label='Font Weight'
+								name='fontWeight'
+								value={componentStyle.fontWeight || '400'}
+								options={[
+									{value: '400', label: '400'},
+									{value: '500', label: '500'},
+									{value: '600', label: '600'},
+									{value: '700', label: '700'},
+									{value: '800', label: '800'},
+								]}
+								onChange={handleInputChange}
+							/>
+
 							{/* Font Style */}
 							<SelectStyleSelector
 								label='Font Style'
@@ -837,28 +858,22 @@ const Sidebar: React.FC<SidebarProps> = ({
 		if (editingComponent?.type === EHTMLTag.INPUT) {
 			return (
 				<>
-					{/* Input Placeholder */}
-					<InputStyleSelector
-						label={`Placeholder Text`}
-						name='placeholder'
-						value={componentStyle.placeholder || ''}
-						type='text'
-						onChange={handleUpdateSelector}
+					<SectionHeading
+						name='input'
+						isOpen={activeSections.includes('input')}
+						onSwitch={toggleSection}
 					/>
 
-					<InputStyleSelector
-						label={`Content`}
-						name='content'
-						value={editingComponent.content || ''}
-						type='text'
-						onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-							onUpdateProperty(
-								editingComponentId as string,
-								e.target.name,
-								e.target.value
-							)
-						}}
-					/>
+					{activeSections.includes('input') && (
+						// Input Placeholder
+						<InputStyleSelector
+							label={`Placeholder Text`}
+							name='placeholder'
+							value={componentStyle.placeholder || ''}
+							type='text'
+							onChange={handleUpdateSelector}
+						/>
+					)}
 				</>
 			)
 		}
@@ -951,24 +966,31 @@ const Sidebar: React.FC<SidebarProps> = ({
 
 	return (
 		<aside className='w-[22.5%] max-h-full px-6 overflow-y-auto select-none py-5 bg-stone-900 min-w-72 border-l-2 border-lightGray'>
-			<div className='flex gap-6 pb-3 mb-8 text-base border-b-2 border-stone-500'>
-				<button
-					className={clsx(
-						isEditing
-							? 'text-stone-400 hover:text-white transition-all'
-							: 'text-white'
-					)}
-					onClick={onExitEditMode}
-				>
-					Components
-				</button>
-				<button
-					className={clsx(
-						!isEditing ? 'text-stone-400 cursor-not-allowed' : 'text-white'
-					)}
-				>
-					Properties
-				</button>
+			<div className='flex items-center justify-between pb-3 mb-8 border-b-2 border-stone-500'>
+				<div className='flex gap-6 text-base'>
+					<button
+						className={clsx(
+							isEditing
+								? 'text-stone-400 hover:text-white transition-all'
+								: 'text-white'
+						)}
+						onClick={onExitEditMode}
+					>
+						Components
+					</button>
+					<button
+						className={clsx(
+							!isEditing ? 'text-stone-400 cursor-not-allowed' : 'text-white'
+						)}
+					>
+						Properties
+					</button>
+				</div>
+				{editingComponent?.type === EHTMLTag.INPUT && (
+					<span className='text-xs font-bold text-primary mt-[.1rem]'>
+						type="{editingComponent.style?.inputType}"
+					</span>
+				)}
 			</div>
 
 			{!isEditing && (

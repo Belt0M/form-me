@@ -14,8 +14,8 @@ export const getElementMinDimensions = (
 
 		switch (type) {
 			case EHTMLTag.INPUT:
-				result.width = Math.round(60 / (parentWidth / 100))
-				result.height = Math.round(20 / (parentHeight / 100))
+				result.width = Math.round(100 / (parentWidth / 100))
+				result.height = Math.round(30 / (parentHeight / 100))
 				break
 			default:
 				result.width = Math.round(100 / (parentWidth / 100))

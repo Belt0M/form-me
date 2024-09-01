@@ -378,6 +378,8 @@ const RenderCanvasComponent: React.FC<Props> = ({
 						onEditComponent={handleEdit}
 						editingComponentId={editingComponentId}
 						isCurrentInFocus={isCurrentInFocus}
+						onUpdateStyle={onUpdateStyle}
+						setIsResizing={setIsResizing}
 						isResizing={isResizing}
 						onHoverGUI={onHoverGUI}
 					/>
