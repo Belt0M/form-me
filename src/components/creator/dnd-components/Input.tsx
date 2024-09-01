@@ -272,6 +272,7 @@ const Input: FC<InputProps> = ({
 				isErrorHint ? 'bg-red-500 border-red-700' : 'bg-hint border-hintBorder',
 				'block w-[205px] h-[40px] border-2 rounded-lg bg-opacity-30'
 			)}
+			data-hint={true}
 		/>
 	)
 }

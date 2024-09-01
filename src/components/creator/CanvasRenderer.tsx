@@ -15,7 +15,7 @@ interface Props {
 	component: ICanvasComponent
 	hoveredComponentId: string | null
 	draggingType: EHTMLTag | null
-	isHintShowing: boolean
+	isHintShowing: string | null
 	editingComponentId: string | null
 	canvasComponents: ICanvasComponent[]
 	isResizing?: boolean
@@ -29,7 +29,7 @@ interface Props {
 		newComponent: ICanvasComponent,
 		isHint?: boolean
 	) => void
-	setIsHintShowing: React.Dispatch<React.SetStateAction<boolean>>
+	setIsHintShowing: React.Dispatch<React.SetStateAction<string | null>>
 }
 
 const RenderCanvasComponent: React.FC<Props> = ({
@@ -79,7 +79,6 @@ const RenderCanvasComponent: React.FC<Props> = ({
 
 	const createHintComponent = (hoveredID: string) => {
 		if (hoveredID) {
-			console.log(hoveredID)
 			const isError = getIsIncorrectHint(hoveredID)
 
 			const id = crypto.randomUUID()
@@ -105,12 +104,18 @@ const RenderCanvasComponent: React.FC<Props> = ({
 		event.preventDefault()
 		event.stopPropagation()
 
-		if (event.currentTarget.contains(event.relatedTarget as Node)) {
+		const targetElement = event.target as HTMLElement | null
+
+		if (event.currentTarget.contains(event.relatedTarget as Node)) return
+		if (
+			targetElement?.getAttribute('data-hint') ||
+			targetElement?.id === isHintShowing
+		)
 			return
-		}
+
+		console.log('enter', event)
 
 		const relatedElement = event.relatedTarget as HTMLElement | null
-		const targetElement = event.target as HTMLElement | null
 		const isEnterFromAnotherComponent =
 			targetElement?.getAttribute('aria-atomic') &&
 			relatedElement?.getAttribute('aria-atomic')
@@ -119,7 +124,7 @@ const RenderCanvasComponent: React.FC<Props> = ({
 
 		if (draggingType) {
 			if (!isEnterFromAnotherComponent) {
-				setIsHintShowing(true)
+				setIsHintShowing(id)
 
 				createHintComponent(id)
 			}
@@ -133,10 +138,19 @@ const RenderCanvasComponent: React.FC<Props> = ({
 		event.stopPropagation()
 
 		const targetElement = event.target as HTMLElement | null
-		const isTargetComponentType = targetElement?.getAttribute('aria-atomic')
+		const relatedElement = event.relatedTarget as HTMLElement | null
 
-		if (isTargetComponentType) {
-			const relatedElement = event.relatedTarget as HTMLElement | null
+		if (relatedElement?.getAttribute('data-hint')) return
+
+		console.log('leave', event)
+
+		const isTargetComponentType = targetElement?.getAttribute('aria-atomic')
+		const isLeaveHintViaComponent =
+			targetElement?.getAttribute('data-hint') &&
+			relatedElement?.id !== hoveredComponentId &&
+			!relatedElement?.getAttribute('aria-disabled')
+
+		if (isTargetComponentType || isLeaveHintViaComponent) {
 			const isLeaveOnNextComponent =
 				targetElement?.getAttribute('aria-atomic') &&
 				relatedElement?.getAttribute('aria-atomic')
@@ -144,13 +158,13 @@ const RenderCanvasComponent: React.FC<Props> = ({
 			if (!relatedElement?.getAttribute('aria-disabled') && isHintShowing) {
 				onDeleteComponent()
 
-				setIsHintShowing(false)
+				setIsHintShowing(null)
 			}
 
-			if (isLeaveOnNextComponent) {
+			if (isLeaveOnNextComponent || isLeaveHintViaComponent) {
 				createHintComponent(relatedElement!.id)
 
-				setIsHintShowing(true)
+				setIsHintShowing(relatedElement!.id)
 			}
 
 			if (event.currentTarget.contains(event.relatedTarget as Node)) {

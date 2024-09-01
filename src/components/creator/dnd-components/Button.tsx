@@ -90,6 +90,7 @@ const Button: FC<Props> = ({
 				isErrorHint ? 'bg-red-500 border-red-700' : 'bg-hint border-hintBorder',
 				'border-2 rounded-lg px-[25px] pt-[12px] pb-[9px] bg-opacity-30'
 			)}
+			data-hint={true}
 		>
 			Button
 		</button>

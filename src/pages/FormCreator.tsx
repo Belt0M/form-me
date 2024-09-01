@@ -45,7 +45,7 @@ const FormCreator: React.FC = () => {
 	const [editingComponentId, setEditingComponentId] = useState<string | null>(
 		null
 	)
-	const [isHintShowing, setIsHintShowing] = useState<boolean>(false)
+	const [isHintShowing, setIsHintShowing] = useState<string | null>(null)
 	const [isResizing, setIsResizing] = useState<boolean>(false)
 	const [isModalOpen, setIsModalOpen] = useState<{
 		input: boolean
@@ -362,6 +362,8 @@ const FormCreator: React.FC = () => {
 		if (!isHint) {
 			setHoveredComponentId(null)
 			setEditingComponentId(null)
+		} else {
+			setIsHintShowing(null)
 		}
 
 		const removeHintComponent = (

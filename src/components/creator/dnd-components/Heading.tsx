@@ -92,6 +92,7 @@ const Heading: FC<HeadingProps> = ({
 				isErrorHint ? 'bg-red-500 border-red-700' : 'bg-hint border-hintBorder',
 				'w-full p-2 text-[12.8px] text-white border-2 bg-opacity-30'
 			)}
+			data-hint={true}
 		>
 			{content || 'Heading'}
 		</Tag>

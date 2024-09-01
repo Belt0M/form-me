@@ -271,6 +271,7 @@ const Div: FC<Props> = ({
 				isErrorHint ? 'bg-red-500 border-red-700' : 'bg-hint border-hintBorder',
 				'w-full border-2 min-h-24 bg-opacity-30'
 			)}
+			data-hint={true}
 		/>
 	)
 }
