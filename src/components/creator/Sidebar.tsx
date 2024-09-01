@@ -3,8 +3,10 @@ import clsx from 'clsx'
 import _ from 'lodash'
 import React, {CSSProperties, useEffect, useState} from 'react'
 import {sidebarComponents} from '../../data/sidebar-components'
+import {EDirection} from '../../types/EDirection'
 import {EHTMLTag} from '../../types/EHTMLTag'
 import {EPosition} from '../../types/EPosition'
+import {ESpacing} from '../../types/ESpacing'
 import {ICanvasComponent} from '../../types/ICanvasComponent'
 import {IExtendedCSSProperties} from '../../types/IExtendedCSSProperties'
 import {findComponentById} from '../../utils/getComponentByID'
@@ -12,7 +14,9 @@ import {getElementMinDimensions} from '../../utils/getElementMinDimensions'
 import {getFontSizeByHeadingLevel} from '../../utils/getFontSizeByHeadingLevel'
 import {getIsBlockComponentByType} from '../../utils/getIsBlockComponentByType'
 import {roundTo} from '../../utils/roundTo'
+import InputStyleSelector from './InputStyleSelector'
 import SectionHeading from './SectionHeading'
+import SelectStyleSelector from './SelectStyleSelector'
 
 interface SidebarProps {
 	editingComponentId: string | null
@@ -28,22 +32,6 @@ interface SidebarProps {
 	onExitEditMode: () => void
 }
 
-enum ESpacing {
-	ALL = 1,
-	AXIS = 2,
-	INDIVIDUAL = 3,
-}
-
-enum EDirection {
-	ALL = 'All',
-	HORIZONTAL = 'Horizontal',
-	VERTICAL = 'Vertical',
-	LEFT = 'Left',
-	RIGHT = 'Right',
-	TOP = 'Top',
-	BOTTOM = 'Bottom',
-}
-
 const defaultGradient = {
 	enabled: false,
 	direction: 'to right',
@@ -51,7 +39,13 @@ const defaultGradient = {
 	endColor: '#000000',
 }
 
-const defaultOpenedSections = ['background', 'border', 'spacing', 'display']
+const defaultOpenedSections = [
+	'background',
+	'border',
+	'spacing',
+	'display',
+	'text',
+]
 
 const Sidebar: React.FC<SidebarProps> = ({
 	editingComponentId,
@@ -73,8 +67,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 		canvasComponents,
 		editingComponentId
 	)
-	const isFirstComponent = canvasComponents?.[0]?.id === editingComponentId
-	const isCanvasEmpty = canvasComponents.length === 0
+
 	const currentElement = (
 		editingComponent ? document.getElementById(editingComponent.id) : null
 	) as HTMLElement | null
@@ -84,9 +77,13 @@ const Sidebar: React.FC<SidebarProps> = ({
 		parent,
 		editingComponent?.type
 	)
+
+	const isFirstComponent = canvasComponents?.[0]?.id === editingComponentId
+	const isCanvasEmpty = canvasComponents.length === 0
 	const isBlock = editingComponent
 		? getIsBlockComponentByType(editingComponent?.type)
 		: false
+	const isEditing = !!editingComponentId
 
 	const [dimensions, setDimensions] = useState<{
 		width: string
@@ -107,7 +104,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 	})
 
 	useEffect(() => {
-		if (editingComponentId) {
+		if (isEditing) {
 			setDimensions({
 				width:
 					Math.round(parseFloat(componentStyle.width as string)).toString() ||
@@ -134,22 +131,6 @@ const Sidebar: React.FC<SidebarProps> = ({
 			setActiveSections(defaultOpenedSections)
 		}
 	}, [editingComponentId])
-
-	useEffect(() => {
-		if (componentStyle.backgroundImage) {
-			const gradientMatch = componentStyle.backgroundImage.match(
-				/linear-gradient\(([^,]+),\s*(#[0-9A-Fa-f]+),\s*(#[0-9A-Fa-f]+)\)/
-			)
-			if (gradientMatch) {
-				setBackgroundGradient({
-					enabled: true,
-					direction: gradientMatch[1],
-					startColor: gradientMatch[2],
-					endColor: gradientMatch[3],
-				})
-			}
-		}
-	}, [componentStyle.backgroundImage])
 
 	const toggleSection = (section: string) => {
 		setActiveSections(prev =>
@@ -493,8 +474,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 		value: string | number,
 		disabled = false
 	) => (
-		<div className='flex items-center mb-2'>
-			<label className='w-1/3 text-white'>{label}</label>
+		<div className='items-center mb-2 text-sm'>
+			<label className='block text-white'>{label}</label>
 			<input
 				type='range'
 				name={name}
@@ -502,7 +483,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 				max='100'
 				value={parseInt(value as string) || 0}
 				onChange={handleRangeChange}
-				className='w-full'
+				className='w-full pt-3 pb-2'
 				disabled={disabled}
 			/>
 			<input
@@ -510,7 +491,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 				name={name}
 				value={parseInt(value as string) || 0}
 				onChange={handleRangeChange}
-				className='w-16 p-1 ml-2 text-white rounded bg-stone-700'
+				className='w-16 px-2 pt-2.5 pb-1.5 text-white rounded bg-stone-700'
 				style={{appearance: 'textfield'}}
 				disabled={disabled}
 			/>
@@ -592,31 +573,43 @@ const Sidebar: React.FC<SidebarProps> = ({
 	}
 
 	const renderHeadingSection = () => {
-		if (
-			editingComponent?.type === EHTMLTag.HEADING ||
-			editingComponent?.type === EHTMLTag.BUTTON ||
-			editingComponent?.type === EHTMLTag.INPUT
-		) {
+		if (editingComponent) {
 			const isHeading = editingComponent?.type === EHTMLTag.HEADING
 			const componentName = isHeading ? 'Heading' : 'Button'
+
 			return (
 				<>
 					{/* Heading Level */}
-					{isHeading && (
-						<div className='group'>
-							<div className='flex justify-between cursor-pointer'>
-								<span className='text-white'>Heading Level</span>
-							</div>
-							<div className='mt-2'>
-								<select
+					<SectionHeading
+						name='text'
+						isOpen={activeSections.includes('text')}
+						onSwitch={toggleSection}
+					/>
+
+					{activeSections.includes('text') && (
+						<>
+							{isHeading && (
+								<SelectStyleSelector
+									label='Heading Level'
 									name='level'
 									value={editingComponent?.level || 6}
+									options={[1, 2, 3, 4, 5, 6].map(level => ({
+										value: level,
+										label: `h${level}`,
+									}))}
 									onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
 										if (editingComponentId) {
+											const newFontSize = getFontSizeByHeadingLevel(
+												+e.target.value
+											)
 											const updatedStyle = {
 												...componentStyle,
-												fontSize: getFontSizeByHeadingLevel(+e.target.value),
+												fontSize: newFontSize,
 											}
+											setFontSize({
+												fontSize: newFontSize,
+												isEditing: false,
+											})
 											onUpdateStyle(editingComponentId as string, updatedStyle)
 											onUpdateProperty(
 												editingComponentId,
@@ -625,148 +618,81 @@ const Sidebar: React.FC<SidebarProps> = ({
 											)
 										}
 									}}
-									className='w-full p-2 mb-4 text-white rounded bg-stone-700'
-								>
-									{[1, 2, 3, 4, 5, 6].map(level => (
-										<option key={level} value={level}>{`h${level}`}</option>
-									))}
-								</select>
-							</div>
-						</div>
-					)}
-
-					{/* Heading Text */}
-					{editingComponent?.type !== EHTMLTag.INPUT && (
-						<div className='group'>
-							<div className='flex justify-between cursor-pointer'>
-								<span className='text-white'>{componentName} Text</span>
-							</div>
-							<div className='mt-2'>
-								<input
-									type='text'
-									name='content'
-									value={editingComponent.content || ''}
-									onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-										onUpdateProperty(
-											editingComponentId as string,
-											e.target.name,
-											e.target.value
-										)
-									}}
-									className='w-full p-2 mb-4 text-white rounded bg-stone-700'
 								/>
-							</div>
-						</div>
-					)}
+							)}
 
-					{/* Text Color */}
-					<div className='group'>
-						<div className='flex justify-between cursor-pointer'>
-							<span className='text-white'>Text Color</span>
-						</div>
-						<div className='mt-2'>
-							<input
-								type='color'
+							{/* Heading Text */}
+							<InputStyleSelector
+								label={`${componentName} Text`}
+								name='content'
+								value={editingComponent.content || ''}
+								type='text'
+								onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+									onUpdateProperty(
+										editingComponentId as string,
+										e.target.name,
+										e.target.value
+									)
+								}}
+							/>
+
+							{/* Text Color */}
+							<InputStyleSelector
+								label='Text Color'
 								name='color'
 								value={componentStyle.color || '#ffffff'}
+								type='color'
 								onChange={handleInputChange}
-								className='w-full h-10 px-2 py-1 border rounded'
 							/>
-						</div>
-					</div>
 
-					{/* Font Size */}
-					<div className='group'>
-						<div className='flex justify-between cursor-pointer'>
-							<span className='text-white'>Font Size</span>
-						</div>
-						<div className='mt-2'>
-							<input
-								type='number'
+							{/* Font Size */}
+							<InputStyleSelector
+								label='Font Size'
 								name='fontSize'
 								value={
 									fontSize.isEditing
-										? parseFloat(fontSize.fontSize as string)
-										: parseFloat(componentStyle.fontSize as string)
+										? parseFloat(fontSize.fontSize as string).toString()
+										: parseFloat(componentStyle.fontSize as string).toString()
 								}
+								type='number'
 								onChange={e => handleInputChange(e, 'px')}
 								onBlur={e => handleBlur(e.target as HTMLElement, 'fontSize')}
 								onKeyDown={e => handleKeyDown(e, 'fontSize')}
 								onFocus={() =>
 									setFontSize(prev => ({...prev, isEditing: true}))
 								}
-								className='w-full p-2 mb-4 text-white rounded bg-stone-700'
+								useAdvancedHandlers
 							/>
-						</div>
-					</div>
 
-					{/* Font Weight */}
-					<div className='group'>
-						<div className='flex justify-between cursor-pointer'>
-							<span className='text-white'>Font Weight</span>
-						</div>
-						<div className='mt-2'>
-							<select
-								name='fontWeight'
-								value={componentStyle.fontWeight || 'normal'}
-								onChange={handleInputChange}
-								className='w-full p-2 mb-4 text-white rounded bg-stone-700'
-							>
-								<option value='normal'>Normal</option>
-								<option value='bold'>Bold</option>
-								<option value='bolder'>Bolder</option>
-								<option value='lighter'>Lighter</option>
-								<option value='100'>100</option>
-								<option value='200'>200</option>
-								<option value='300'>300</option>
-								<option value='400'>400</option>
-								<option value='500'>500</option>
-								<option value='600'>600</option>
-								<option value='700'>700</option>
-								<option value='800'>800</option>
-								<option value='900'>900</option>
-							</select>
-						</div>
-					</div>
-
-					{/* Text Decoration */}
-					<div className='group'>
-						<div className='flex justify-between cursor-pointer'>
-							<span className='text-white'>Text Decoration</span>
-						</div>
-						<div className='mt-2'>
-							<select
+							{/* Text Decoration */}
+							<SelectStyleSelector
+								label='Text Decoration'
 								name='textDecoration'
-								value={componentStyle.textDecoration || 'none'}
+								value={(componentStyle.textDecoration as string) || 'none'}
+								options={[
+									{value: 'none', label: 'None'},
+									{value: 'underline', label: 'Underline'},
+									{value: 'line-through', label: 'Line Through'},
+									{value: 'overline', label: 'Overline'},
+								]}
 								onChange={handleInputChange}
-								className='w-full p-2 mb-4 text-white rounded bg-stone-700'
-							>
-								<option value='none'>None</option>
-								<option value='underline'>Underline</option>
-								<option value='line-through'>Line Through</option>
-								<option value='overline'>Overline</option>
-							</select>
-						</div>
-					</div>
+							/>
 
-					{/* Font Style */}
-					<div className='group'>
-						<div className='flex justify-between cursor-pointer'>
-							<span className='text-white'>Font Style</span>
-						</div>
-						<div className='mt-2'>
-							<select
+							{/* Font Style */}
+							<SelectStyleSelector
+								label='Font Style'
 								name='fontStyle'
 								value={componentStyle.fontStyle || 'normal'}
+								options={[
+									{value: 'normal', label: 'Normal'},
+									{value: 'italic', label: 'Italic'},
+									{value: 'oblique', label: 'Oblique'},
+									{value: 'inherit', label: 'Inherit'},
+								]}
 								onChange={handleInputChange}
-								className='w-full p-2 mb-4 text-white rounded bg-stone-700'
-							>
-								<option value='normal'>Normal</option>
-								<option value='italic'>Italic</option>
-								<option value='oblique'>Oblique</option>
-							</select>
-						</div>
-					</div>
+							/>
+						</>
+					)}
 				</>
 			)
 		}
@@ -923,7 +849,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 			<div className='flex gap-6 mb-4 text-base'>
 				<button
 					className={clsx(
-						editingComponentId
+						isEditing
 							? 'text-stone-400 hover:text-white transition-all'
 							: 'text-white'
 					)}
@@ -933,16 +859,14 @@ const Sidebar: React.FC<SidebarProps> = ({
 				</button>
 				<button
 					className={clsx(
-						!editingComponentId
-							? 'text-stone-400 cursor-not-allowed'
-							: 'text-white'
+						!isEditing ? 'text-stone-400 cursor-not-allowed' : 'text-white'
 					)}
 				>
 					Properties
 				</button>
 			</div>
 
-			{!editingComponentId && (
+			{!isEditing && (
 				<>
 					<div className='mb-4'>
 						<label className='block mb-2 text-white'>Position</label>
@@ -983,7 +907,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 				</>
 			)}
 
-			{editingComponentId && (
+			{isEditing && (
 				<div className='flex flex-col gap-4'>
 					{/* Background Section */}
 					{isBlock && (
@@ -1127,37 +1051,33 @@ const Sidebar: React.FC<SidebarProps> = ({
 					)}
 
 					{/* Padding & Margin Section */}
-					<div className='group'>
-						<SectionHeading
-							name='spacing'
-							isOpen={activeSections.includes('spacing')}
-							onSwitch={toggleSection}
-						/>
-						{activeSections.includes('spacing') && (
-							<div className='mt-2'>
-								<label className='block mb-2 text-white'>Spacing Mode</label>
-								<select
-									value={spacingMode}
-									onChange={e => setSpacingMode(+e.target.value as ESpacing)}
-									className='w-full p-2 mb-4 text-white rounded bg-stone-700'
-								>
-									<option value='1'>All Sides</option>
-									<option value='2'>Axis (Vertical/Horizontal)</option>
-									<option value='3'>Individual Sides</option>
-								</select>
-
-								{renderSpacingSection('Padding', 'padding')}
-								<div className={isFirstComponent ? 'opacity-50' : ''}>
-									{renderSpacingSection('Margin', 'margin')}
-									{isFirstComponent && (
-										<p className='mt-1 text-xs text-yellow-500'>
-											Margin change is disabled for the root component.
-										</p>
-									)}
-								</div>
-							</div>
-						)}
-					</div>
+					<SectionHeading
+						name='spacing'
+						isOpen={activeSections.includes('spacing')}
+						onSwitch={toggleSection}
+					/>
+					{activeSections.includes('spacing') && (
+						<>
+							<SelectStyleSelector
+								label='Mode'
+								name='mode'
+								value={spacingMode}
+								onChange={e => setSpacingMode(+e.target.value as ESpacing)}
+								options={[
+									{label: 'All Sides', value: '1'},
+									{label: 'Axis (Vertical/Horizontal)', value: '2'},
+									{label: 'Individual Sides', value: '3'},
+								]}
+							/>
+							{renderSpacingSection('Padding', 'padding')}
+							{renderSpacingSection('Margin', 'margin')}
+							{isFirstComponent && (
+								<p className='text-xs text-yellow-500'>
+									Margin change is disabled for the root component.
+								</p>
+							)}
+						</>
+					)}
 
 					{/* Display Section */}
 					{isBlock && (

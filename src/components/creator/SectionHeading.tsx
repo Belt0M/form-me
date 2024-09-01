@@ -10,7 +10,7 @@ interface Props {
 const SectionHeading: FC<Props> = ({isOpen, name, onSwitch}) => {
 	return (
 		<div
-			className='flex justify-between cursor-pointer'
+			className='flex justify-between pb-2 mb-1 border-b border-dashed cursor-pointer border-stone-500'
 			onClick={() => onSwitch(name)}
 		>
 			<span className='text-white'>

@@ -80,6 +80,40 @@ h6 {
 	font-size: 0.8rem;
 }
 
+input[type='color'] {
+	position: relative;
+	padding: 0;
+}
+/* 
+input[type='color']::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: 50px;
+	padding: 4.5px 2.5px;
+	background: linear-gradient(45deg, red, blue);
+	-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+	-webkit-mask-composite: xor;
+	mask-composite: exclude;
+} */
+
+input[type='color'] {
+	position: relative;
+	left: -0.1rem;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	background-color: transparent;
+	width: 3.5rem;
+	height: 2.5rem;
+	cursor: pointer;
+}
+
+input[type='color']::-webkit-color-swatch {
+	border: double 3px transparent;
+	border-radius: 0.25rem;
+}
+
 @media (prefers-color-scheme: light) {
 	:root {
 		color: #1d1d1d;

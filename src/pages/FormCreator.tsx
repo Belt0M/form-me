@@ -464,11 +464,6 @@ const FormCreator: React.FC = () => {
 		)
 	}
 
-	console.log(
-		canvasComponents?.[0]?.style?.width,
-		canvasComponents?.[0]?.style?.height
-	)
-
 	const isContentChanged = (
 		initialComponents: ICanvasComponent[],
 		currentComponents: ICanvasComponent[]
