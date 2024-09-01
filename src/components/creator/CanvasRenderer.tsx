@@ -63,13 +63,6 @@ const RenderCanvasComponent: React.FC<Props> = ({
 
 			const {width, height} = getDefaultComponentDimensionsInPX(draggingType)
 
-			console.log(
-				width,
-				height,
-				availableWidth,
-				availableHeight,
-				component.type
-			)
 			if (
 				(width === -1 && (!availableWidth || availableWidth < 50)) ||
 				height > availableHeight ||
@@ -86,6 +79,7 @@ const RenderCanvasComponent: React.FC<Props> = ({
 
 	const createHintComponent = (hoveredID: string) => {
 		if (hoveredID) {
+			console.log(hoveredID)
 			const isError = getIsIncorrectHint(hoveredID)
 
 			const id = crypto.randomUUID()

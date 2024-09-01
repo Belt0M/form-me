@@ -45,7 +45,6 @@ const FormCreator: React.FC = () => {
 	const [editingComponentId, setEditingComponentId] = useState<string | null>(
 		null
 	)
-	const [draggingType, setDraggingType] = useState<EHTMLTag | null>(null)
 	const [isHintShowing, setIsHintShowing] = useState<boolean>(false)
 	const [isResizing, setIsResizing] = useState<boolean>(false)
 	const [isModalOpen, setIsModalOpen] = useState<{
@@ -108,15 +107,14 @@ const FormCreator: React.FC = () => {
 	}, [isUpdateSuccess, isUpdateError])
 
 	const handleDragStart = (type: EHTMLTag, position: EPosition) => {
-		setDraggingType(type)
 		setDraggedComponentType(type)
 		setPositionMode(position)
 	}
 
 	const handleDragEnd = () => {
-		draggingType !== EHTMLTag.INPUT &&
-			draggingType !== EHTMLTag.BUTTON &&
-			setDraggingType(null)
+		draggedComponentType !== EHTMLTag.INPUT &&
+			draggedComponentType !== EHTMLTag.BUTTON &&
+			setDraggedComponentType(null)
 	}
 
 	const addComponent = (
@@ -196,8 +194,8 @@ const FormCreator: React.FC = () => {
 			})
 			toast('P.S. keep an eye on whether the hint component has appeared', {
 				position: 'top-center',
-				delay: 1000,
-				autoClose: 1500,
+				delay: 1500,
+				autoClose: 2500,
 				type: 'warning',
 				style: {padding: '0.5rem'},
 				theme: 'dark',
@@ -271,7 +269,7 @@ const FormCreator: React.FC = () => {
 				getComponentsQuantity(canvasComponents) + 1
 			)
 
-			if (draggingType !== EHTMLTag.BUTTON) {
+			if (draggedComponentType !== EHTMLTag.BUTTON) {
 				const width = getDefaultComponentWidth(
 					draggedComponentType,
 					hoveredComponentId
@@ -286,8 +284,11 @@ const FormCreator: React.FC = () => {
 				newComponent.style!.borderColor = backgroundColor
 			}
 
-			if (draggingType === EHTMLTag.BUTTON || draggingType === EHTMLTag.INPUT) {
-				if (draggingType === EHTMLTag.BUTTON) {
+			if (
+				draggedComponentType === EHTMLTag.BUTTON ||
+				draggedComponentType === EHTMLTag.INPUT
+			) {
+				if (draggedComponentType === EHTMLTag.BUTTON) {
 					newComponent.style!.padding = '12px 25px 9px 25px'
 
 					if (buttonType) {
@@ -310,9 +311,9 @@ const FormCreator: React.FC = () => {
 		}
 
 		if (
-			draggingType === EHTMLTag.BUTTON ||
-			draggingType === EHTMLTag.INPUT ||
-			draggingType === EHTMLTag.HEADING
+			draggedComponentType === EHTMLTag.BUTTON ||
+			draggedComponentType === EHTMLTag.INPUT ||
+			draggedComponentType === EHTMLTag.HEADING
 		) {
 			newComponent.style!.fontSize = '12.8px'
 		}
@@ -320,10 +321,10 @@ const FormCreator: React.FC = () => {
 		const hasContent = getIsContainContent(draggedComponentType)
 
 		if (hasContent) {
-			if (draggingType === EHTMLTag.HEADING) {
+			if (draggedComponentType === EHTMLTag.HEADING) {
 				newComponent.content = 'Heading'
 				newComponent.level = 6
-			} else if (draggingType === EHTMLTag.BUTTON) {
+			} else if (draggedComponentType === EHTMLTag.BUTTON) {
 				newComponent.content = buttonType === 'button' ? 'Button' : 'Submit'
 			}
 		}
@@ -648,13 +649,13 @@ const FormCreator: React.FC = () => {
 					editingComponentId={editingComponentId}
 					onDeleteComponent={handleDeleteComponent}
 					isEmptyCanvas={!canvasComponents.length}
-					isDragging={!!draggingType}
+					isDragging={!!draggedComponentType}
 				>
 					{canvasComponents.map(component => (
 						<RenderCanvasComponent
 							key={component.id}
 							component={component}
-							draggingType={draggingType}
+							draggingType={draggedComponentType}
 							editingComponentId={editingComponentId}
 							canvasComponents={canvasComponents}
 							setHoveredComponentId={setHoveredComponentId}
