@@ -23,16 +23,24 @@ interface Props {
 	isHint?: boolean
 	isEditing?: boolean
 	isResizing?: boolean
-	onDragEnter?: (event: React.DragEvent<HTMLDivElement>) => void
-	onDragLeave?: (event: React.DragEvent<HTMLDivElement>) => void
-	onMouseEnter?: (event: React.MouseEvent<HTMLDivElement>) => void
-	onMouseLeave?: (event: React.MouseEvent<HTMLDivElement>) => void
+	onDragEnter?: (
+		event: React.DragEvent<HTMLDivElement | HTMLFormElement>
+	) => void
+	onDragLeave?: (
+		event: React.DragEvent<HTMLDivElement | HTMLFormElement>
+	) => void
+	onMouseEnter?: (
+		event: React.MouseEvent<HTMLDivElement | HTMLFormElement>
+	) => void
+	onMouseLeave?: (
+		event: React.MouseEvent<HTMLDivElement | HTMLFormElement>
+	) => void
 	onEditComponent?: (editID: string) => void
 	setIsResizing?: React.Dispatch<React.SetStateAction<boolean>>
 	onUpdateStyle?: (id: string, updatedStyle: React.CSSProperties) => void
 }
 
-const Section: FC<Props> = ({
+const Form: FC<Props> = ({
 	id,
 	style,
 	children,
@@ -49,7 +57,7 @@ const Section: FC<Props> = ({
 	setIsResizing,
 	onUpdateStyle,
 }) => {
-	const resizableRef = useRef<HTMLDivElement>(null)
+	const resizableRef = useRef<HTMLFormElement>(null)
 	const parentElement = resizableRef.current
 		?.parentElement as HTMLElement | null
 
@@ -194,7 +202,7 @@ const Section: FC<Props> = ({
 	}
 
 	return !isHint ? (
-		<section
+		<form
 			ref={resizableRef}
 			className={clsx(
 				isCurrentInFocus && !isEditing && !isResizing && 'shadow-hoverGUI',
@@ -262,10 +270,10 @@ const Section: FC<Props> = ({
 					</div>
 				</>
 			)}
-		</section>
+		</form>
 	) : (
-		<section className='w-full border-2 bg-hint border-hintBorder min-h-36 bg-opacity-30 hint-grid' />
+		<form className='w-full border-2 bg-hint border-hintBorder min-h-36 bg-opacity-30 hint-grid' />
 	)
 }
 
-export default Section
+export default Form

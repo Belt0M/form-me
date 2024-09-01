@@ -1016,7 +1016,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 					</div>
 					<div className='grid grid-cols-2 gap-4'>
 						{sidebarComponents.map(({icon: IconComponent, type}) => {
-							const isSection = type === EHTMLTag.SECTION
+							const isSection = type === EHTMLTag.FORM
 							const isDisabled =
 								(isCanvasEmpty && !isSection) || (isSection && !isCanvasEmpty)
 									? true
@@ -1086,7 +1086,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 												]}
 												onChange={handleGradientDirectionChange}
 											/>
-											<div className='flex items-center justify-center gap-4 p-2 rounded bg-stone-700'>
+											<div className='flex items-center justify-center gap-8 p-2 rounded bg-stone-700'>
 												<InputStyleSelector
 													name='startColor'
 													value={backgroundGradient.startColor}
@@ -1167,7 +1167,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 										type='range'
 										onChange={handleSimpleRangeChange}
 										min={0}
-										max={30}
+										max={15}
 										infoBelow
 									/>
 								</>

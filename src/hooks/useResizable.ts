@@ -4,7 +4,9 @@ import {getMaxSiblingDimensions} from '../utils/getMaxSiblingDimension'
 const useResizable = (
 	initialWidth: number,
 	initialHeight: number,
-	resizableRef: React.RefObject<HTMLDivElement | HTMLButtonElement>,
+	resizableRef: React.RefObject<
+		HTMLDivElement | HTMLButtonElement | HTMLFormElement
+	>,
 	isCenteredX: boolean,
 	isCenteredY: boolean,
 	minWidth: number = 100,

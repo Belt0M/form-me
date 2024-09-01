@@ -1,5 +1,5 @@
 export enum EHTMLTag {
-	SECTION = 'section',
+	FORM = 'form',
 	DIV = 'div',
 	INPUT = 'input',
 	BUTTON = 'button',

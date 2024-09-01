@@ -43,7 +43,7 @@ const InputStyleSelector: React.FC<Props> = ({
 	return (
 		<div
 			className={clsx(
-				type === 'range' ? 'flex-[2]' : 'flex-1',
+				type === 'range' ? 'flex-[2]' : type !== 'color' && 'flex-1',
 				'flex flex-col justify-center text-sm text-white'
 			)}
 		>

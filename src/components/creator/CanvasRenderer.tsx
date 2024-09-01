@@ -6,8 +6,8 @@ import {getAvailableSpace} from '../../utils/getAvailableSpace'
 import {getComponentById} from '../../utils/getComponentByID'
 import {getDefaultComponentDimensionsInPX} from '../../utils/getDefaultComponentDimensionsInPX'
 import Div from '../creator/dnd-components/Div'
-import Section from '../creator/dnd-components/Section'
 import Button from './dnd-components/Button'
+import Form from './dnd-components/Form'
 import Heading from './dnd-components/Heading'
 import Input from './dnd-components/Input'
 
@@ -99,7 +99,7 @@ const RenderCanvasComponent: React.FC<Props> = ({
 	}
 
 	const handleDragEnter = (
-		event: React.DragEvent<HTMLDivElement | HTMLButtonElement>
+		event: React.DragEvent<HTMLDivElement | HTMLButtonElement | HTMLFormElement>
 	) => {
 		event.preventDefault()
 		event.stopPropagation()
@@ -132,7 +132,7 @@ const RenderCanvasComponent: React.FC<Props> = ({
 	}
 
 	const handleDragLeave = (
-		event: React.DragEvent<HTMLDivElement | HTMLButtonElement>
+		event: React.DragEvent<HTMLDivElement | HTMLButtonElement | HTMLFormElement>
 	) => {
 		event.preventDefault()
 		event.stopPropagation()
@@ -180,7 +180,9 @@ const RenderCanvasComponent: React.FC<Props> = ({
 	}
 
 	const handleMouseEnter = (
-		event: React.MouseEvent<HTMLDivElement | HTMLButtonElement>
+		event: React.MouseEvent<
+			HTMLDivElement | HTMLButtonElement | HTMLFormElement
+		>
 	) => {
 		event.preventDefault()
 
@@ -189,7 +191,9 @@ const RenderCanvasComponent: React.FC<Props> = ({
 	}
 
 	const handleMouseLeave = (
-		event: React.MouseEvent<HTMLDivElement | HTMLButtonElement>
+		event: React.MouseEvent<
+			HTMLDivElement | HTMLButtonElement | HTMLFormElement
+		>
 	) => {
 		event.preventDefault()
 		event.stopPropagation()
@@ -300,16 +304,16 @@ const RenderCanvasComponent: React.FC<Props> = ({
 	}
 
 	switch (type) {
-		case EHTMLTag.SECTION:
+		case EHTMLTag.FORM:
 			if (isHint) {
 				renderedComponent = (
-					<Section id={id} isHint={!!isHint}>
+					<Form id={id} isHint={!!isHint}>
 						{renderChildren()}
-					</Section>
+					</Form>
 				)
 			} else {
 				renderedComponent = (
-					<Section
+					<Form
 						id={id}
 						style={computedStyle}
 						onDragEnter={handleDragEnter}
@@ -326,7 +330,7 @@ const RenderCanvasComponent: React.FC<Props> = ({
 						onUpdateStyle={onUpdateStyle}
 					>
 						{renderChildren()}
-					</Section>
+					</Form>
 				)
 			}
 
