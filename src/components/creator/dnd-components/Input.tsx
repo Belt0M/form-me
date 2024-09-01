@@ -189,16 +189,6 @@ const Input: FC<InputProps> = ({
 		height = (+height / parentDimension.height) * 100 + '%'
 	}
 
-	console.log(
-		dimensions,
-		style?.width,
-		style?.height,
-		width,
-		height,
-		isResizing,
-		parentDimension
-	)
-
 	return !isHint ? (
 		<div
 			className='relative block'

@@ -193,8 +193,6 @@ const Div: FC<Props> = ({
 		height = (+height / parentDimension.height) * 100 + '%'
 	}
 
-	// console.log(dimensions, style?.width, style?.height)
-
 	return !isHint ? (
 		<div
 			ref={resizableRef}

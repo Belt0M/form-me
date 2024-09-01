@@ -1,4 +1,5 @@
 import {useEffect, useState} from 'react'
+import {getMaxSiblingDimensions} from '../utils/getMaxSiblingDimension'
 
 const useResizable = (
 	initialWidth: number,
@@ -28,35 +29,37 @@ const useResizable = (
 		const startHeight = dimensions.height
 
 		const handleMouseMove = (event: MouseEvent) => {
-			if (resizableRef) {
-				const parentElement = resizableRef.current?.parentElement
+			if (resizableRef.current) {
+				const parentElement = resizableRef.current.parentElement as HTMLElement
 
 				if (isResizing && parentElement) {
-					const parentRect = getComputedStyle(parentElement)
-					const parentWidth =
-						parentElement.clientWidth -
-						parseFloat(parentRect.paddingLeft) -
-						parseFloat(parentRect.paddingRight)
-					const parentHeight =
-						parentElement.clientHeight -
-						parseFloat(parentRect.paddingTop) -
-						parseFloat(parentRect.paddingBottom)
 					const cursorDiffX = (event.clientX - startX) * (isCenteredX ? 2 : 1)
 					const cursorDiffY = (event.clientY - startY) * (isCenteredY ? 2 : 1)
+
 					let newWidth = startWidth
 					let newHeight = startHeight
 
-					if (direction === 'right' || direction === 'bottom-right') {
-						newWidth = Math.min(startWidth + cursorDiffX, parentWidth)
+					const elementId =
+						resizableRef.current.id ||
+						resizableRef.current.querySelector('[aria-atomic="true"]')?.id ||
+						null
+
+					const {maxWidth, maxHeight} = getMaxSiblingDimensions(
+						parentElement,
+						elementId
+					)
+
+					if (direction.includes('right')) {
+						newWidth = Math.min(startWidth + cursorDiffX, maxWidth)
 					}
-					if (direction === 'left') {
+					if (direction.includes('left')) {
 						newWidth = Math.max(startWidth - cursorDiffX, minWidth)
 					}
 
-					if (direction === 'bottom' || direction === 'bottom-right') {
-						newHeight = Math.min(startHeight + cursorDiffY, parentHeight)
+					if (direction.includes('bottom')) {
+						newHeight = Math.min(startHeight + cursorDiffY, maxHeight)
 					}
-					if (direction === 'top') {
+					if (direction.includes('top')) {
 						newHeight = Math.max(startHeight - cursorDiffY, minHeight)
 					}
 

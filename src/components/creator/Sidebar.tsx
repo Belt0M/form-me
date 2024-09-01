@@ -13,6 +13,7 @@ import {findComponentById} from '../../utils/getComponentByID'
 import {getElementMinDimensions} from '../../utils/getElementMinDimensions'
 import {getFontSizeByHeadingLevel} from '../../utils/getFontSizeByHeadingLevel'
 import {getIsBlockComponentByType} from '../../utils/getIsBlockComponentByType'
+import {getMaxSiblingDimensions} from '../../utils/getMaxSiblingDimension'
 import {parseGradientSelector} from '../../utils/parseGradientSelector'
 import {roundTo} from '../../utils/roundTo'
 import InputStyleSelector from './InputStyleSelector'
@@ -79,11 +80,20 @@ const Sidebar: React.FC<SidebarProps> = ({
 				? currentElement.parentElement?.parentElement
 				: currentElement.parentElement
 			: null
+
 	const componentStyle = editingComponent?.style || {}
 	const {width: minWidth, height: minHeight} = getElementMinDimensions(
 		parent as HTMLElement | null,
 		editingComponent?.type
 	)
+
+	const {maxWidth, maxHeight} = getMaxSiblingDimensions(
+		parent as HTMLElement | null,
+		editingComponentId,
+		true
+	)
+
+	console.log(minWidth, minHeight, maxWidth, maxHeight)
 
 	const isFirstComponent = canvasComponents?.[0]?.id === editingComponentId
 	const isCanvasEmpty = canvasComponents.length === 0
@@ -1341,7 +1351,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 											}
 											type='range'
 											min={minWidth}
-											max={100}
+											max={maxWidth}
 											onChange={handleRangePercentageChange}
 										/>
 
@@ -1354,7 +1364,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 											}
 											type='number'
 											min={minWidth}
-											max={100}
+											max={maxWidth}
 											onChange={e => handleDimensionInputChange(e, 'width')}
 											onBlur={e => handleBlur(e.target as HTMLElement, 'width')}
 											onKeyDown={e => handleKeyDown(e, 'width')}
@@ -1376,7 +1386,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 											}
 											type='range'
 											min={minHeight}
-											max={100}
+											max={maxHeight}
 											onChange={handleRangePercentageChange}
 										/>
 
@@ -1389,7 +1399,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 											}
 											type='number'
 											min={minHeight}
-											max={100}
+											max={maxHeight}
 											onChange={e => handleDimensionInputChange(e, 'height')}
 											onBlur={e =>
 												handleBlur(e.target as HTMLElement, 'height')
