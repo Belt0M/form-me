@@ -19,10 +19,12 @@ import {EPosition} from '../types/EPosition'
 import {ICanvasComponent} from '../types/ICanvasComponent'
 import {generateColor} from '../utils/generateColor'
 import {generateJSX} from '../utils/generateJSX'
+import {getComponentById} from '../utils/getComponentByID'
 import {getComponentsQuantity} from '../utils/getComponentsQuantity'
 import {getDefaultComponentHeight} from '../utils/getDefaultComponentHeight'
 import {getDefaultComponentWidth} from '../utils/getDefaultComponentWidth'
 import {getIsBlockComponentByType} from '../utils/getIsBlockComponentByType'
+import {getIsComponentWithChildren} from '../utils/getIsComponentWithChildren'
 import {getIsContainContent} from '../utils/getIsContainContent'
 
 const FormCreator: React.FC = () => {
@@ -154,6 +156,49 @@ const FormCreator: React.FC = () => {
 		buttonType?: 'button' | 'submit' | null
 	) => {
 		handleDeleteComponent()
+
+		if (!hoveredComponentId && canvasComponents.length) {
+			toast('When dropping a new component, the parent should be highlighted', {
+				position: 'top-center',
+				autoClose: 2000,
+				type: 'error',
+				style: {padding: '0.5rem'},
+				theme: 'dark',
+				transition: Bounce,
+			})
+			toast('P.S. keep an eye on whether the hint component has appeared', {
+				position: 'top-center',
+				delay: 1000,
+				autoClose: 1500,
+				type: 'warning',
+				style: {padding: '0.5rem'},
+				theme: 'dark',
+				transition: Bounce,
+			})
+			return
+		}
+
+		if (hoveredComponentId) {
+			const hoveredComponentType = getComponentById(
+				canvasComponents,
+				hoveredComponentId
+			)?.type
+			const isComponentWithoutChildren =
+				hoveredComponentType &&
+				!getIsComponentWithChildren(hoveredComponentType)
+
+			if (isComponentWithoutChildren) {
+				toast('The existing component does not support nesting', {
+					position: 'top-center',
+					autoClose: 2000,
+					type: 'error',
+					style: {padding: '0.5rem'},
+					theme: 'dark',
+					transition: Bounce,
+				})
+				return
+			}
+		}
 
 		if (draggedComponentType === EHTMLTag.INPUT && !inputType) {
 			setIsModalOpen({

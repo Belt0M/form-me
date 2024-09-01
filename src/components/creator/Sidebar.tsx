@@ -9,7 +9,7 @@ import {ESpacing} from '../../types/ESpacing'
 import {ICanvasComponent} from '../../types/ICanvasComponent'
 import {IExtendedCSSProperties} from '../../types/IExtendedCSSProperties'
 import {IGradient} from '../../types/IGradient'
-import {findComponentById} from '../../utils/getComponentByID'
+import {getComponentById} from '../../utils/getComponentByID'
 import {getElementMinDimensions} from '../../utils/getElementMinDimensions'
 import {getFontSizeByHeadingLevel} from '../../utils/getFontSizeByHeadingLevel'
 import {getIsBlockComponentByType} from '../../utils/getIsBlockComponentByType'
@@ -66,7 +66,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 		useState<IGradient>(defaultGradient)
 	const [spacingMode, setSpacingMode] = useState<ESpacing>(ESpacing.ALL)
 
-	const editingComponent = findComponentById(
+	const editingComponent = getComponentById(
 		canvasComponents,
 		editingComponentId
 	)
@@ -92,8 +92,6 @@ const Sidebar: React.FC<SidebarProps> = ({
 		editingComponentId,
 		true
 	)
-
-	console.log(minWidth, minHeight, maxWidth, maxHeight)
 
 	const isFirstComponent = canvasComponents?.[0]?.id === editingComponentId
 	const isCanvasEmpty = canvasComponents.length === 0

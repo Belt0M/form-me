@@ -1,6 +1,6 @@
 import {ICanvasComponent} from '../types/ICanvasComponent'
 
-export function findComponentById(
+export function getComponentById(
 	tree: ICanvasComponent[],
 	id: string | null
 ): ICanvasComponent | null {

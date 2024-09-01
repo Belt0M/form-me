@@ -20,6 +20,7 @@ interface Props {
 	onHoverGUI?: JSX.Element
 	isCurrentInFocus?: boolean
 	isHint?: boolean
+	isErrorHint?: boolean
 	isResizing?: boolean
 	editingComponentId?: string | null
 	onDragEnter?: (event: React.DragEvent<HTMLDivElement>) => void
@@ -38,6 +39,7 @@ const Div: FC<Props> = ({
 	onHoverGUI,
 	isCurrentInFocus,
 	isHint,
+	isErrorHint,
 	isResizing,
 	editingComponentId,
 	onDragEnter,
@@ -193,6 +195,8 @@ const Div: FC<Props> = ({
 		height = (+height / parentDimension.height) * 100 + '%'
 	}
 
+	console.log(isErrorHint)
+
 	return !isHint ? (
 		<div
 			ref={resizableRef}
@@ -264,7 +268,12 @@ const Div: FC<Props> = ({
 			)}
 		</div>
 	) : (
-		<div className='w-full border-2 bg-hint border-hintBorder min-h-24 bg-opacity-30' />
+		<div
+			className={clsx(
+				isErrorHint ? 'bg-red-500 border-red-700' : 'bg-hint border-hintBorder',
+				'w-full border-2 min-h-24 bg-opacity-30'
+			)}
+		/>
 	)
 }
 

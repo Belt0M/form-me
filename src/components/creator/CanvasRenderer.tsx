@@ -2,6 +2,9 @@ import React, {useEffect, useRef, useState} from 'react'
 import {EHTMLTag} from '../../types/EHTMLTag'
 import {EPosition} from '../../types/EPosition'
 import {ICanvasComponent} from '../../types/ICanvasComponent'
+import {getAvailableSpace} from '../../utils/getAvailableSpace'
+import {getComponentById} from '../../utils/getComponentByID'
+import {getDefaultComponentDimensionsInPX} from '../../utils/getDefaultComponentDimensionsInPX'
 import Div from '../creator/dnd-components/Div'
 import Section from '../creator/dnd-components/Section'
 import Button from './dnd-components/Button'
@@ -49,15 +52,19 @@ const RenderCanvasComponent: React.FC<Props> = ({
 	const containerRef = useRef<HTMLDivElement | null>(null)
 	const [isHovering, setIsHovering] = useState<boolean>(false)
 
-	const createHintComponent = (hoveredID: string) => {
+	const createHintComponent = (hoveredID: string, isError: boolean = false) => {
 		if (hoveredID) {
 			const id = crypto.randomUUID()
 			const newComponent: ICanvasComponent = {
 				id,
 				type: draggingType!,
-				style: {position: EPosition.RELATIVE, visibility: 'hidden'},
+				style: {
+					position: EPosition.RELATIVE,
+					visibility: 'hidden',
+				},
 				children: [],
 				isHint: true,
+				isErrorHint: isError,
 			}
 
 			addComponent(hoveredID, newComponent, true)
@@ -85,7 +92,30 @@ const RenderCanvasComponent: React.FC<Props> = ({
 		if (draggingType) {
 			if (!isEnterFromAnotherComponent) {
 				setIsHintShowing(true)
-				createHintComponent(id)
+
+				const parent = document.getElementById(id)
+				const component = getComponentById(canvasComponents, id)
+
+				if (parent && component) {
+					const {availableWidth, availableHeight} = getAvailableSpace(parent)
+
+					const {width, height} =
+						getDefaultComponentDimensionsInPX(draggingType)
+
+					let isError = false
+
+					if (
+						(width === -1 && (!availableWidth || availableWidth < 50)) ||
+						height > availableHeight ||
+						component.type === EHTMLTag.INPUT ||
+						component.type === EHTMLTag.HEADING ||
+						component.type === EHTMLTag.BUTTON
+					) {
+						isError = true
+					}
+
+					createHintComponent(id, isError)
+				}
 			}
 		}
 	}
@@ -284,7 +314,7 @@ const RenderCanvasComponent: React.FC<Props> = ({
 		case EHTMLTag.DIV:
 			if (isHint) {
 				renderedComponent = (
-					<Div id={id} isHint={!!isHint}>
+					<Div id={id} isHint isErrorHint>
 						{renderChildren()}
 					</Div>
 				)

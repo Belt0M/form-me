@@ -5,6 +5,7 @@ export interface ICanvasComponent {
 	id: string
 	type: EHTMLTag
 	isHint?: boolean
+	isErrorHint?: boolean
 	style?: IExtendedCSSProperties
 	content?: string
 	children?: ICanvasComponent[]
