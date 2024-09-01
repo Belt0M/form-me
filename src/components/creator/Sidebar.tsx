@@ -809,7 +809,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 										? fontSize.fontSize === '-2'
 											? ''
 											: parseFloat(fontSize.fontSize as string).toString()
-										: parseFloat(componentStyle.fontSize as string).toString()
+										: componentStyle.fontSize
+										? parseFloat(componentStyle.fontSize as string).toString()
+										: '0'
 								}
 								type='number'
 								onChange={e => handleInputChange(e, 'px')}
@@ -916,7 +918,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 			)
 
 			const renderCheckboxConstraint = (label: string, name: string) => (
-				<div className='group'>
+				<>
 					<label className='block mb-2 text-white'>{label}</label>
 					<input
 						type='checkbox'
@@ -931,7 +933,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 						}}
 						className='w-full p-2 mb-4 text-white rounded bg-stone-700'
 					/>
-				</div>
+				</>
 			)
 
 			const constraints = []
@@ -955,7 +957,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 			}
 
 			return (
-				<div className='group'>
+				<>
 					<SectionHeading
 						name='constraints'
 						isOpen={activeSections.includes('constraints')}
@@ -966,7 +968,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 							{constraints}
 						</div>
 					)}
-				</div>
+				</>
 			)
 		}
 		return null
@@ -1053,7 +1055,6 @@ const Sidebar: React.FC<SidebarProps> = ({
 										value={componentStyle.backgroundColor || '#ffffff'}
 										type='color'
 										onChange={handleInputChange}
-										debounce
 									/>
 
 									<label className='flex items-center mb-2 text-white'>
@@ -1086,14 +1087,12 @@ const Sidebar: React.FC<SidebarProps> = ({
 													value={backgroundGradient.startColor}
 													type='color'
 													onChange={handleGradientColorChange}
-													debounce
 												/>
 												<InputStyleSelector
 													name='endColor'
 													value={backgroundGradient.endColor}
 													type='color'
 													onChange={handleGradientColorChange}
-													debounce
 												/>
 											</div>
 										</>
@@ -1105,7 +1104,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
 					{/* Border Section */}
 					{isBlock && (
-						<div className='group'>
+						<>
 							<SectionHeading
 								name='border'
 								isOpen={activeSections.includes('border')}
@@ -1121,10 +1120,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 										onChange={handleSimpleRangeChange}
 										min={0}
 										max={30}
+										infoBelow
 									/>
-									<span className='text-white'>
-										{parseInt(componentStyle.borderWidth as string) || 0}px
-									</span>
 
 									<InputStyleSelector
 										label='Border Color'
@@ -1159,13 +1156,11 @@ const Sidebar: React.FC<SidebarProps> = ({
 										onChange={handleSimpleRangeChange}
 										min={0}
 										max={30}
+										infoBelow
 									/>
-									<span className='text-white'>
-										{parseInt(componentStyle.borderRadius as string) || 0}px
-									</span>
 								</>
 							)}
-						</div>
+						</>
 					)}
 
 					{/* Padding & Margin Section */}
@@ -1271,10 +1266,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 												onChange={handleSimpleRangeChange}
 												min={0}
 												max={50}
+												infoBelow
 											/>
-											<span className='text-white'>
-												{parseInt(componentStyle.gap as string) || 0}px
-											</span>
 										</>
 									)}
 
@@ -1307,10 +1300,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 												onChange={handleSimpleRangeChange}
 												min={0}
 												max={50}
+												infoBelow
 											/>
-											<span className='text-white'>
-												{parseInt(componentStyle.gap as string) || 0}px
-											</span>
 										</>
 									)}
 								</>
@@ -1326,7 +1317,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 					{!isFirstComponent &&
 						isBlock &&
 						editingComponent?.type !== EHTMLTag.BUTTON && (
-							<div className='group'>
+							<>
 								<SectionHeading
 									name='dimensions'
 									isOpen={activeSections.includes('dimensions')}
@@ -1407,7 +1398,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 										/>
 									</>
 								)}
-							</div>
+							</>
 						)}
 				</div>
 			)}

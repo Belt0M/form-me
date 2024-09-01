@@ -1,6 +1,5 @@
 import clsx from 'clsx'
-import _ from 'lodash'
-import React, {useCallback, useRef} from 'react'
+import React from 'react'
 
 interface Props {
 	label?: string
@@ -12,7 +11,8 @@ interface Props {
 	max?: number
 	disabled?: boolean
 	placeholder?: string
-	debounce?: boolean
+	infoBelow?: boolean
+	units?: string
 	onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
 	onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void
 	onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void
@@ -29,24 +29,14 @@ const InputStyleSelector: React.FC<Props> = ({
 	min,
 	disabled = false,
 	placeholder,
-	debounce,
+	infoBelow,
+	units = 'rem',
 	onChange,
 	onBlur,
 	onKeyDown,
 	onFocus,
 }) => {
 	const isNotColorType = type !== 'color'
-
-	const debouncedOnChange = useRef(
-		debounce ? _.debounce(onChange, 300) : onChange
-	).current
-
-	const handleValueChange = useCallback(
-		(event: React.ChangeEvent<HTMLInputElement>) => {
-			debouncedOnChange(event)
-		},
-		[debouncedOnChange]
-	)
 
 	return (
 		<div className='text-sm text-white'>
@@ -55,21 +45,24 @@ const InputStyleSelector: React.FC<Props> = ({
 				type={type}
 				name={name}
 				value={value}
-				onChange={handleValueChange}
-				onBlur={isNotColorType && useAdvancedHandlers ? onBlur : undefined}
-				onKeyDown={
-					isNotColorType && useAdvancedHandlers ? onKeyDown : undefined
-				}
 				min={min != undefined ? min : undefined}
 				max={max != undefined ? max : undefined}
 				disabled={disabled}
-				onFocus={isNotColorType && useAdvancedHandlers ? onFocus : undefined}
 				placeholder={placeholder || undefined}
 				className={clsx(
 					type === 'color' ? 'mt-1' : 'w-full px-2.5 pt-2.5 pb-2 mt-2',
 					'rounded bg-stone-700'
 				)}
+				onChange={onChange}
+				onKeyDown={
+					isNotColorType && useAdvancedHandlers ? onKeyDown : undefined
+				}
+				onFocus={isNotColorType && useAdvancedHandlers ? onFocus : undefined}
+				onBlur={isNotColorType && useAdvancedHandlers ? onBlur : undefined}
 			/>
+			{infoBelow && units && (
+				<span className='text-white'>{value + units}</span>
+			)}
 		</div>
 	)
 }
