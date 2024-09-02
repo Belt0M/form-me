@@ -40,31 +40,35 @@ export const generateJSXAsComponent = (
 			? Object.entries(style)
 					.filter(([key]) => key !== 'level')
 					.map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
-					.join(', ')
+					.join(',\n' + '  '.repeat(indentLevel + 1))
 			: ''
 
 		if (styleString) {
-			jsxTag += ` style={{ ${styleString} }} `
+			jsxTag += `\n${'  '.repeat(indentLevel + 1)}style={{\n${'  '.repeat(
+				indentLevel + 2
+			)}${styleString}\n${'  '.repeat(indentLevel + 1)}}}`
 		}
 
 		if (type === EHTMLTag.IMG && src) {
-			jsxTag += `src='${src}' `
+			jsxTag += `\n${'  '.repeat(indentLevel + 1)}src='${src}'`
 		}
 
 		if (type === EHTMLTag.INPUT) {
 			const name = `nameValue${inputCounter++}`
-			jsxTag += ` name='${name}' value={state.${name}} onChange={handleChange} `
+			jsxTag += `\n${'  '.repeat(
+				indentLevel + 1
+			)}name='${name}' value={state.${name}} onChange={handleChange}`
 		}
 
 		if (type === EHTMLTag.FORM && !hasFormHandlerAdded) {
-			jsxTag += ` onSubmit={handleSubmit} `
+			jsxTag += `\n${'  '.repeat(indentLevel + 1)}onSubmit={handleSubmit}`
 			hasFormHandlerAdded = true
 		}
 
-		jsxTag += `>`
+		jsxTag += `\n${indent}>`
 
 		if (content) {
-			jsxTag += `\n${indent}  ${content}`
+			jsxTag += `\n${'  '.repeat(indentLevel + 1)}${content}`
 		}
 
 		if (children && children.length > 0) {
