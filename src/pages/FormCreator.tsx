@@ -312,6 +312,7 @@ const FormCreator: React.FC = () => {
 			) {
 				if (draggedComponentType === EHTMLTag.BUTTON) {
 					newComponent.style!.padding = '12px 25px 9px 25px'
+					newComponent.style!.display = 'block'
 
 					if (buttonType) {
 						newComponent.style!.buttonType = buttonType

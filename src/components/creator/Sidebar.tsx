@@ -59,7 +59,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 	onUpdateProperty,
 	onExitEditMode,
 }) => {
-	const [position, setPosition] = useState<EPosition>(EPosition.RELATIVE)
+	const [position] = useState<EPosition>(EPosition.RELATIVE)
 	const [activeSections, setActiveSections] = useState<string[]>(
 		defaultOpenedSections
 	)
@@ -1029,7 +1029,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 	return (
 		<aside className='w-[22.5%] max-h-full px-6 overflow-y-auto select-none py-5 bg-stone-900 min-w-72 border-l-2 border-lightGray'>
 			<div className='flex items-center justify-between pb-3 mb-8 border-b-2 border-stone-500'>
-				<div className='flex gap-6 text-base'>
+				<div className='flex gap-6 px-1 text-base'>
 					<button
 						className={clsx(
 							isEditing
@@ -1062,7 +1062,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
 			{!isEditing && (
 				<>
-					<div className='mb-4'>
+					{/* <div className='mb-4'>
 						<label className='block mb-2 text-white'>Position</label>
 						<select
 							value={position}
@@ -1072,7 +1072,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 							<option value={EPosition.RELATIVE}>Relative</option>
 							<option value={EPosition.ABSOLUTE}>Absolute</option>
 						</select>
-					</div>
+					</div> */}
 					<div className='grid grid-cols-2 gap-4'>
 						{sidebarComponents.map(({icon: IconComponent, type}) => {
 							const isForm = type === EHTMLTag.FORM

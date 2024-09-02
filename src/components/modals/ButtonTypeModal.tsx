@@ -42,7 +42,7 @@ const ButtonTypeModal: FC<ButtonTypeModalProps> = ({
 							>
 								<button
 									type='button'
-									className='w-full h-full p-2 py-4 text-white transition-all border-2 rounded-lg bg-stone-800 enabled:border-primary hover:enabled:brightness-110 disabled:bg-stone-600 disabled:cursor-not-allowed'
+									className='w-full h-full p-2 pt-4 pb-3.5 text-white transition-all border-2 rounded-lg bg-stone-800 enabled:border-primary hover:enabled:brightness-110 disabled:bg-stone-600 disabled:cursor-not-allowed'
 									onClick={() =>
 										onSelectType(null, type as 'button' | 'submit' | null)
 									}
