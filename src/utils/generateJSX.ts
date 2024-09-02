@@ -2,7 +2,7 @@ import {EHTMLTag} from '../types/EHTMLTag'
 import {ICanvasComponent} from '../types/ICanvasComponent'
 
 export const generateJSX = (component: ICanvasComponent): string => {
-	const {type, style, children, content, level} = component
+	const {type, style, children, content, level, src} = component
 
 	let jsxTag = ''
 
@@ -20,7 +20,11 @@ export const generateJSX = (component: ICanvasComponent): string => {
 		: ''
 
 	if (styleString) {
-		jsxTag += ` style={{ ${styleString} }}`
+		jsxTag += ` style={{ ${styleString} }} `
+	}
+
+	if (type === EHTMLTag.IMG) {
+		jsxTag += `src='${src}' `
 	}
 
 	jsxTag += `>`
