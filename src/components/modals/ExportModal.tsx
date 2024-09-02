@@ -47,7 +47,7 @@ const ExportModal: React.FC<ExportModalProps> = ({onClose, exportedCode}) => {
 				</p>
 			</header>
 
-			<div className='relative w-2/3 h-full p-4 my-12 rounded-xl bg-stone-700'>
+			<div className='relative w-2/3 h-full max-h-full p-4 my-12 overflow-y-auto rounded-xl bg-stone-700'>
 				<SyntaxHighlighter
 					language='xml'
 					style={atomOneDark}

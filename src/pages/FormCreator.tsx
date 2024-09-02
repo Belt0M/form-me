@@ -19,6 +19,7 @@ import {EHTMLTag} from '../types/EHTMLTag'
 import {EPosition} from '../types/EPosition'
 import {ICanvasComponent} from '../types/ICanvasComponent'
 import {generateColor} from '../utils/generateColor'
+import {generateJSXAsComponent} from '../utils/generateJSXAsComponent'
 import {generateSimpleJSX} from '../utils/generateSimpleJSX'
 import {getComponentById} from '../utils/getComponentByID'
 import {getComponentsQuantity} from '../utils/getComponentsQuantity'
@@ -496,12 +497,20 @@ const FormCreator: React.FC = () => {
 		setCanvasComponents(prevComponents => updateComponentStyle(prevComponents))
 	}
 
-	function exportFormAsJSX(components: ICanvasComponent[]): string {
+	const exportFormAsJSX = (components: ICanvasComponent[]): string => {
 		return components.map(component => generateSimpleJSX(component)).join('\n')
 	}
 
+	const exportFormAsJSXAsComponent = (
+		components: ICanvasComponent[]
+	): string => {
+		return components
+			.map(component => generateJSXAsComponent(component))
+			.join('\n')
+	}
+
 	const handleExport = () => {
-		let exportedCode = exportFormAsJSX(canvasComponents)
+		let exportedCode = exportFormAsJSXAsComponent(canvasComponents)
 
 		try {
 			exportedCode = html(exportedCode, {

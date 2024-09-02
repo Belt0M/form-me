@@ -1,21 +1,21 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 import clsx from 'clsx'
-import React, {CSSProperties, useEffect, useState} from 'react'
-import {sidebarComponents} from '../../data/sidebar-components'
-import {EDirection} from '../../types/EDirection'
-import {EHTMLTag} from '../../types/EHTMLTag'
-import {EPosition} from '../../types/EPosition'
-import {ESpacing} from '../../types/ESpacing'
-import {ICanvasComponent} from '../../types/ICanvasComponent'
-import {IExtendedCSSProperties} from '../../types/IExtendedCSSProperties'
-import {IGradient} from '../../types/IGradient'
-import {getComponentById} from '../../utils/getComponentByID'
-import {getElementMinDimensions} from '../../utils/getElementMinDimensions'
-import {getFontSizeByHeadingLevel} from '../../utils/getFontSizeByHeadingLevel'
-import {getIsBlockComponentByType} from '../../utils/getIsBlockComponentByType'
-import {getMaxSiblingDimensions} from '../../utils/getMaxSiblingDimension'
-import {parseGradientSelector} from '../../utils/parseGradientSelector'
-import {roundTo} from '../../utils/roundTo'
+import React, { CSSProperties, useEffect, useState } from 'react'
+import { sidebarComponents } from '../../data/sidebar-components'
+import { EDirection } from '../../types/EDirection'
+import { EHTMLTag } from '../../types/EHTMLTag'
+import { EPosition } from '../../types/EPosition'
+import { ESpacing } from '../../types/ESpacing'
+import { ICanvasComponent } from '../../types/ICanvasComponent'
+import { IExtendedCSSProperties } from '../../types/IExtendedCSSProperties'
+import { IGradient } from '../../types/IGradient'
+import { getComponentById } from '../../utils/getComponentByID'
+import { getElementMinDimensions } from '../../utils/getElementMinDimensions'
+import { getFontSizeByHeadingLevel } from '../../utils/getFontSizeByHeadingLevel'
+import { getIsBlockComponentByType } from '../../utils/getIsBlockComponentByType'
+import { getMaxSiblingDimensions } from '../../utils/getMaxSiblingDimension'
+import { parseGradientSelector } from '../../utils/parseGradientSelector'
+import { roundTo } from '../../utils/roundTo'
 import InputStyleSelector from './InputStyleSelector'
 import SectionHeading from './SectionHeading'
 import SelectStyleSelector from './SelectStyleSelector'
@@ -122,8 +122,6 @@ const Sidebar: React.FC<SidebarProps> = ({
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [editingComponent?.src])
-
-	console.log(editingComponent?.src)
 
 	const [fontSize, setFontSize] = useState<{
 		fontSize: string
