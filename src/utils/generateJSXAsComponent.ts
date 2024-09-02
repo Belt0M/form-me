@@ -58,7 +58,6 @@ export const generateJSXAsComponent = (
 
 		if (type === EHTMLTag.INPUT) {
 			const name = `nameValue${inputNameCounter++}`
-
 			jsxTag += ` name='${name}' value={state.${name} || ''} onChange={handleChange}`
 		}
 
@@ -67,19 +66,25 @@ export const generateJSXAsComponent = (
 			hasFormHandlerAdded = true
 		}
 
-		jsxTag += `>\n`
+		if (type === EHTMLTag.IMG || type === EHTMLTag.INPUT) {
+			jsxTag += ` />\n`
+		} else {
+			jsxTag += `>\n`
 
-		if (content) {
-			jsxTag += `${'  '.repeat(indentLevel + 1)}${content}\n`
+			if (content) {
+				jsxTag += `${'  '.repeat(indentLevel + 1)}${content}\n`
+			}
+
+			if (children && children.length > 0) {
+				jsxTag += children
+					.map(child => generateComponentJSX(child, indentLevel + 1))
+					.join('\n')
+			}
+
+			jsxTag += `${indent}</${
+				type === 'heading' && level ? `h${level}` : type
+			}>\n`
 		}
-
-		if (children && children.length > 0) {
-			jsxTag += children
-				.map(child => generateComponentJSX(child, indentLevel + 1))
-				.join('\n')
-		}
-
-		jsxTag += `${indent}</${type === 'heading' && level ? `h${level}` : type}>`
 
 		return jsxTag
 	}
