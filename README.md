@@ -29,7 +29,7 @@ Projekt ten wykorzystuje następujące technologie:
 Aby uruchomić aplikację lokalnie:
 
    ```bash
-   git clone https://github.com/twoj-uzytkownik/webowy-konstruktor-formularzy-frontend.git
+   git clone https://github.com/Belt0M/form-me.git
    cd form-me
    code .
    npm i
