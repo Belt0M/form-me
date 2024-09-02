@@ -12,4 +12,5 @@ export interface ICanvasComponent {
 	parent?: HTMLElement
 	isBlock?: boolean
 	level?: number
+	src?: string
 }

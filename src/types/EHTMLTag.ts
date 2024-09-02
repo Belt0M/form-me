@@ -4,4 +4,5 @@ export enum EHTMLTag {
 	INPUT = 'input',
 	BUTTON = 'button',
 	HEADING = 'heading',
+	IMG = 'img',
 }

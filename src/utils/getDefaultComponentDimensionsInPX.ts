@@ -20,6 +20,10 @@ export const getDefaultComponentDimensionsInPX = (type: EHTMLTag) => {
 			width = 200
 			height = 40
 			break
+		case EHTMLTag.IMG:
+			width = 350
+			height = 200
+			break
 		default:
 			break
 	}

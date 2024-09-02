@@ -10,8 +10,8 @@ import {
 } from '../store/forms.api'
 import {ICreateForm} from '../types/ICreateForm'
 import {IForm} from '../types/IForm'
-import CreateFormPopup from './CreateFormPopup'
 import FormCard from './FormCard'
+import CreateFormPopup from './modals/CreateFormPopup'
 
 const defaultFormData: ICreateForm = {title: '', description: ''}
 

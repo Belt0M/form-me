@@ -34,6 +34,11 @@ export const getDefaultComponentHeight = (
 				? Math.round((40 / parentHeight) * 100) + '%'
 				: '40px'
 			break
+		case EHTMLTag.IMG:
+			result = parentHeight
+				? Math.round((200 / parentHeight) * 100) + '%'
+				: '200px'
+			break
 		default:
 			break
 	}

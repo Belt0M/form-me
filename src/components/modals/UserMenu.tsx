@@ -1,6 +1,6 @@
 import {FC, useRef, useState} from 'react'
-import {useAppSelector} from '../hooks/storeHook'
-import useClickOutsideCommon from '../hooks/useClickOutsideCommon'
+import {useAppSelector} from '../../hooks/storeHook'
+import useClickOutsideCommon from '../../hooks/useClickOutsideCommon'
 
 interface Props {
 	onLogout: () => void

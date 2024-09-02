@@ -10,32 +10,32 @@ import {roundTo} from '../../../utils/roundTo'
 interface InputProps {
 	id: string
 	style?: IExtendedCSSProperties
-	type: string
 	isCurrentInFocus?: boolean
 	isHint?: boolean
 	editingComponentId?: string | null
 	isResizing?: boolean
 	onHoverGUI?: JSX.Element
 	isErrorHint?: boolean
-	onDragEnter?: (event: React.DragEvent<HTMLDivElement>) => void
-	onDragLeave?: (event: React.DragEvent<HTMLDivElement>) => void
-	onMouseEnter?: (event: React.MouseEvent<HTMLDivElement>) => void
-	onMouseLeave?: (event: React.MouseEvent<HTMLDivElement>) => void
+	src?: string
+	onDragEnter?: (event: React.DragEvent<HTMLImageElement>) => void
+	onDragLeave?: (event: React.DragEvent<HTMLImageElement>) => void
+	onMouseEnter?: (event: React.MouseEvent<HTMLImageElement>) => void
+	onMouseLeave?: (event: React.MouseEvent<HTMLImageElement>) => void
 	onEditComponent?: (editID: string) => void
 	setIsResizing?: React.Dispatch<React.SetStateAction<boolean>>
 	onUpdateStyle?: (id: string, updatedStyle: React.CSSProperties) => void
 }
 
-const Input: FC<InputProps> = ({
+const Img: FC<InputProps> = ({
 	id,
 	style,
-	type,
 	isCurrentInFocus,
 	isHint,
 	editingComponentId,
 	isResizing,
 	onHoverGUI,
 	isErrorHint,
+	src,
 	onDragEnter,
 	onDragLeave,
 	onMouseEnter,
@@ -44,7 +44,7 @@ const Input: FC<InputProps> = ({
 	setIsResizing,
 	onUpdateStyle,
 }) => {
-	const resizableRef = useRef<HTMLDivElement>(null)
+	const resizableRef = useRef<HTMLImageElement>(null)
 	const parentElement = resizableRef.current
 		?.parentElement as HTMLElement | null
 
@@ -206,16 +206,18 @@ const Input: FC<InputProps> = ({
 			onMouseEnter={onMouseEnter}
 			onMouseLeave={onMouseLeave}
 		>
-			<input
-				type={type}
+			<img
 				id={id}
+				src={
+					src ||
+					'https://thumbs.dreamstime.com/b/gray-squares-white-background-vector-illustration-gray-squares-white-background-102555310.jpg'
+				}
 				style={{
 					...style,
 					width: '100%',
 					height: '100%',
 				}}
 				aria-atomic={true}
-				placeholder={style?.placeholder || ''}
 			/>
 			{!isResizing && onHoverGUI}
 			{!isResizing && onHoverGUI}
@@ -267,11 +269,11 @@ const Input: FC<InputProps> = ({
 		<div
 			className={clsx(
 				isErrorHint ? 'bg-red-500 border-red-700' : 'bg-hint border-hintBorder',
-				'block w-[205px] h-[40px] border-2 rounded-lg bg-opacity-30'
+				'block w-[350px] h-[200px] border-2 rounded-lg bg-opacity-30'
 			)}
 			data-hint={true}
 		/>
 	)
 }
 
-export default Input
+export default Img

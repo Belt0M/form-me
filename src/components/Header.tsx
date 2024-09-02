@@ -5,7 +5,7 @@ import {Link, useNavigate} from 'react-router-dom'
 import Logo from '../assets/img/logo.png'
 import {useAppDispatch, useAppSelector} from '../hooks/storeHook'
 import {logout} from '../store/authSlice'
-import UserMenu from './UserMenu'
+import UserMenu from './modals/UserMenu'
 
 interface RequirementIndicatorProps {
 	label: string

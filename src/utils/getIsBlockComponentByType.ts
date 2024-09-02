@@ -6,6 +6,7 @@ export const getIsBlockComponentByType = (type: EHTMLTag): boolean => {
 		EHTMLTag.FORM,
 		EHTMLTag.INPUT,
 		EHTMLTag.BUTTON,
+		EHTMLTag.IMG,
 	]
 
 	return blockComponents.includes(type)

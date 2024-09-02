@@ -47,6 +47,7 @@ const defaultOpenedSections = [
 	'spacing',
 	'display',
 	'text',
+	'image',
 ]
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -110,6 +111,20 @@ const Sidebar: React.FC<SidebarProps> = ({
 		isEditing: false,
 	})
 
+	const [url, setUrl] = useState<{url: string; isEditing?: boolean}>({
+		url: editingComponent?.src ? editingComponent.src : '',
+		isEditing: false,
+	})
+
+	useEffect(() => {
+		if (!url && editingComponent?.src) {
+			setUrl({url: editingComponent.src, isEditing: false})
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [editingComponent?.src])
+
+	console.log(editingComponent?.src)
+
 	const [fontSize, setFontSize] = useState<{
 		fontSize: string
 		isEditing?: boolean
@@ -171,6 +186,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 					? parsedGradient
 					: defaultGradient
 
+			setUrl({
+				url: editingComponent?.src || url.url,
+				isEditing: false,
+			})
 			setSpacingMode(ESpacing.ALL)
 			setBackgroundGradient(gradientToApply)
 			setActiveSections(defaultOpenedSections)
@@ -369,6 +388,11 @@ const Sidebar: React.FC<SidebarProps> = ({
 				}
 				break
 			}
+			case 'src':
+				if (editingComponentId) {
+					onUpdateProperty(editingComponentId, 'src', url.url)
+				}
+				break
 			case 'fontSize': {
 				const value = fontSize[updatedName]
 
@@ -888,6 +912,38 @@ const Sidebar: React.FC<SidebarProps> = ({
 		return null
 	}
 
+	const renderImgSection = () => {
+		if (editingComponent?.type === EHTMLTag.IMG) {
+			return (
+				<>
+					<SectionHeading
+						name='image'
+						isOpen={activeSections.includes('image')}
+						onSwitch={toggleSection}
+					/>
+
+					{activeSections.includes('image') && (
+						// Image Url
+						<InputStyleSelector
+							label='Image URL'
+							name='src'
+							value={url.url || ''}
+							type='text'
+							onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+								setUrl(prev => ({...prev, url: e.target.value}))
+							}}
+							onBlur={e => handleBlur(e.target as HTMLElement, 'src')}
+							onKeyDown={e => handleKeyDown(e, 'src')}
+							onFocus={() => setUrl(prev => ({...prev, isEditing: true}))}
+							useAdvancedHandlers
+						/>
+					)}
+				</>
+			)
+		}
+		return null
+	}
+
 	const renderConstraintsSection = () => {
 		if (editingComponent?.type === EHTMLTag.INPUT) {
 			const inputType = componentStyle.inputType || 'text'
@@ -1016,11 +1072,11 @@ const Sidebar: React.FC<SidebarProps> = ({
 					</div>
 					<div className='grid grid-cols-2 gap-4'>
 						{sidebarComponents.map(({icon: IconComponent, type}) => {
-							const isSection = type === EHTMLTag.FORM
-							const isDisabled =
-								(isCanvasEmpty && !isSection) || (isSection && !isCanvasEmpty)
-									? true
-									: false
+							const isForm = type === EHTMLTag.FORM
+
+							if (isForm && !isCanvasEmpty) return null
+
+							const isDisabled = isCanvasEmpty && !isForm
 							return (
 								<div
 									key={type}
@@ -1029,9 +1085,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 										!isDisabled && onDragStart(type, position, event)
 									}
 									onDragEnd={onDragEnd}
-									className={`flex flex-col items-center justify-center gap-2 p-2 mb-2 text-white bg-white border-2 border-purple-800 cursor-pointer aspect-square rounded-xl bg-opacity-10 hover:brightness-125 transition-all ${
-										isDisabled ? 'opacity-50 cursor-not-allowed' : ''
-									}`}
+									className={clsx(
+										isDisabled && 'opacity-50 cursor-not-allowed',
+										'flex flex-col items-center justify-center gap-2 p-2 mb-2 text-white bg-white border-2 border-purple-800 cursor-pointer aspect-square rounded-xl bg-opacity-10 hover:brightness-125 transition-all'
+									)}
 								>
 									<IconComponent size={24} weight='bold' />
 									<span className='font-bold'>{`</${type}>`}</span>
@@ -1044,8 +1101,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 
 			{isEditing && (
 				<div className='flex flex-col gap-4'>
+					{renderImgSection()}
+
 					{/* Background Section */}
-					{isBlock && (
+					{isBlock && editingComponent?.type !== EHTMLTag.IMG && (
 						<>
 							<SectionHeading
 								name='background'
@@ -1072,6 +1131,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 										/>
 										Enable Gradient
 									</label>
+
 									{backgroundGradient.enabled && (
 										<>
 											<SelectStyleSelector

@@ -29,6 +29,11 @@ export const getDefaultComponentWidth = (
 				? Math.round((200 / parentWidth) * 100) + '%'
 				: '200px'
 			break
+		case EHTMLTag.IMG:
+			result = parentWidth
+				? Math.round((350 / parentWidth) * 100) + '%'
+				: '350px'
+			break
 		default:
 			break
 	}

@@ -4,14 +4,15 @@ import React, {useEffect, useRef, useState} from 'react'
 import {useLocation} from 'react-router-dom'
 import {Bounce, toast, ToastContainer} from 'react-toastify'
 import {Tooltip} from 'react-tooltip'
-import ButtonTypeModal from '../components/creator/ButtonTypeModal'
 import Canvas from '../components/creator/Canvas'
 import RenderCanvasComponent from '../components/creator/CanvasRenderer'
-import InputTypeModal from '../components/creator/InputTypeModal'
 import Sidebar from '../components/creator/Sidebar'
-import ExportModal from '../components/ExportModal'
 import Header from '../components/Header'
-import PreviewModal from '../components/PreviewModal'
+import ButtonTypeModal from '../components/modals/ButtonTypeModal'
+import ExportModal from '../components/modals/ExportModal'
+import ImageModal from '../components/modals/ImageModal'
+import InputTypeModal from '../components/modals/InputTypeModal'
+import PreviewModal from '../components/modals/PreviewModal'
 import {useClickOutside} from '../hooks/useClickOutside'
 import {useUpdateFormMutation} from '../store/forms.api'
 import {EHTMLTag} from '../types/EHTMLTag'
@@ -52,7 +53,8 @@ const FormCreator: React.FC = () => {
 		button: boolean
 		preview: boolean
 		export: boolean
-	}>({export: false, input: false, button: false, preview: false})
+		image: boolean
+	}>({export: false, input: false, button: false, preview: false, image: false})
 	const [exportedCode, setExportedCode] = useState<string>('')
 	const [initialCanvasComponents, setInitialCanvasComponents] = useState<
 		ICanvasComponent[]
@@ -114,6 +116,7 @@ const FormCreator: React.FC = () => {
 	const handleDragEnd = () => {
 		draggedComponentType !== EHTMLTag.INPUT &&
 			draggedComponentType !== EHTMLTag.BUTTON &&
+			draggedComponentType !== EHTMLTag.IMG &&
 			setDraggedComponentType(null)
 	}
 
@@ -152,7 +155,8 @@ const FormCreator: React.FC = () => {
 
 	const handleDrop = (
 		inputType?: string | null,
-		buttonType?: 'button' | 'submit' | null
+		buttonType?: 'button' | 'submit' | null,
+		imageUrl?: string | null
 	) => {
 		const hintComponent = getHintComponent(canvasComponents)
 		const isError = hintComponent?.isErrorHint
@@ -227,12 +231,24 @@ const FormCreator: React.FC = () => {
 			}
 		}
 
+		if (draggedComponentType === EHTMLTag.IMG && !imageUrl) {
+			setIsModalOpen({
+				export: false,
+				input: false,
+				button: false,
+				preview: false,
+				image: true,
+			})
+			return
+		}
+
 		if (draggedComponentType === EHTMLTag.INPUT && !inputType) {
 			setIsModalOpen({
 				export: false,
 				input: true,
 				button: false,
 				preview: false,
+				image: false,
 			})
 			return
 		}
@@ -243,6 +259,7 @@ const FormCreator: React.FC = () => {
 				input: false,
 				button: true,
 				preview: false,
+				image: false,
 			})
 			return
 		}
@@ -262,6 +279,10 @@ const FormCreator: React.FC = () => {
 			},
 			children: [],
 			isBlock,
+		}
+
+		if (draggedComponentType === EHTMLTag.IMG) {
+			newComponent!.src = imageUrl || ''
 		}
 
 		if (isBlock) {
@@ -310,6 +331,11 @@ const FormCreator: React.FC = () => {
 			newComponent.style!.borderWidth = '2px'
 		}
 
+		if (draggedComponentType === EHTMLTag.IMG) {
+			newComponent.style!.padding = ''
+			newComponent.style!.borderWidth = ''
+		}
+
 		if (
 			draggedComponentType === EHTMLTag.BUTTON ||
 			draggedComponentType === EHTMLTag.INPUT ||
@@ -344,6 +370,7 @@ const FormCreator: React.FC = () => {
 				input: false,
 				preview: false,
 				button: false,
+				image: false,
 			})
 		}
 	}
@@ -491,6 +518,7 @@ const FormCreator: React.FC = () => {
 				input: false,
 				preview: false,
 				button: false,
+				image: false,
 			})
 		} catch (error) {
 			console.error('Error formatting code:', error)
@@ -512,6 +540,7 @@ const FormCreator: React.FC = () => {
 			input: false,
 			preview: true,
 			button: false,
+			image: false,
 		})
 	}
 
@@ -521,6 +550,7 @@ const FormCreator: React.FC = () => {
 			input: false,
 			preview: false,
 			button: false,
+			image: false,
 		})
 	}
 
@@ -700,6 +730,12 @@ const FormCreator: React.FC = () => {
 				{isModalOpen.button && (
 					<ButtonTypeModal
 						onSelectType={handleDrop}
+						onClose={handleCloseModal}
+					/>
+				)}
+				{isModalOpen.image && (
+					<ImageModal
+						onSelectUrl={url => handleDrop(undefined, undefined, url)}
 						onClose={handleCloseModal}
 					/>
 				)}

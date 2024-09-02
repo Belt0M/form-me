@@ -9,6 +9,7 @@ import Div from '../creator/dnd-components/Div'
 import Button from './dnd-components/Button'
 import Form from './dnd-components/Form'
 import Heading from './dnd-components/Heading'
+import Img from './dnd-components/Img'
 import Input from './dnd-components/Input'
 
 interface Props {
@@ -48,7 +49,7 @@ const RenderCanvasComponent: React.FC<Props> = ({
 	setIsHintShowing,
 	setIsResizing,
 }) => {
-	const {id, type, style, children, isHint, content, level, isErrorHint} =
+	const {id, type, style, children, isHint, content, level, isErrorHint, src} =
 		component
 	const containerRef = useRef<HTMLDivElement | null>(null)
 	const [isHovering, setIsHovering] = useState<boolean>(false)
@@ -110,10 +111,9 @@ const RenderCanvasComponent: React.FC<Props> = ({
 		if (
 			targetElement?.getAttribute('data-hint') ||
 			targetElement?.id === isHintShowing
-		)
+		) {
 			return
-
-		console.log('enter', event)
+		}
 
 		const relatedElement = event.relatedTarget as HTMLElement | null
 		const isEnterFromAnotherComponent =
@@ -141,8 +141,6 @@ const RenderCanvasComponent: React.FC<Props> = ({
 		const relatedElement = event.relatedTarget as HTMLElement | null
 
 		if (relatedElement?.getAttribute('data-hint')) return
-
-		console.log('leave', event)
 
 		const isTargetComponentType = targetElement?.getAttribute('aria-atomic')
 		const isLeaveHintViaComponent =
@@ -437,6 +435,32 @@ const RenderCanvasComponent: React.FC<Props> = ({
 						id={id}
 						style={computedStyle}
 						type={style?.inputType || 'text'}
+						onDragEnter={handleDragEnter}
+						onDragLeave={handleDragLeave}
+						onMouseEnter={handleMouseEnter}
+						onMouseLeave={handleMouseLeave}
+						onEditComponent={handleEdit}
+						editingComponentId={editingComponentId}
+						isCurrentInFocus={isCurrentInFocus}
+						onUpdateStyle={onUpdateStyle}
+						setIsResizing={setIsResizing}
+						isResizing={isResizing}
+						onHoverGUI={onHoverGUI}
+					/>
+				)
+			}
+			break
+		case EHTMLTag.IMG:
+			if (isHint) {
+				renderedComponent = (
+					<Img id={id} isHint={true} isErrorHint={isErrorHint} />
+				)
+			} else {
+				renderedComponent = (
+					<Img
+						id={id}
+						src={src}
+						style={computedStyle}
 						onDragEnter={handleDragEnter}
 						onDragLeave={handleDragLeave}
 						onMouseEnter={handleMouseEnter}
