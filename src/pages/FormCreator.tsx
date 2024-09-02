@@ -19,7 +19,7 @@ import {EHTMLTag} from '../types/EHTMLTag'
 import {EPosition} from '../types/EPosition'
 import {ICanvasComponent} from '../types/ICanvasComponent'
 import {generateColor} from '../utils/generateColor'
-import {generateJSX} from '../utils/generateJSX'
+import {generateSimpleJSX} from '../utils/generateSimpleJSX'
 import {getComponentById} from '../utils/getComponentByID'
 import {getComponentsQuantity} from '../utils/getComponentsQuantity'
 import {getDefaultComponentHeight} from '../utils/getDefaultComponentHeight'
@@ -497,7 +497,7 @@ const FormCreator: React.FC = () => {
 	}
 
 	function exportFormAsJSX(components: ICanvasComponent[]): string {
-		return components.map(component => generateJSX(component)).join('\n')
+		return components.map(component => generateSimpleJSX(component)).join('\n')
 	}
 
 	const handleExport = () => {
