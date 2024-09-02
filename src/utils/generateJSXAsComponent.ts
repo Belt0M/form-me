@@ -8,6 +8,7 @@ export const generateJSXAsComponent = (
 	const stateEntries: string[] = []
 	const stateConditions: string[] = []
 	let inputCounter = 1
+	let inputNameCounter = 1
 	let hasFormHandlerAdded = false
 
 	const generateState = (component: ICanvasComponent): void => {
@@ -56,7 +57,7 @@ export const generateJSXAsComponent = (
 		}
 
 		if (type === EHTMLTag.INPUT) {
-			const name = `nameValue${inputCounter++}`
+			const name = `nameValue${inputNameCounter++}`
 
 			jsxTag += ` name='${name}' value={state.${name} || ''} onChange={handleChange}`
 		}
