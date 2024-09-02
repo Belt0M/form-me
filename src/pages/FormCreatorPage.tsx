@@ -336,6 +336,7 @@ const FormCreatorPage: React.FC = () => {
 		if (draggedComponentType === EHTMLTag.IMG) {
 			newComponent.style!.padding = ''
 			newComponent.style!.borderWidth = ''
+			newComponent.style!.display = 'block'
 		}
 
 		if (

@@ -100,7 +100,7 @@ export const generateJSXAsComponent = (
 	const formComponentsJSX = generateComponentJSX(component, 1)
 
 	return `
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const ${formName} = () => {
   const [state, setState] = useState({

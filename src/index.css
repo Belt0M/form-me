@@ -45,6 +45,8 @@ label {
 }
 
 .canvas-grid {
+	font-family: Arial, Helvetica, sans-serif;
+	color: #000;
 	background-size: 50px 50px;
 	background-image: linear-gradient(to right, #393939 1px, transparent 1px),
 		linear-gradient(to bottom, #393939 1px, transparent 1px);
@@ -112,19 +114,6 @@ input[type='color'] {
 input[type='color']::-webkit-color-swatch {
 	border: double 3px transparent;
 	border-radius: 0.25rem;
-}
-
-@media (prefers-color-scheme: light) {
-	:root {
-		color: #1d1d1d;
-		background-color: #ffffff;
-	}
-	a:hover {
-		color: #747bff;
-	}
-	button {
-		background-color: #f9f9f9;
-	}
 }
 
 /* Scrollbar */
