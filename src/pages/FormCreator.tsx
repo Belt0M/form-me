@@ -731,6 +731,7 @@ const FormCreator: React.FC = () => {
 					<ButtonTypeModal
 						onSelectType={handleDrop}
 						onClose={handleCloseModal}
+						hasSubmit={hasSubmitButtonElement}
 					/>
 				)}
 				{isModalOpen.image && (

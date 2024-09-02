@@ -1050,9 +1050,14 @@ const Sidebar: React.FC<SidebarProps> = ({
 						Properties
 					</button>
 				</div>
-				{editingComponent?.type === EHTMLTag.INPUT && (
+				{(editingComponent?.type === EHTMLTag.INPUT ||
+					editingComponent?.type === EHTMLTag.BUTTON) && (
 					<span className='text-xs font-bold text-primary mt-[.1rem]'>
-						type="{editingComponent.style?.inputType}"
+						type="
+						{editingComponent.type === EHTMLTag.INPUT
+							? editingComponent.style?.inputType
+							: editingComponent.style?.buttonType}
+						"
 					</span>
 				)}
 			</div>
