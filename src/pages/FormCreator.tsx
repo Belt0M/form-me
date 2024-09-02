@@ -174,7 +174,7 @@ const FormCreator: React.FC = () => {
 				transition: Bounce,
 			})
 			toast(
-				'P.S. For absolute positioning, select "position: absolute" from the side menu above components',
+				'P.S. For absolute positioning, select "position: absolute" from the side menu above components ( Soon... :D )',
 				{
 					position: 'top-center',
 					delay: 1000,

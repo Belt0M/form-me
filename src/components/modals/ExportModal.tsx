@@ -49,7 +49,7 @@ const ExportModal: React.FC<ExportModalProps> = ({onClose, exportedCode}) => {
 
 			<div className='relative w-2/3 h-full max-h-full p-4 my-12 overflow-y-auto rounded-xl bg-stone-700'>
 				<SyntaxHighlighter
-					language='xml'
+					language='jsx'
 					style={atomOneDark}
 					customStyle={{
 						padding: '.7rem 1rem',

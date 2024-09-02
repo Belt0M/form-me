@@ -40,47 +40,42 @@ export const generateJSXAsComponent = (
 			? Object.entries(style)
 					.filter(([key]) => key !== 'level')
 					.map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
-					.join(',\n' + '  '.repeat(indentLevel + 1))
+					.join(`,\n${'  '.repeat(indentLevel + 2)}`)
 			: ''
 
 		if (styleString) {
-			jsxTag += `\n${'  '.repeat(indentLevel + 1)}style={{\n${'  '.repeat(
+			jsxTag += ` style={{\n${'  '.repeat(
 				indentLevel + 2
-			)}${styleString}\n${'  '.repeat(indentLevel + 1)}}}`
+			)}${styleString}\n${indent}  }}`
 		}
 
 		if (type === EHTMLTag.IMG && src) {
-			jsxTag += `\n${'  '.repeat(indentLevel + 1)}src='${src}'`
+			jsxTag += ` src='${src}'`
 		}
 
 		if (type === EHTMLTag.INPUT) {
 			const name = `nameValue${inputCounter++}`
-			jsxTag += `\n${'  '.repeat(
-				indentLevel + 1
-			)}name='${name}' value={state.${name}} onChange={handleChange}`
+			jsxTag += ` name='${name}' value={state.${name}} onChange={handleChange}`
 		}
 
 		if (type === EHTMLTag.FORM && !hasFormHandlerAdded) {
-			jsxTag += `\n${'  '.repeat(indentLevel + 1)}onSubmit={handleSubmit}`
+			jsxTag += ` onSubmit={handleSubmit}`
 			hasFormHandlerAdded = true
 		}
 
-		jsxTag += `\n${indent}>`
+		jsxTag += `>\n`
 
 		if (content) {
-			jsxTag += `\n${'  '.repeat(indentLevel + 1)}${content}`
+			jsxTag += `${'  '.repeat(indentLevel + 1)}${content}\n`
 		}
 
 		if (children && children.length > 0) {
-			jsxTag +=
-				'\n' +
-				children
-					.map(child => generateComponentJSX(child, indentLevel + 1))
-					.join('\n')
-			jsxTag += `\n${indent}`
+			jsxTag += children
+				.map(child => generateComponentJSX(child, indentLevel + 1))
+				.join('\n')
 		}
 
-		jsxTag += `</${type === 'heading' && level ? `h${level}` : type}>`
+		jsxTag += `${indent}</${type === 'heading' && level ? `h${level}` : type}>`
 
 		return jsxTag
 	}
