@@ -7,7 +7,6 @@ import {EHTMLTag} from '../../types/EHTMLTag'
 import {EPosition} from '../../types/EPosition'
 import {ESpacing} from '../../types/ESpacing'
 import {ICanvasComponent} from '../../types/ICanvasComponent'
-import {IExtendedCSSProperties} from '../../types/IExtendedCSSProperties'
 import {IGradient} from '../../types/IGradient'
 import {getComponentById} from '../../utils/getComponentByID'
 import {getElementMinDimensions} from '../../utils/getElementMinDimensions'
@@ -943,86 +942,86 @@ const Sidebar: React.FC<SidebarProps> = ({
 	}
 
 	const renderConstraintsSection = () => {
-		if (editingComponent?.type === EHTMLTag.INPUT) {
-			const inputType = componentStyle.inputType || 'text'
+		// if (editingComponent?.type === EHTMLTag.INPUT) {
+		// 	const inputType = componentStyle.inputType || 'text'
 
-			const renderConstraint = (
-				label: string,
-				name: string,
-				type: 'text' | 'number' | 'pattern' = 'text',
-				placeholder = ''
-			) => (
-				<InputStyleSelector
-					label={label}
-					name={name}
-					value={
-						typeof componentStyle[name as keyof IExtendedCSSProperties] ===
-							'string' ||
-						typeof componentStyle[name as keyof IExtendedCSSProperties] ===
-							'number'
-							? String(componentStyle[name as keyof IExtendedCSSProperties])
-							: ''
-					}
-					type={type}
-					onChange={handleInputChange}
-					placeholder={placeholder}
-				/>
-			)
+		// 	const renderConstraint = (
+		// 		label: string,
+		// 		name: string,
+		// 		type: 'text' | 'number' | 'pattern' = 'text',
+		// 		placeholder = ''
+		// 	) => (
+		// 		<InputStyleSelector
+		// 			label={label}
+		// 			name={name}
+		// 			value={
+		// 				typeof componentStyle[name as keyof IExtendedCSSProperties] ===
+		// 					'string' ||
+		// 				typeof componentStyle[name as keyof IExtendedCSSProperties] ===
+		// 					'number'
+		// 					? String(componentStyle[name as keyof IExtendedCSSProperties])
+		// 					: ''
+		// 			}
+		// 			type={type}
+		// 			onChange={handleInputChange}
+		// 			placeholder={placeholder}
+		// 		/>
+		// 	)
 
-			const renderCheckboxConstraint = (label: string, name: string) => (
-				<>
-					<label className='block mb-2 text-white'>{label}</label>
-					<input
-						type='checkbox'
-						name={name}
-						checked={!!componentStyle[name as keyof IExtendedCSSProperties]}
-						onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-							const updatedStyle = {
-								...componentStyle,
-								[name]: e.target.checked,
-							}
-							onUpdateStyle(editingComponentId as string, updatedStyle)
-						}}
-						className='w-full p-2 mb-4 text-white rounded bg-stone-700'
-					/>
-				</>
-			)
+		// 	const renderCheckboxConstraint = (label: string, name: string) => (
+		// 		<>
+		// 			<label className='block mb-2 text-white'>{label}</label>
+		// 			<input
+		// 				type='checkbox'
+		// 				name={name}
+		// 				checked={!!componentStyle[name as keyof IExtendedCSSProperties]}
+		// 				onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+		// 					const updatedStyle = {
+		// 						...componentStyle,
+		// 						[name]: e.target.checked,
+		// 					}
+		// 					onUpdateStyle(editingComponentId as string, updatedStyle)
+		// 				}}
+		// 				className='w-full p-2 mb-4 text-white rounded bg-stone-700'
+		// 			/>
+		// 		</>
+		// 	)
 
-			const constraints = []
+		// 	const constraints = []
 
-			switch (inputType) {
-				case 'text':
-				case 'email':
-				case 'password':
-					constraints.push(renderCheckboxConstraint('Required', 'required'))
-					break
-				case 'number':
-				case 'range':
-					constraints.push(renderConstraint('Min Value', 'min', 'number'))
-					constraints.push(renderConstraint('Max Value', 'max', 'number'))
-					constraints.push(renderConstraint('Step', 'step', 'number'))
-					constraints.push(renderCheckboxConstraint('Required', 'required'))
+		// 	switch (inputType) {
+		// 		case 'text':
+		// 		case 'email':
+		// 		case 'password':
+		// 			constraints.push(renderCheckboxConstraint('Required', 'required'))
+		// 			break
+		// 		case 'number':
+		// 		case 'range':
+		// 			constraints.push(renderConstraint('Min Value', 'min', 'number'))
+		// 			constraints.push(renderConstraint('Max Value', 'max', 'number'))
+		// 			constraints.push(renderConstraint('Step', 'step', 'number'))
+		// 			constraints.push(renderCheckboxConstraint('Required', 'required'))
 
-					break
-				default:
-					break
-			}
+		// 			break
+		// 		default:
+		// 			break
+		// 	}
 
-			return (
-				<>
-					<SectionHeading
-						name='constraints'
-						isOpen={activeSections.includes('constraints')}
-						onSwitch={toggleSection}
-					/>
-					{activeSections.includes('constraints') && (
-						<div className='mt-2' key='constraints'>
-							{constraints}
-						</div>
-					)}
-				</>
-			)
-		}
+		// 	return (
+		// 		<>
+		// 			<SectionHeading
+		// 				name='constraints'
+		// 				isOpen={activeSections.includes('constraints')}
+		// 				onSwitch={toggleSection}
+		// 			/>
+		// 			{activeSections.includes('constraints') && (
+		// 				<div className='mt-2' key='constraints'>
+		// 					{constraints}
+		// 				</div>
+		// 			)}
+		// 		</>
+		// 	)
+		// }
 		return null
 	}
 
