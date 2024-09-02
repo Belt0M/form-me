@@ -13,10 +13,12 @@ export const generateJSXAsComponent = (
 	const generateState = (component: ICanvasComponent): void => {
 		if (component.type === EHTMLTag.INPUT) {
 			const stateKey = `nameValue${inputCounter}`
+
 			stateEntries.push(`${stateKey}: ''`)
 			stateConditions.push(`!state.${stateKey}`)
 			inputCounter++
 		}
+
 		if (component.children && component.children.length > 0) {
 			component.children.forEach(child => generateState(child))
 		}
@@ -55,7 +57,8 @@ export const generateJSXAsComponent = (
 
 		if (type === EHTMLTag.INPUT) {
 			const name = `nameValue${inputCounter++}`
-			jsxTag += ` name='${name}' value={state.${name}} onChange={handleChange}`
+
+			jsxTag += ` name='${name}' value={state.${name} || ''} onChange={handleChange}`
 		}
 
 		if (type === EHTMLTag.FORM && !hasFormHandlerAdded) {
@@ -80,13 +83,10 @@ export const generateJSXAsComponent = (
 		return jsxTag
 	}
 
-	// Генерація стану
 	generateState(component)
 
-	// Генерація JSX коду компонентів
 	const formComponentsJSX = generateComponentJSX(component, 1)
 
-	// Генерація JSX коду для кореневого тега форми
 	return `
 import React, { useState } from 'react';
 
@@ -111,8 +111,6 @@ const ${formName} = () => {
     }
     alert(JSON.stringify(state, null, 2));
   };
-
-  const isSubmitDisabled = ${stateConditions.join(' || ')};
 
   return (
     ${formComponentsJSX}

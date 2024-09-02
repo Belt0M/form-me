@@ -62,7 +62,7 @@ const ExportModal: React.FC<ExportModalProps> = ({onClose, exportedCode}) => {
 					{exportedCode}
 				</SyntaxHighlighter>
 				<button
-					className='absolute flex items-center justify-center text-white transition-all bg-blue-600 border-2 border-blue-700 rounded-lg w-11 h-11 bg-opacity-20 bottom-11 right-7 hover:enabled:bg-blue-700 disabled:border-green-600 disabled:bg-green-600'
+					className='absolute flex items-center justify-center text-white transition-all bg-blue-600 border-2 border-blue-700 rounded-lg w-11 h-11 bg-opacity-20 bottom-7 right-9 hover:enabled:bg-blue-700 disabled:border-green-600 disabled:bg-green-600'
 					disabled={isCopied}
 					onClick={handleCopy}
 				>
