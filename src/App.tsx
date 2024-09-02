@@ -7,7 +7,7 @@ import {
 } from 'react-router-dom'
 import {useAppDispatch, useAppSelector} from './hooks/storeHook'
 import AuthPage from './pages/AuthPage'
-import FormCreator from './pages/FormCreator'
+import FormCreatorPage from './pages/FormCreatorPage'
 import HomePage from './pages/HomePage'
 import {useVerifyTokenMutation} from './store/auth.api'
 import {login} from './store/authSlice'
@@ -45,7 +45,7 @@ const App: React.FC = () => {
 			<Route path='/' element={isAuthenticated ? <HomePage /> : null} />
 			<Route
 				path='/form/:id'
-				element={isAuthenticated ? <FormCreator /> : null}
+				element={isAuthenticated ? <FormCreatorPage /> : null}
 			/>
 		</Routes>
 	)

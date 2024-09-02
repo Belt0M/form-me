@@ -30,7 +30,7 @@ import {getIsBlockComponentByType} from '../utils/getIsBlockComponentByType'
 import {getIsComponentWithChildren} from '../utils/getIsComponentWithChildren'
 import {getIsContainContent} from '../utils/getIsContainContent'
 
-const FormCreator: React.FC = () => {
+const FormCreatorPage: React.FC = () => {
 	const [updateForm, {isSuccess: isUpdateSuccess, isError: isUpdateError}] =
 		useUpdateFormMutation()
 	const [canvasComponents, setCanvasComponents] = useState<ICanvasComponent[]>(
@@ -768,4 +768,4 @@ const FormCreator: React.FC = () => {
 	)
 }
 
-export default FormCreator
+export default FormCreatorPage
