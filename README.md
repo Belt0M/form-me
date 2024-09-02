@@ -1,30 +1,36 @@
-# React + TypeScript + Vite
+# Webowy Konstruktor Formularzy - Klient (Front-End)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Ten projekt stanowi część mojej pracy dyplomowej, której celem było stworzenie narzędzia do bezkodowego tworzenia formularzy internetowych. Klientowa aplikacja została stworzona z użyciem technologii takich jak React, Redux Toolkit, TypeScript oraz Tailwind CSS.
 
-Currently, two official plugins are available:
+## Funkcje aplikacji
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Intuicyjny interfejs użytkownika**: Umożliwia łatwe przeciąganie i upuszczanie elementów formularza, takich jak pola tekstowe, przyciski, obrazy i inne.
+- **Obsługa wielu typów danych**: Formularze mogą zawierać różnorodne pola, w tym pola tekstowe, checkboxy, radio buttony i inne.
+- **Wizualne stylizowanie**: Każdy element formularza można stylizować przy użyciu zaawansowanych opcji, dzięki czemu użytkownicy mogą dostosować wygląd formularza do swoich potrzeb.
+- **Walidacja danych**: Formularze są automatycznie walidowane, aby zapewnić poprawność wprowadzanych danych przed ich wysłaniem.
+- **Obsługa stanu aplikacji**: Użycie Redux Toolkit umożliwia zarządzanie stanem aplikacji w sposób skalowalny i wydajny.
 
-## Expanding the ESLint configuration
+## Technologia
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+Projekt ten wykorzystuje następujące technologie:
 
-- Configure the top-level `parserOptions` property like this:
+- **React**: Biblioteka do budowania interfejsów użytkownika.
+- **Redux Toolkit**: Narzędzie do zarządzania stanem aplikacji w React.
+- **TypeScript**: Język programowania, który rozszerza JavaScript o statyczne typowanie.
+- **Tailwind CSS**: Narzędzie do szybkiego stylizowania interfejsów użytkownika.
+- **RTK Query**: Narzędzie do zarządzania danymi i obsługi zapytań w Redux Toolkit.
+- **React Router**: Biblioteka do zarządzania nawigacją w aplikacjach React.
+- **React Tooltip**: Biblioteka do tworzenia dynamicznych tooltipów.
+- **React Toastify**: Narzędzie do wyświetlania powiadomień toast w aplikacjach React.
+- **React Syntax Highlighter**: Biblioteka do podświetlania składni kodu w aplikacjach React.
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json', './tsconfig.app.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
+## Instalacja
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+Aby uruchomić aplikację lokalnie:
+
+   ```bash
+   git clone https://github.com/Belt0M/form-me.git
+   cd form-me
+   code .
+   npm i
+   npm run dev
