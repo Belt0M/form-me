@@ -2,27 +2,23 @@ import {EHTMLTag} from '../types/EHTMLTag'
 import {ICanvasComponent} from '../types/ICanvasComponent'
 
 export const generateJSXAsComponent = (
-	components: ICanvasComponent,
+	component: ICanvasComponent,
 	formName: string = 'Form'
 ): string => {
+	const stateEntries: string[] = []
+	const stateConditions: string[] = []
 	let inputCounter = 1
 
-	const generateState = (component: ICanvasComponent): string => {
-		return component.type === EHTMLTag.INPUT
-			? `nameValue${inputCounter++}: ''`
-			: ''
-	}
-
-	const generateHandleChange = (): string => {
-		let handleChangeCode = ''
-		for (let i = 1; i < inputCounter; i++) {
-			handleChangeCode += `
-			[name]: value
-		})
-	}`
+	const generateState = (component: ICanvasComponent): void => {
+		if (component.type === EHTMLTag.INPUT) {
+			const stateKey = `nameValue${inputCounter}`
+			stateEntries.push(`${stateKey}: ''`)
+			stateConditions.push(`!state.${stateKey}`)
+			inputCounter++
 		}
-		handleChangeCode = handleChangeCode.replace('return {...prev, ', '')
-		return handleChangeCode
+		if (component.children && component.children.length > 0) {
+			component.children.forEach(child => generateState(child))
+		}
 	}
 
 	const generateComponentJSX = (component: ICanvasComponent): string => {
@@ -70,49 +66,49 @@ export const generateJSXAsComponent = (
 		return jsxTag
 	}
 
-	const formState = generateState(components)
-	const formComponentsJSX = generateComponentJSX(components)
-	const handleChangeCode = generateHandleChange()
+	// Генерація стану
+	generateState(component)
 
+	// Генерація JSX коду компонентів
+	const formComponentsJSX = generateComponentJSX(component)
+
+	// Генерація JSX коду для кореневого тега форми
 	return `
-	const ${formName} = () => {
-		const [state, setState] = useState({
-			${formState}
-		})
+import React, { useState } from 'react';
 
-		const handleChange = (event) => {
-			const { name, value } = event.target
-			setState((prev) => ({
-				...prev,
-				${handleChangeCode}
-			}))
-		}
+const ${formName} = () => {
+  const [state, setState] = useState({
+    ${stateEntries.join(',\n    ')}
+  });
 
-		const handleSubmit = (event) => {
-			event.preventDefault()
-			if (${Object.keys(components)
-				.map((_, index) => `!state.nameValue${index + 1}`)
-				.join(' || ')}) {
-				alert('Please fill out all fields')
-				return
-			}
-			alert(JSON.stringify(state, null, 2))
-		}
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setState(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
-		const isSubmitDisabled = ${Object.keys(components)
-			.map((_, index) => `!state.nameValue${index + 1}`)
-			.join(' || ')}
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    if (${stateConditions.join(' || ')}) {
+      alert('Please fill out all fields');
+      return;
+    }
+    alert(JSON.stringify(state, null, 2));
+  };
 
-		return (
-			<form onSubmit={handleSubmit}>
-				${formComponentsJSX}
-				<button type="submit" disabled={isSubmitDisabled}>
-					Submit
-				</button>
-			</form>
-		)
-	}
+  const isSubmitDisabled = ${stateConditions.join(' || ')};
 
-	export default ${formName}
-	`
+  return (
+    ${formComponentsJSX.replace('<form', '<form onSubmit={handleSubmit}')}
+    <button type="submit" disabled={isSubmitDisabled}>
+      Submit
+    </button>
+    </form>
+  );
+};
+
+export default ${formName};
+  `
 }
