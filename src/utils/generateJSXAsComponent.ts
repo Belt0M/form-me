@@ -8,6 +8,7 @@ export const generateJSXAsComponent = (
 	const stateEntries: string[] = []
 	const stateConditions: string[] = []
 	let inputCounter = 1
+	let hasFormHandlerAdded = false
 
 	const generateState = (component: ICanvasComponent): void => {
 		if (component.type === EHTMLTag.INPUT) {
@@ -21,14 +22,18 @@ export const generateJSXAsComponent = (
 		}
 	}
 
-	const generateComponentJSX = (component: ICanvasComponent): string => {
+	const generateComponentJSX = (
+		component: ICanvasComponent,
+		indentLevel: number = 1
+	): string => {
 		const {type, style, children, content, level, src} = component
+		const indent = '  '.repeat(indentLevel)
 		let jsxTag = ''
 
 		if (type === EHTMLTag.HEADING && level) {
-			jsxTag = `<h${level}`
+			jsxTag = `${indent}<h${level}`
 		} else {
-			jsxTag = `<${type}`
+			jsxTag = `${indent}<${type}`
 		}
 
 		const styleString = style
@@ -51,14 +56,24 @@ export const generateJSXAsComponent = (
 			jsxTag += ` name='${name}' value={state.${name}} onChange={handleChange} `
 		}
 
+		if (type === EHTMLTag.FORM && !hasFormHandlerAdded) {
+			jsxTag += ` onSubmit={handleSubmit} `
+			hasFormHandlerAdded = true
+		}
+
 		jsxTag += `>`
 
 		if (content) {
-			jsxTag += content
+			jsxTag += `\n${indent}  ${content}`
 		}
 
 		if (children && children.length > 0) {
-			jsxTag += children.map(child => generateComponentJSX(child)).join('')
+			jsxTag +=
+				'\n' +
+				children
+					.map(child => generateComponentJSX(child, indentLevel + 1))
+					.join('\n')
+			jsxTag += `\n${indent}`
 		}
 
 		jsxTag += `</${type === 'heading' && level ? `h${level}` : type}>`
@@ -70,7 +85,7 @@ export const generateJSXAsComponent = (
 	generateState(component)
 
 	// Генерація JSX коду компонентів
-	const formComponentsJSX = generateComponentJSX(component)
+	const formComponentsJSX = generateComponentJSX(component, 1)
 
 	// Генерація JSX коду для кореневого тега форми
 	return `
@@ -101,11 +116,7 @@ const ${formName} = () => {
   const isSubmitDisabled = ${stateConditions.join(' || ')};
 
   return (
-    ${formComponentsJSX.replace('<form', '<form onSubmit={handleSubmit}')}
-    <button type="submit" disabled={isSubmitDisabled}>
-      Submit
-    </button>
-    </form>
+    ${formComponentsJSX}
   );
 };
 
