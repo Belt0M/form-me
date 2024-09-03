@@ -281,7 +281,7 @@ const Div: FC<Props> = ({
 						/>
 					))}
 					<div
-						className='absolute grid w-8 h-8 bg-black rounded-tl place-items-center hover:brightness-110 cursor-se-resize z-[52]'
+						className='absolute grid w-8 h-8 bg-black rounded-tl place-items-center hover:brightness-110 cursor-se-resize z-[52] text-white'
 						style={{
 							bottom: -borderSize + 'rem',
 							right: -borderSize + 'rem',

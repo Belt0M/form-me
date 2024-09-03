@@ -25,6 +25,8 @@ export const generateSimpleJSX = (component: ICanvasComponent): string => {
 
 	if (type === EHTMLTag.IMG) {
 		jsxTag += `src='${src}' />`
+	} else if (type === EHTMLTag.INPUT && style?.placeholder) {
+		jsxTag += `placeholder='${style.placeholder}' >`
 	} else {
 		jsxTag += `>`
 

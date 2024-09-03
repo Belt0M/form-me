@@ -787,25 +787,27 @@ const Sidebar: React.FC<SidebarProps> = ({
 							)}
 
 							{/* Heading Text */}
-							<InputStyleSelector
-								label={`${componentName} Text`}
-								name='content'
-								value={editingComponent.content || ''}
-								type='text'
-								onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-									onUpdateProperty(
-										editingComponentId as string,
-										e.target.name,
-										e.target.value
-									)
-								}}
-							/>
+							{editingComponent?.type !== EHTMLTag.INPUT && (
+								<InputStyleSelector
+									label={`${componentName} Text`}
+									name='content'
+									value={editingComponent.content || ''}
+									type='text'
+									onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+										onUpdateProperty(
+											editingComponentId as string,
+											e.target.name,
+											e.target.value
+										)
+									}}
+								/>
+							)}
 
 							{/* Text Color */}
 							<InputStyleSelector
 								label='Text Color'
 								name='color'
-								value={componentStyle.color || '#ffffff'}
+								value={componentStyle.color || '#000'}
 								type='color'
 								onChange={handleInputChange}
 							/>
@@ -1225,11 +1227,14 @@ const Sidebar: React.FC<SidebarProps> = ({
 									<InputStyleSelector
 										label='Border Radius'
 										name='borderRadius'
-										value={parseInt(componentStyle.borderRadius as string) || 0}
+										value={
+											parseFloat(componentStyle.borderRadius as string) || 0
+										}
 										type='range'
 										onChange={handleSimpleRangeChange}
 										min={0}
 										max={15}
+										step={0.1}
 										infoBelow
 									/>
 								</>

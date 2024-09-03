@@ -59,7 +59,9 @@ export const generateJSXAsComponent = (
 		if (type === EHTMLTag.INPUT) {
 			const name = `nameValue${inputNameCounter++}`
 			const inputType = style?.inputType ? ` type='${style.inputType}'` : ''
-			jsxTag += `${inputType} name='${name}' value={state.${name} || ''} onChange={handleChange}`
+			jsxTag += `${inputType} name='${name}' placeholder='${
+				style?.placeholder || ''
+			}' value={state.${name} || ''} onChange={handleChange}`
 		}
 
 		if (type === EHTMLTag.BUTTON) {

@@ -322,6 +322,7 @@ const FormCreatorPage: React.FC = () => {
 					if (inputType) {
 						newComponent.style!.inputType = inputType
 						newComponent.style!.display = 'block'
+						newComponent.style!.borderStyle = 'solid'
 					}
 				}
 

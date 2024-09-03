@@ -249,7 +249,7 @@ const Input: FC<InputProps> = ({
 						/>
 					))}
 					<div
-						className='absolute grid w-6 h-6 bg-black rounded-tl place-items-center hover:brightness-110 cursor-se-resize'
+						className='absolute grid w-6 h-6 text-white bg-black rounded-tl place-items-center hover:brightness-110 cursor-se-resize'
 						style={{
 							bottom: 0,
 							right: 0,

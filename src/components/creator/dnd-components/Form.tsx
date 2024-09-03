@@ -257,7 +257,7 @@ const Form: FC<Props> = ({
 						/>
 					))}
 					<div
-						className='absolute grid w-8 h-8 bg-black rounded-tl place-items-center hover:brightness-110 cursor-se-resize'
+						className='absolute grid w-8 h-8 text-white bg-black rounded-tl place-items-center hover:brightness-110 cursor-se-resize'
 						style={{
 							bottom: -borderSize - 0.1 + 'rem',
 							right: -borderSize - 0.1 + 'rem',
