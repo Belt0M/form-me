@@ -1,8 +1,8 @@
-import {Check, Clipboard} from '@phosphor-icons/react'
-import React, {useState} from 'react'
+import { Check, Clipboard } from '@phosphor-icons/react'
+import React, { useState } from 'react'
 import SyntaxHighlighter from 'react-syntax-highlighter'
-import {atomOneDark} from 'react-syntax-highlighter/dist/esm/styles/hljs'
-import {Bounce, toast, ToastContainer} from 'react-toastify'
+import { atomOneDark } from 'react-syntax-highlighter/dist/esm/styles/hljs'
+import { Bounce, toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
 interface ExportModalProps {
@@ -40,7 +40,7 @@ const ExportModal: React.FC<ExportModalProps> = ({onClose, exportedCode}) => {
 	return (
 		<section className='fixed inset-0 flex flex-col items-center z-[1000] bg-dark canvas-grid'>
 			<header className='w-full px-6 pt-3.5 pb-4 bg-stone-800 border-b-2 border-pink-600 border-opacity-70'>
-				<h1 className='text-xl font-bold'>Form Export</h1>
+				<h1 className='text-xl font-bold text-white'>Form Export</h1>
 				<p className='mt-2 text-sm italic font-bold text-stone-400'>
 					Here you will find the source code that you can copy and paste into
 					your project

@@ -1,4 +1,4 @@
-import {FC} from 'react'
+import { FC } from 'react'
 import JsxParser from 'react-jsx-parser'
 
 interface Props {
@@ -10,7 +10,7 @@ const PreviewModal: FC<Props> = ({onClose, exportedCode}) => {
 	return (
 		<section className='fixed inset-0 z-[1000] flex flex-col items-center bg-dark canvas-grid'>
 			<header className='w-full px-6 pt-3.5 pb-4 bg-stone-800 border-b-2 border-pink-600 border-opacity-70'>
-				<h1 className='text-xl font-bold'>Form Preview</h1>
+				<h1 className='text-xl font-bold text-white'>Form Preview</h1>
 				<p className='mt-2 text-sm italic font-bold text-stone-400'>
 					This is what your form will look like to your users.
 				</p>
